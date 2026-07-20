@@ -1,0 +1,30 @@
+generated: '2026-07-18'
+method: searched
+source: openapi/collate-openmetadata-openapi.yml
+docs: https://docs.open-metadata.org/latest/api-reference/authentication
+description: >-
+  OpenMetadata authenticates every REST API request with a JWT Bearer token
+  passed in the Authorization header (`Authorization: Bearer <jwt>`). Tokens are
+  either Bot tokens (Settings > Bots > Generate Token) or Personal Access Tokens
+  (profile > Access Tokens, expiry required, shown once). The server validates
+  the JWT signature and enforces role-based access control before processing the
+  request; expired or invalid tokens return 401. The same JWT works across the
+  Python, Java, and curl/bash clients. The hosted MCP server uses OAuth 2.1 /
+  OIDC (authorization_code + PKCE) — see mcp/collate-mcp.yml.
+summary:
+  types:
+  - http
+  http_schemes:
+  - bearer
+  bearer_format: JWT
+schemes:
+- name: BearerAuth
+  type: http
+  scheme: bearer
+  bearer_format: JWT
+  description: >-
+    JWT Bearer token in the Authorization header. Issued as a Bot token or a
+    Personal Access Token from the OpenMetadata UI.
+  header: 'Authorization: Bearer <jwt-token>'
+  sources:
+  - openapi/collate-openmetadata-openapi.yml
