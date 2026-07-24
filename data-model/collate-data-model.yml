@@ -1,0 +1,80 @@
+generated: '2026-07-18'
+method: searched
+source: https://docs.open-metadata.org/latest/api-reference/data-assets
+description: >-
+  Entity-relationship model for the OpenMetadata metadata graph, derived from the
+  API reference data-asset hierarchy and the JSON-schema metadata standard. Every
+  entity is addressable by id or fullyQualifiedName, carries owner/tags/domain,
+  and exposes a /versions history. Data assets hang off a parent *Service*; the
+  governance layer (Glossary, Classification/Tags, Teams/Users, Policies/Roles)
+  binds across all assets.
+entities:
+- name: DatabaseService
+  children: [Database]
+- name: Database
+  belongs_to: DatabaseService
+  children: [DatabaseSchema]
+- name: DatabaseSchema
+  belongs_to: Database
+  children: [Table, StoredProcedure]
+- name: Table
+  belongs_to: DatabaseSchema
+  has_many: [Column]
+  relationships:
+  - {type: has_many, target: Column, via: columns}
+  - {type: has_one, target: User, via: owner}
+  - {type: has_many, target: Tag, via: tags}
+- name: DashboardService
+  children: [Dashboard, Chart, DataModel]
+- name: Dashboard
+  belongs_to: DashboardService
+  relationships:
+  - {type: has_many, target: Chart, via: charts}
+- name: Chart
+  belongs_to: DashboardService
+- name: PipelineService
+  children: [Pipeline]
+- name: Pipeline
+  belongs_to: PipelineService
+- name: MessagingService
+  children: [Topic]
+- name: Topic
+  belongs_to: MessagingService
+- name: StorageService
+  children: [Container]
+- name: Container
+  belongs_to: StorageService
+- name: MlModelService
+  children: [MlModel]
+- name: MlModel
+  belongs_to: MlModelService
+- name: ApiService
+  children: [ApiCollection]
+- name: ApiCollection
+  belongs_to: ApiService
+  relationships:
+  - {type: has_many, target: ApiEndpoint, via: endpoints}
+- name: ApiEndpoint
+  belongs_to: ApiCollection
+- name: SearchService
+  children: [SearchIndex]
+- name: Glossary
+  children: [GlossaryTerm]
+- name: GlossaryTerm
+  belongs_to: Glossary
+- name: Classification
+  children: [Tag]
+- name: Tag
+  belongs_to: Classification
+- name: Team
+  relationships:
+  - {type: has_many, target: User, via: users}
+- name: User
+- name: Domain
+  children: [DataProduct]
+- name: DataProduct
+  belongs_to: Domain
+cross_cutting:
+  lineage: Any data asset links upstream/downstream via the lineage graph (entityLineage).
+  ownership: Every entity has an owner (User or Team).
+  governance: Tags (Classification), GlossaryTerms, Domains, Policies/Roles apply across all assets.

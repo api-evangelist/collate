@@ -1,0 +1,39 @@
+generated: '2026-07-18'
+method: searched
+source: https://docs.open-metadata.org/latest/sdk/python
+description: >-
+  OpenMetadata ships a first-party CLI, `metadata`, distributed inside the
+  openmetadata-ingestion Python package (see packages/). It drives ingestion
+  workflows (metadata, profiler, data-quality/test-suite, lineage, usage), Airflow
+  DAG management, backup/restore of the metadata store, and OpenMetadata server
+  operations. Workflows are configured with a YAML file passed via `-c`.
+cli:
+  name: metadata
+  install: pip install openmetadata-ingestion
+  binary: metadata
+  config: YAML workflow file passed with -c / --config
+commands:
+- group: ingest
+  command: metadata ingest -c <workflow.yaml>
+  description: Run a metadata ingestion workflow from a source connector.
+- group: profile
+  command: metadata profile -c <workflow.yaml>
+  description: Run the data profiler workflow.
+- group: test
+  command: metadata test -c <workflow.yaml>
+  description: Run a data-quality test-suite workflow.
+- group: usage
+  command: metadata usage -c <workflow.yaml>
+  description: Run a usage/query-log ingestion workflow.
+- group: backup
+  command: metadata backup
+  description: Back up the OpenMetadata metadata store.
+- group: restore
+  command: metadata restore
+  description: Restore the OpenMetadata metadata store from a backup.
+- group: openmetadata-imports-migration
+  command: metadata openmetadata-imports-migration
+  description: Airflow imports migration helper.
+- group: webserver / docker
+  command: metadata docker
+  description: Manage a local OpenMetadata Docker sandbox (start/stop/clean).

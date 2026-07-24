@@ -1,0 +1,30 @@
+overlay: 1.0.0
+info:
+  title: API Evangelist enhancements for OpenMetadata REST API
+  version: 1.0.0
+extends: openapi/collate-openmetadata-openapi.yml
+actions:
+- target: $.info
+  update:
+    x-apievangelist-provider: collate
+    x-apievangelist-product: OpenMetadata
+    x-apievangelist-api-reference: https://docs.open-metadata.org/latest/api-reference
+    x-apievangelist-note: >-
+      The shipped OpenAPI declares the global BearerAuth (JWT) security scheme;
+      the full per-entity CRUD operation surface (databases, schemas, tables,
+      dashboards, charts, pipelines, topics, containers, ML models, API
+      collections/endpoints, glossaries, teams, users, policies, lineage,
+      versions, events) is documented in the API reference rather than enumerated
+      as paths in this file.
+- target: $.info
+  update:
+    x-apievangelist-conventions: conventions/collate-conventions.yml
+    x-apievangelist-errors: errors/collate-error-codes.yml
+    x-apievangelist-webhooks: asyncapi/collate-webhooks.yml
+    x-apievangelist-mcp: mcp/collate-mcp.yml
+- target: $.components.securitySchemes.BearerAuth
+  update:
+    bearerFormat: JWT
+    description: >-
+      JWT Bearer token (Bot token or Personal Access Token) in the Authorization
+      header. See authentication/collate-authentication.yml.

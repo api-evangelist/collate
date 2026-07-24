@@ -1,0 +1,4 @@
+Contact: mailto:security@collate.com
+Expires: 2026-01-01T00:00:00Z
+Hiring: https://collate.com/careers
+Preferred-Languages: en

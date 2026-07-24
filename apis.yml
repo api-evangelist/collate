@@ -1,8 +1,18 @@
 aid: collate
 name: Collate
-description: 'Collate is a company surfaced as a portfolio company of crv, redpoint-ventures and added
-  to the API Evangelist network as a stub for enrichment. Sector: data. This profile is a lead awaiting
-  the enrichment pipeline.'
+description: >-
+  Collate is the commercial company behind OpenMetadata, the open-source unified
+  metadata platform and data catalog for data and AI. OpenMetadata provides a
+  single place to discover, govern, observe, and collaborate on data assets —
+  databases, tables, dashboards, pipelines, ML models, topics, containers, and
+  API collections/endpoints — with a JSON-schema-first metadata standard, 90+
+  ingestion connectors, data quality and profiling, lineage, glossary, and
+  role-based access control. Everything in the product is driven by a
+  comprehensive JWT-authenticated REST API (plus Python and Java SDKs, a
+  `metadata` CLI, webhook change-events, and a hosted MCP server), making the
+  metadata layer fully programmable for humans, AI assistants, and agents.
+  Collate offers a managed, enterprise SaaS edition of OpenMetadata. Backed by
+  CRV and Redpoint Ventures.
 url: https://raw.githubusercontent.com/api-evangelist/collate/refs/heads/main/apis.yml
 x-type: company
 x-source: vc-portfolio
@@ -11,18 +21,127 @@ x-backed-by:
 - redpoint-ventures
 x-tier: stub
 x-tier-reason: portfolio-lead
+accessModel:
+  pricing: unknown
+  onboarding: self-serve
+  trial: false
+  try_now: false
+  public: false
+  label: Self-serve signup
+  confidence: medium
+  source:
+  - authentication
+  generated: '2026-07-22'
+  method: derived
 specificationVersion: '0.20'
 created: '2026-07-17'
-modified: '2026-07-17'
+modified: '2026-07-18'
+image: https://avatars.githubusercontent.com/u/74767841
 tags:
 - Company
 - Data
-apis: []
+- Metadata
+- Data Catalog
+- Data Governance
+- Data Discovery
+- Data Quality
+- Data Lineage
+- Open Source
+- API
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
 - FN: APIs.json
   email: info@apis.io
+apis:
+- aid: collate-openmetadata-rest-api
+  name: OpenMetadata REST API
+  description: >-
+    The OpenMetadata REST API — a JWT-authenticated (Bearer) CRUD API over every
+    data asset and governance entity in OpenMetadata (databases, schemas, tables,
+    dashboards, charts, pipelines, topics, containers, ML models, API
+    collections/endpoints, glossaries, teams, users, policies, bots), plus
+    lineage, versions, and change events. The spec ships as an OpenAPI 3.0.3
+    document declaring HTTP Bearer (JWT) security; the full per-entity operation
+    surface is documented in the API reference.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Metadata
+  - Data Catalog
+  - REST
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-openmetadata-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: Overlay
+    url: overlays/collate-openmetadata-overlay.yaml
 common:
 - type: Website
   url: https://collate.com/
+- type: DeveloperPortal
+  url: https://docs.open-metadata.org/
+- type: Documentation
+  url: https://docs.open-metadata.org/
+- type: APIReference
+  url: https://docs.open-metadata.org/latest/api-reference
+- type: GettingStarted
+  url: https://docs.open-metadata.org/latest/quick-start
+- type: Authentication
+  url: authentication/collate-authentication.yml
+- type: Blog
+  url: https://blog.open-metadata.org/
+- type: Support
+  url: https://open-metadata.org/community
+- type: GitHubOrganization
+  url: https://github.com/open-metadata
+- type: SignUp
+  url: https://collate.com/#demo-request
+- type: TermsOfService
+  url: https://collate.com/legal/terms
+- type: PrivacyPolicy
+  url: https://collate.com/legal/privacy
+- type: Sandbox
+  url: sandbox/collate-sandbox.yml
+- type: MCPServer
+  url: mcp/collate-mcp.yml
+- type: LLMsTxt
+  url: llms/collate-llms.txt
+- type: WellKnown
+  url: well-known/collate-well-known.yml
+- type: SecurityTxt
+  url: well-known/collate-security.txt
+- type: VulnerabilityDisclosure
+  url: security/collate-vulnerability-disclosure.yml
+- type: Security
+  url: security/collate-vulnerability-disclosure.yml
+- type: DomainSecurity
+  url: security/collate-domain-security.yml
+- type: Packages
+  url: packages/collate-packages.yml
+- type: SDKs
+  url: packages/collate-packages.yml
+- type: CLI
+  url: cli/collate-cli.yml
+- type: ChangeLog
+  url: changelog/collate-changelog.yml
+- type: Lifecycle
+  url: lifecycle/collate-lifecycle.yml
+- type: Conventions
+  url: conventions/collate-conventions.yml
+- type: Conformance
+  url: conformance/collate-conformance.yml
+- type: DataModel
+  url: data-model/collate-data-model.yml
+- type: ErrorCatalog
+  url: errors/collate-error-codes.yml
+- type: Webhooks
+  url: asyncapi/collate-webhooks.yml
+x-enrichment:
+  date: '2026-07-19'
+  status: backfilled
+  pass: local-v1
+  note: backfilled from .gitignore signal + verified work evidence

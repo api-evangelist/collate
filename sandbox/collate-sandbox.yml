@@ -1,0 +1,23 @@
+generated: '2026-07-18'
+method: searched
+source: https://sandbox.open-metadata.org/
+description: >-
+  OpenMetadata operates a public, hosted sandbox — a live, fully-featured demo
+  instance of the product (and its REST API + hosted MCP server) that anyone can
+  explore. Sign-in is via SSO (Google) on the sandbox; the same instance backs
+  the /api/v1 REST surface (GET /api/v1/system/version returns 200) used as this
+  repo's baseURL. It is a demo/exploration environment, not a payments-style test
+  harness, so there are no test cards or magic values — the "test data" is the
+  pre-seeded catalog of sample data assets. A local sandbox can also be run via
+  `metadata docker` (see cli/collate-cli.yml).
+hosted_sandbox:
+  url: https://sandbox.open-metadata.org/
+  api_base: https://sandbox.open-metadata.org/api/v1
+  version_endpoint: https://sandbox.open-metadata.org/api/v1/system/version
+  version_observed: 1.13.1
+  auth: SSO (Google) for the UI; JWT Bearer for the API; OAuth for the MCP server
+  seeded_data: pre-loaded sample databases, dashboards, pipelines, topics, and glossary
+local_sandbox:
+  command: metadata docker --start
+  docs: https://docs.open-metadata.org/latest/quick-start/local-docker-deployment
+test_values: none-published

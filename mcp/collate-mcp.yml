@@ -1,0 +1,39 @@
+generated: '2026-07-18'
+method: searched
+status: published
+source: https://sandbox.open-metadata.org/.well-known/openid-configuration
+description: >-
+  OpenMetadata (the product Collate commercializes) ships a hosted, remote MCP
+  (Model Context Protocol) server. The public sandbox exposes it at
+  https://sandbox.open-metadata.org/mcp and advertises a full OAuth 2.1 /
+  OIDC authorization surface via /.well-known/openid-configuration and
+  /.well-known/oauth-authorization-server (issuer https://sandbox.open-metadata.org/mcp,
+  authorization_code + refresh_token grants, PKCE S256, dynamic client
+  registration). The endpoint is live: GET /mcp returns 405 (method not allowed)
+  and an unauthenticated JSON-RPC tools/list POST returns 401 (McpError, token
+  required) — confirming a real MCP transport that requires OAuth. The MCP
+  server is bundled in the OpenMetadata server (self-hostable); the URL below is
+  the public sandbox instance. Tool list is not enumerated here because it
+  requires authentication (401) and is not published statically; it exposes
+  OpenMetadata's search/read/govern operations over data assets.
+server:
+  name: openmetadata
+  transport: http
+  url: https://sandbox.open-metadata.org/mcp
+  auth: oauth2
+  issuer: https://sandbox.open-metadata.org/mcp
+  authorization_endpoint: https://sandbox.open-metadata.org/mcp/authorize
+  token_endpoint: https://sandbox.open-metadata.org/mcp/token
+  registration_endpoint: https://sandbox.open-metadata.org/mcp/register
+  revocation_endpoint: https://sandbox.open-metadata.org/mcp/revoke
+  scopes_supported: [openid, profile, email]
+  grant_types_supported: [authorization_code, refresh_token]
+  code_challenge_methods_supported: [S256]
+  well_known: well-known/collate-openid-configuration.json
+probe:
+  get_mcp_status: 405
+  unauth_tools_list_status: 401
+tools: []
+tools_note: >-
+  Tool list requires OAuth (401 unauthenticated) and is not statically
+  published; not enumerated to avoid fabrication.

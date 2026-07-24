@@ -1,0 +1,45 @@
+generated: '2026-07-18'
+method: searched
+source: https://docs.open-metadata.org/latest/sdk
+description: >-
+  First-party OpenMetadata client libraries and tools, verified against the
+  public package registries (PyPI, Maven Central) and the OpenMetadata SDK docs.
+  The Python distribution (openmetadata-ingestion) bundles both the Python SDK
+  (OpenMetadata client under metadata.ingestion.ometa) and the `metadata` CLI.
+  A JavaScript/npm client is not published (the UI is app-internal, not a
+  released package).
+packages:
+- language: python
+  registry: pypi
+  name: openmetadata-ingestion
+  version: 1.13.1.1
+  url: https://pypi.org/project/openmetadata-ingestion/
+  source: https://github.com/open-metadata/OpenMetadata
+  install: pip install openmetadata-ingestion
+  official: true
+  notes: >-
+    Python SDK (metadata.ingestion.ometa.OpenMetadata client) + the `metadata`
+    CLI + 90+ ingestion connectors.
+- language: python
+  registry: pypi
+  name: openmetadata-managed-apis
+  version: 1.13.1.1
+  url: https://pypi.org/project/openmetadata-managed-apis/
+  source: https://github.com/open-metadata/OpenMetadata
+  install: pip install openmetadata-managed-apis
+  official: true
+  notes: Airflow REST APIs to create and manage OpenMetadata ingestion DAGs.
+- language: java
+  registry: maven
+  name: org.open-metadata:openmetadata-java-client
+  version: 1.8.0
+  url: https://central.sonatype.com/artifact/org.open-metadata/openmetadata-java-client
+  source: https://github.com/open-metadata/OpenMetadata
+  install: 'Maven: org.open-metadata:openmetadata-java-client'
+  official: true
+- language: java
+  registry: maven
+  name: org.open-metadata:openmetadata-clients
+  url: https://central.sonatype.com/artifact/org.open-metadata/openmetadata-clients
+  source: https://github.com/open-metadata/OpenMetadata
+  official: true

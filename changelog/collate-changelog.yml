@@ -1,0 +1,39 @@
+generated: '2026-07-18'
+method: searched
+source: https://github.com/open-metadata/OpenMetadata/releases
+description: >-
+  OpenMetadata publishes dated, versioned releases on GitHub (and a docs
+  "What's New" section). Versioning is semantic (MAJOR.MINOR.PATCH); a new minor
+  (1.x.0) carries features while patch releases (1.x.y) deliver fixes and
+  security patches. The recent window below is captured from the GitHub releases
+  feed; the live releases page is the source of truth.
+scheme: semver
+current_version: 1.13.1
+changelog_url: https://github.com/open-metadata/OpenMetadata/releases
+docs_url: https://docs.open-metadata.org/latest/releases/all-releases
+entries:
+- version: 1.13.1
+  date: '2026-06-27'
+  type: patch
+  highlights: Security fixes.
+- version: 1.13.0
+  date: '2026-06-08'
+  type: minor
+  breaking: false
+  highlights: Feature release (new capabilities across data assets and governance).
+- version: 1.12.13
+  date: '2026-07-06'
+  type: patch
+  highlights: Search & performance improvements.
+- version: 1.12.12
+  date: '2026-06-24'
+  type: patch
+  highlights: Security fixes.
+- version: 1.12.11
+  date: '2026-06-12'
+  type: patch
+  highlights: Maintenance release — security patches and MCP improvements.
+- version: 1.12.10
+  date: '2026-06-03'
+  type: patch
+  highlights: Maintenance fixes.

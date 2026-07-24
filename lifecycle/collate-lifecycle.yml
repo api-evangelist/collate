@@ -1,0 +1,26 @@
+generated: '2026-07-18'
+method: searched
+source: https://github.com/open-metadata/OpenMetadata/releases
+description: >-
+  Lifecycle posture for the OpenMetadata REST API. The API is versioned in the
+  URI path (/api/v1); the product follows semantic versioning with regular
+  dated releases (current 1.13.1). OpenMetadata additionally versions individual
+  metadata entities (every entity exposes a /versions history and version diffs).
+  No public hosted status page was found (status.open-metadata.org did not
+  resolve at probe time) and no formal RFC 8594 Sunset/Deprecation-header policy
+  is documented — so neither a StatusPage nor a Deprecation pointer is asserted.
+versioning:
+  api_scheme: uri-path
+  api_current: v1
+  product_scheme: semver
+  product_current: 1.13.1
+  entity_versioning: true
+  entity_versioning_note: Each entity exposes /versions history and version-diff endpoints.
+  docs: https://docs.open-metadata.org/latest/api-reference
+releases:
+  url: https://github.com/open-metadata/OpenMetadata/releases
+  cadence: frequent (minor + patch)
+status_page: null
+deprecation_policy: null
+sla: null
+deprecated_operations: []

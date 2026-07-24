@@ -1,0 +1,45 @@
+generated: '2026-07-18'
+method: searched
+description: >-
+  Results of probing the /.well-known/ discovery surface for the Collate website
+  and the public OpenMetadata hosts (base host from apis.yml + the OpenMetadata
+  API host). Status is the HTTP code observed at fetch time. Only documents that
+  returned a real, correctly-typed payload were saved verbatim. Notably, the
+  public OpenMetadata sandbox publishes an OAuth 2.0 / OIDC discovery document
+  for its hosted MCP server (issuer https://sandbox.open-metadata.org/mcp);
+  /.well-known/api-catalog returns a 200 that is actually the SPA index.html
+  shell, so it is recorded as present-but-not-a-real-document and not saved.
+hosts:
+- host: https://collate.com
+  documents:
+  - path: /.well-known/security.txt
+    status: 200
+    type: text/plain
+    file: collate-security.txt
+  - path: /.well-known/openid-configuration
+    status: 404
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+  - path: /.well-known/api-catalog
+    status: 404
+  - path: /.well-known/ai-plugin.json
+    status: 404
+- host: https://sandbox.open-metadata.org
+  documents:
+  - path: /.well-known/openid-configuration
+    status: 200
+    type: application/json
+    file: collate-openid-configuration.json
+    note: OIDC discovery for the OpenMetadata hosted MCP server (issuer .../mcp)
+  - path: /.well-known/oauth-authorization-server
+    status: 200
+    type: application/json
+    file: collate-oauth-authorization-server.json
+    note: RFC 8414 authorization-server metadata for the MCP server
+  - path: /.well-known/api-catalog
+    status: 200
+    note: returns the SPA index.html shell, not a real RFC 9727 catalog — not saved
+  - path: /.well-known/security.txt
+    status: 404
+  - path: /.well-known/ai-plugin.json
+    status: 404

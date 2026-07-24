@@ -1,0 +1,53 @@
+generated: '2026-07-18'
+method: searched
+source: https://docs.open-metadata.org/latest/how-to-guides/admin-guide/alerts
+spec_type: Webhooks
+description: >-
+  OpenMetadata emits Change Events for every metadata mutation and delivers them
+  through Alerts / Event Subscriptions to external destinations. (The legacy
+  standalone "webhooks" surface was deprecated in 0.13.1 in favor of Alerts.)
+  Change events are also readable directly from the REST change-events feed
+  (GET /api/v1/events). Event subscriptions are managed via the
+  /api/v1/events/subscriptions API with entity/event filters. Destinations
+  supported: generic HTTP webhook, Slack, Microsoft Teams, Google Chat, and
+  email. No published AsyncAPI document exists — this is the webhook/event
+  catalog. eventType values below are taken verbatim from the OpenMetadata
+  changeEventType.json JSON schema.
+mechanism: Alerts / Event Subscriptions (change events)
+management_api: /api/v1/events/subscriptions
+change_events_feed: /api/v1/events
+destinations:
+- generic-webhook
+- slack
+- microsoft-teams
+- google-chat
+- email
+event_types:
+- entityCreated
+- entityUpdated
+- entityFieldsChanged
+- entityNoChange
+- entitySoftDeleted
+- entityDeleted
+- entityRestored
+- entityLineageAdded
+- entityLineageUpdated
+- entityLineageDeleted
+- threadCreated
+- threadUpdated
+- postCreated
+- postUpdated
+- taskCreated
+- taskUpdated
+- taskResolved
+- taskClosed
+- suggestionCreated
+- suggestionUpdated
+- suggestionAccepted
+- suggestionRejected
+- suggestionDeleted
+- logicalTestCaseAdded
+- userLogin
+- userLogout
+payload: ChangeEvent (type/changeEvent.json) — eventType, entityType, entityId, entityFullyQualifiedName, previousVersion, currentVersion, changeDescription, timestamp
+legacy_note: Standalone webhooks deprecated in 0.13.1; use Alerts.

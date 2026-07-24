@@ -1,0 +1,50 @@
+generated: '2026-07-18'
+method: searched
+source: https://docs.open-metadata.org/latest/api-reference
+description: >-
+  Cross-cutting request/response conventions for the OpenMetadata REST API,
+  captured from the API reference and the JSON-schema metadata standard. Cross-links
+  authentication/collate-authentication.yml, errors/collate-error-codes.yml, and
+  lifecycle/collate-lifecycle.yml.
+authentication:
+  style: jwt-bearer
+  header: 'Authorization: Bearer <jwt>'
+  ref: authentication/collate-authentication.yml
+base_path: /api/v1
+pagination:
+  style: cursor
+  params: [limit, before, after]
+  default_limit: 10
+  max_limit: 1000000
+  response_fields:
+    data: data[]
+    paging: 'paging: { before, after, total }'
+  note: List endpoints return a data[] array plus a paging cursor object.
+field_selection:
+  fields_param: fields
+  note: >-
+    The `fields` query param requests additional (sparse/expanded) attributes on
+    an entity, e.g. fields=owner,tags,columns. Only requested fields are returned
+    beyond the default set.
+soft_delete:
+  include_param: include
+  values: [all, deleted, non-deleted]
+idempotency:
+  key_header: null
+  upsert: true
+  upsert_note: >-
+    OpenMetadata models writes as idempotent upserts — PUT create-or-update
+    endpoints (createOrUpdate) are safe to repeat and converge to the same state
+    by fully-qualified name. There is no Idempotency-Key request header.
+versioning:
+  api: uri-path (/api/v1)
+  entity_versioning: true
+  entity_versioning_note: Every entity has a /versions history with version diffs.
+  ref: lifecycle/collate-lifecycle.yml
+error_envelope:
+  shape: '{ "code": <int>, "message": <string> }'
+  problem_json: false
+  ref: errors/collate-error-codes.yml
+metadata_standard:
+  format: JSON Schema
+  note: All entities are defined by JSON Schema (openmetadata-spec) — the metadata standard.

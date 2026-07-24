@@ -1,0 +1,45 @@
+generated: '2026-07-18'
+method: derived
+source: >-
+  live probes of https://sandbox.open-metadata.org/api +
+  https://docs.open-metadata.org/latest/api-reference
+description: >-
+  Error model for the OpenMetadata REST API. Errors are returned as a JSON
+  envelope { "code": <httpStatus>, "message": <string> } (not RFC 9457
+  problem+json). The status/message pairs below were observed live against the
+  public API host and cross-checked with the API reference; each is a standard
+  HTTP status the API returns.
+format: custom
+envelope:
+  shape: '{ "code": <int>, "message": <string> }'
+  content_type: application/json
+problems:
+- status: 400
+  title: Bad Request
+  meaning: Malformed request body or invalid query parameters / entity validation failure.
+- status: 401
+  title: Not Authorized
+  meaning: Missing, expired, or invalid JWT Bearer token.
+  observed: true
+  observed_message: 'Not Authorized! Token not present'
+- status: 403
+  title: Forbidden
+  meaning: Authenticated principal lacks the RBAC permission/policy for the operation.
+- status: 404
+  title: Not Found
+  meaning: Entity (by id or fullyQualifiedName) does not exist.
+  observed: true
+  observed_message: 'HTTP 404 Not Found'
+- status: 405
+  title: Method Not Allowed
+  meaning: HTTP method not supported on the endpoint.
+  observed: true
+- status: 409
+  title: Conflict
+  meaning: Entity already exists / version or concurrency conflict on write.
+- status: 422
+  title: Unprocessable Entity
+  meaning: Request understood but semantically invalid.
+- status: 500
+  title: Internal Server Error
+  meaning: Unexpected server error.
