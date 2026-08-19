@@ -1,0 +1,15 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "OpenMetadata APIs",
+    "version": "1.6.0"
+  },
+  "request": {
+    "auth": {
+      "type": "bearer",
+      "token": "{{bearerToken}}"
+    }
+  },
+  "items": [],
+  "bundled": true
+}
