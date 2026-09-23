@@ -1,0 +1,1 @@
+{"resource":"https://sandbox.open-metadata.org/mcp","authorization_servers":["https://sandbox.open-metadata.org/mcp"],"bearer_methods_supported":["header"],"resource_documentation":"https://sandbox.open-metadata.org/docs","scopes_supported":["openid","profile","email"]}
