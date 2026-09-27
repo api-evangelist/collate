@@ -47,6 +47,10 @@ specificationVersion: '0.23'
 created: '2026-07-17'
 modified: '2026-07-18'
 image: https://avatars.githubusercontent.com/u/74767841
+x-docs-platform: mintlify
+x-docs-platform-confidence: medium
+x-docs-platform-checked: 2026-09-24
+x-docs-hosting: vercel
 tags:
 - Company
 - Data
@@ -56,7 +60,7 @@ tags:
 - Data Discovery
 - Data Quality
 - Data Lineage
-- Open-Source
+- Open Source
 tags_raw:
 - Company
 - Data
@@ -68,6 +72,7 @@ tags_raw:
 - Data Lineage
 - Open Source
 - API
+- Open-Source
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
