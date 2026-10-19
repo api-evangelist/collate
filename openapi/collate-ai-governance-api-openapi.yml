@@ -1,0 +1,292 @@
+openapi: 3.2.0
+info:
+  title: OpenMetadata AI Governance API
+  description: Common types and API definition for OpenMetadata
+  contact:
+    name: OpenMetadata
+    url: https://open-metadata.org
+    email: openmetadata-dev@googlegroups.com
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+  version: 2.0.5
+servers:
+- url: /api
+  description: Current Host
+- url: http://localhost:8585/api
+  description: Endpoint URL
+security:
+- BearerAuth: []
+tags:
+- name: AI Governance
+  description: 'Cross-asset AI governance endpoints: intake checks, submitForReview, approve, reject, shadow triage.'
+paths:
+  /v1/aiGovernance/{entityType}/{id}/approve:
+    post:
+      tags:
+      - AI Governance
+      summary: Approve a PendingApproval AI asset
+      description: Sets registrationStatus to Approved and stamps approvedBy / approvedAt.
+      operationId: approveAIAsset
+      parameters:
+      - name: entityType
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AIGovernanceTransitionRequest'
+      responses:
+        default:
+          description: default response
+          content:
+            application/json: {}
+  /v1/aiGovernance/shadow/bulkTriage:
+    post:
+      tags:
+      - AI Governance
+      summary: Bulk-triage Shadow AI detections
+      description: Bulk register or dismiss a set of Shadow AI detections. 'Register' flips registrationStatus to PendingApproval; 'Dismiss' flips to Rejected with the supplied reason.
+      operationId: shadowBulkTriage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AIGovernanceBulkTriageRequest'
+      responses:
+        default:
+          description: default response
+          content:
+            application/json: {}
+  /v1/aiGovernance/activity:
+    get:
+      tags:
+      - AI Governance
+      summary: Curated AI governance activity feed
+      description: Returns a chronological feed of governance-significant events (registered, approved, rejected, assessed, reassessment scheduled, shadow detected). Supports filtering to a single asset via entityType + entityId.
+      operationId: getAIGovernanceActivity
+      parameters:
+      - name: entityType
+        in: query
+        schema:
+          type: string
+      - name: entityId
+        in: query
+        schema:
+          type: string
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          format: int32
+          default: 50
+      responses:
+        default:
+          description: default response
+          content:
+            application/json: {}
+  /v1/aiGovernance/dashboard:
+    get:
+      tags:
+      - AI Governance
+      summary: Rollup of AI governance state
+      description: 'Returns the dashboard widgets in one shot: estate stats, risk × impact matrix counts, framework readiness percentages, top-N Shadow AI detections, top-N pending approvals. Computes from the AI Application / LLM Model / MCP Server entities directly so the UI can render in a single round-trip.'
+      operationId: getAIGovernanceDashboard
+      responses:
+        default:
+          description: default response
+          content:
+            application/json: {}
+  /v1/aiGovernance/intakeChecks/{entityType}/name/{fqn}:
+    get:
+      tags:
+      - AI Governance
+      summary: Return the AI governance intake checks for an asset
+      description: Computes the 5 intake checks the Approvals queue surfaces (owner assigned, risk classified, fairness evidence attached, DPIA referenced, transparency disclosure). Each check returns a passing boolean and an evidence reference where applicable.
+      operationId: getIntakeChecksByFqn
+      parameters:
+      - name: entityType
+        in: path
+        description: AI asset type
+        required: true
+        schema:
+          type: string
+      - name: fqn
+        in: path
+        description: Fully qualified name of the asset
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Intake check results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IntakeChecksResponse'
+  /v1/aiGovernance/{entityType}/{id}/policyStatus:
+    get:
+      tags:
+      - AI Governance
+      summary: Evaluate AI governance policies attached to an asset
+      description: 'Evaluates a small set of always-on synthetic policies (drift threshold, PII access requires DPIA, subgroup fairness quarterly, human oversight, audit log retention) plus any AIGovernancePolicy entries the asset references. Returns per-rule status: Passing | Breached | NotApplicable.'
+      operationId: getPolicyStatus
+      parameters:
+      - name: entityType
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        default:
+          description: default response
+          content:
+            application/json: {}
+  /v1/aiGovernance/policies/{policyId}/violations:
+    get:
+      tags:
+      - AI Governance
+      summary: Recent breach events for a single AI governance policy
+      description: Returns recent breach events scoped to this policy across the AI estate. Computed by re-evaluating PolicyEvaluator over in-scope AI assets and projecting rule names that match the policy name pattern. Optional since (epoch ms) bound and limit (default 50).
+      operationId: getPolicyViolations
+      parameters:
+      - name: policyId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: since
+        in: query
+        schema:
+          type: integer
+          format: int64
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          format: int32
+          default: 50
+      responses:
+        default:
+          description: default response
+          content:
+            application/json: {}
+  /v1/aiGovernance/{entityType}/{id}/reject:
+    post:
+      tags:
+      - AI Governance
+      summary: Reject a PendingApproval AI asset
+      description: Sets registrationStatus to Rejected and records the comment.
+      operationId: rejectAIAsset
+      parameters:
+      - name: entityType
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AIGovernanceTransitionRequest'
+      responses:
+        default:
+          description: default response
+          content:
+            application/json: {}
+  /v1/aiGovernance/{entityType}/{id}/submitForReview:
+    post:
+      tags:
+      - AI Governance
+      summary: Flip an AI asset's registrationStatus to PendingApproval
+      description: Convenience endpoint used by the Intake Wizard. Loads the entity, sets registrationStatus to PendingApproval (with registeredBy / registeredAt), and PATCHes back. The intake workflow picks up the change-event and creates a Risk Council approval task.
+      operationId: submitForReview
+      parameters:
+      - name: entityType
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        default:
+          description: default response
+          content:
+            application/json: {}
+components:
+  schemas:
+    IntakeCheck:
+      required:
+      - name
+      - passing
+      type: object
+      properties:
+        name:
+          type: string
+        passing:
+          type: boolean
+        evidenceRef:
+          type: string
+    AIGovernanceBulkTriageItem:
+      required:
+      - entityType
+      - id
+      type: object
+      properties:
+        entityType:
+          type: string
+        id:
+          type: string
+    AIGovernanceBulkTriageRequest:
+      type: object
+      properties:
+        action:
+          type: string
+        reason:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AIGovernanceBulkTriageItem'
+    IntakeChecksResponse:
+      required:
+      - checks
+      type: object
+      properties:
+        checks:
+          type: array
+          items:
+            $ref: '#/components/schemas/IntakeCheck'
+    AIGovernanceTransitionRequest:
+      type: object
+      properties:
+        comment:
+          type: string
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

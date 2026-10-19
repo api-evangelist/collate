@@ -79,29 +79,1602 @@ maintainers:
 - FN: APIs.json
   email: info@apis.io
 apis:
-- aid: collate:collate-openmetadata-rest-api
-  name: OpenMetadata REST API
-  description: The OpenMetadata REST API — a JWT-authenticated (Bearer) CRUD API over every data asset
-    and governance entity in OpenMetadata (databases, schemas, tables, dashboards, charts, pipelines,
-    topics, containers, ML models, API collections/endpoints, glossaries, teams, users, policies, bots),
-    plus lineage, versions, and change events. The spec ships as an OpenAPI 3.0.3 document declaring HTTP
-    Bearer (JWT) security; the full per-entity operation surface is documented in the API reference.
+- aid: collate:collate-activity-stream-api
+  name: Collate Activity Stream API
+  description: Lightweight activity notifications for dashboards and feeds.
   humanURL: https://docs.open-metadata.org/latest/api-reference
   baseURL: https://sandbox.open-metadata.org/api/v1
   tags:
-  - Metadata
-  - Data Catalog
-  - REST
+  - Activity Stream
   properties:
   - type: OpenAPI
-    url: openapi/collate-openmetadata-openapi.yml
+    url: openapi/collate-activity-stream-api-openapi.yml
   - type: Documentation
     url: https://docs.open-metadata.org/latest/api-reference
   - type: APIReference
     url: https://docs.open-metadata.org/latest/api-reference
-  - type: Overlay
-    url: overlays/collate-openmetadata-overlay.yaml
+- aid: collate:collate-agent-executions-api
+  name: Collate Agent Executions API
+  description: >-
+    `Agent Executions` are time-series records of AI agent execution runs, capturing observability metrics,
+    governance checks, and performance data.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Agent Executions
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-agent-executions-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-ai-applications-api
+  name: Collate AI Applications API
+  description: >-
+    `AI Applications` are autonomous software entities that use LLM models to perform tasks, make decisions,
+    and interact with data sources.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - AI Applications
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-ai-applications-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-ai-audit-reports-api
+  name: Collate AI Audit Reports API
+  description: >-
+    Auto-generated audit packs (JSON/PDF evidence bundles) for AI governance. Submitted asynchronously
+    and consumed by auditors and regulators.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - AI Audit Reports
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-ai-audit-reports-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-ai-context-api
+  name: Collate AI Context API
+  description: >-
+    Question-anchored AI context discovery: semantically search the company-knowledge layer (glossary
+    terms, metrics, articles) and route each hit to the candidate data assets it points to. Asset-anchored
+    context is served per entity at /v1/{entities}/name/{fqn}/context.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - AI Context
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-ai-context-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-ai-framework-controls-api
+  name: Collate AI Framework Controls API
+  description: Controls within an AI Governance Framework (e.g. EU AI Act Article 10).
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - AI Framework Controls
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-ai-framework-controls-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-ai-governance-api
+  name: Collate AI Governance API
+  description: >-
+    Cross-asset AI governance endpoints: intake checks, submitForReview, approve, reject, shadow triage.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - AI Governance
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-ai-governance-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-ai-governance-frameworks-api
+  name: Collate AI Governance Frameworks API
+  description: >-
+    Workspace-level AI governance frameworks (EU AI Act, NIST AI RMF, ISO/IEC 42001, custom). Enabled
+    frameworks drive per-asset compliance assessments.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - AI Governance Frameworks
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-ai-governance-frameworks-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-ai-governance-policies-api
+  name: Collate AI Governance Policies API
+  description: >-
+    `AI Governance Policies` define rules, compliance requirements, bias thresholds, and control measures
+    for AI agents and models.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - AI Governance Policies
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-ai-governance-policies-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-announcements-api
+  name: Collate Announcements API
+  description: Time-bound notifications for data assets
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Announcements
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-announcements-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-api-collections-api
+  name: Collate API Collections API
+  description: >-
+    A `API Collection` is an optional way of grouping API Endpoints that belong to a API Service.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - API Collections
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-api-collections-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-api-endpoint-api
+  name: Collate API Endpoint API
+  description: A `API Endpoint` is a specific endpoint of an API that is part of an API Collection..
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - API Endpoint
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-api-endpoint-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-api-services-api
+  name: Collate API Services API
+  description: APIs related `API Service` entities, such as REST or MicroService.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - API Services
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-api-services-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-apps-api
+  name: Collate Apps API
+  description: Apps marketplace holds to application available for Open-metadata
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Apps
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-apps-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-attachments-api
+  name: Collate Attachments API
+  description: APIs related to uploading attachments.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Attachments
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-attachments-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-audit-logs-api
+  name: Collate Audit Logs API
+  description: APIs for listing user initiated change events persisted for auditing
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Audit Logs
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-audit-logs-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-bots-api
+  name: Collate Bots API
+  description: >-
+    A `Bot` automates tasks, such as ingesting metadata, and running data quality It performs this task
+    as a special user in the system.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Bots
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-bots-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-changesummary-api
+  name: Collate Change Summary API
+  description: >-
+    APIs to retrieve change summary metadata for entities. Change summary tracks who changed each field,
+    the source of the change (e.g., Suggested for AI-generated, Manual for user edits), and when the change
+    occurred.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - ChangeSummary
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-changesummary-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-charts-api
+  name: Collate Charts API
+  description: A `Chart` are computed from data presents data visually and can be part of `Dashboards`.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Charts
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-charts-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-classifications-api
+  name: Collate Classifications API
+  description: >-
+    These APIs are related to `Classification` and `Tags`. A `Classification` entity contains hierarchical
+    terms called `Tags` used for categorizing and classifying data assets and other entities.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Classifications
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-classifications-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-columns-api
+  name: Collate Columns API
+  description: >-
+    Columns represent individual data fields within tables and dashboard data models. This API provides
+    operations to update column metadata such as tags, glossary terms, descriptions, and other properties
+    using the column's fully qualified name.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Columns
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-columns-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-containers-api
+  name: Collate Containers API
+  description: >-
+    A Container is an abstraction for any path(including the top level eg. bucket in S3) storing data
+    in an Object store such as S3, GCP, Azure. It maps a tree-like structure, where each Container can
+    have a parent and a list of sub-folders, and it can be structured - where it contains structured data,
+    or unstructured where no schema for its data is defined.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Containers
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-containers-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-context-center-drive-files-api
+  name: Collate Context Center Drive Files API
+  description: APIs for managing files in the Context Center Drive.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Context Center Drive Files
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-context-center-drive-files-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-context-center-drive-folders-api
+  name: Collate Context Center Drive Folders API
+  description: APIs for managing folders in the Context Center Drive.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Context Center Drive Folders
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-context-center-drive-folders-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-context-center-pages-api
+  name: Collate Context Center Pages API
+  description: APIs related to Context Center pages (articles and quick links).
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Context Center Pages
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-context-center-pages-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-context-memories-api
+  name: Collate Context Memories API
+  description: APIs for managing reusable Context Center memories.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Context Memories
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-context-memories-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-csv-api
+  name: Collate CSV API
+  description: CSV import and export metadata APIs.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - CSV
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-csv-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-csv-async-jobs-api
+  name: Collate CSV Async Jobs API
+  description: CSV import and export job status APIs.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - CSV Async Jobs
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-csv-async-jobs-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-dashboard-data-models-api
+  name: Collate Dashboard Data Models API
+  description: '`Data Models` are the schemas used to build dashboards, charts, or other data assets.'
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Dashboard Data Models
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-dashboard-data-models-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-dashboard-services-api
+  name: Collate Dashboard Services API
+  description: The Dashboard Services API from Collate — 14 operation(s) for dashboard services.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Dashboard Services
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-dashboard-services-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-dashboards-api
+  name: Collate Dashboards API
+  description: >-
+    Dashboards are computed from data and visually present data, metrics, and KPIs. They are typically
+    updated in real-time and allow interactive data exploration.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Dashboards
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-dashboards-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-data-contracts-api
+  name: Collate Data Contracts API
+  description: '`DataContract` defines the schema and quality guarantees for a data asset.'
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Data Contracts
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-data-contracts-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-data-quality-api
+  name: Collate Data Quality API
+  description: APIs to retrieve dimensional test case results data.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Data Quality
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-data-quality-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-database-schemas-api
+  name: Collate Database Schemas API
+  description: >-
+    A `Database Schema` is collection of tables, views, stored procedures, and other database objects.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Database Schemas
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-database-schemas-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-database-services-api
+  name: Collate Database Services API
+  description: >-
+    `Database Service` is a service such as MySQL, BigQuery, Redshift, Postgres, or Snowflake. Alternative
+    terms such as Database Cluster, Database Server instance are also used for database service.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Database Services
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-database-services-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-databases-api
+  name: Collate Databases API
+  description: A `Database` also referred to as `Database Catalog` is a collection of schemas.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Databases
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-databases-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-directories-api
+  name: Collate Directories API
+  description: >-
+    A `Directory` is a folder or organizational unit in a Drive Service that can contain files, spreadsheets,
+    and other directories.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Directories
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-directories-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-document-store-api
+  name: Collate Document Store API
+  description: A `Document` is an generic entity in OpenMetadata.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Document Store
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-document-store-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-domains-api
+  name: Collate Domains API
+  description: >-
+    A `Data Product` or `Data as a Product` is a logical unit that contains all components to process
+    and store domain data for analytical or data-intensive use cases made available to data consumers.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Domains
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-domains-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-drive-services-api
+  name: Collate Drive Services API
+  description: >-
+    `Drive Service` is a cloud file storage service such as Google Drive, OneDrive, SharePoint, Box, or
+    Dropbox where documents, spreadsheets, and other files are stored.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Drive Services
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-drive-services-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-events-api
+  name: Collate Events API
+  description: >-
+    The `Events` are changes to metadata and are sent when entities are created, modified, or updated.
+    External systems can subscribe to events using event subscription API over Webhooks, Slack, or Microsoft
+    Teams.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Events
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-events-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-feeds-api
+  name: Collate Feeds API
+  description: Feeds API supports `Activity Feeds` and `Conversation Threads`.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Feeds
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-feeds-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-files-api
+  name: Collate Files API
+  description: A `File` is a document or resource stored in a Drive Service.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Files
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-files-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-glossaries-api
+  name: Collate Glossaries API
+  description: A `Glossary` is collection of hierarchical `GlossaryTerms`.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Glossaries
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-glossaries-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-ingestion-pipelines-api
+  name: Collate Ingestion Pipelines API
+  description: APIs related pipelines/workflows created by the system to ingest metadata.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Ingestion Pipelines
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-ingestion-pipelines-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-intakeforms-api
+  name: Collate Intake Forms API
+  description: >-
+    An IntakeForm declares fields shown for a governance entity and which are required. Required fields
+    are enforced at the API layer, layered on top of the entity's schema-required fields.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - IntakeForms
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-intakeforms-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-learning-resources-api
+  name: Collate Learning Resources API
+  description: Inline tutorials and expert content surfaced across OpenMetadata product surfaces.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Learning Resources
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-learning-resources-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-lineage-api
+  name: Collate Lineage API
+  description: >-
+    The `Lineage` for a given data asset, has information of the input datasets used and the ETL pipeline
+    that created it.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Lineage
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-lineage-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-llm-models-api
+  name: Collate LLM Models API
+  description: >-
+    `LLM Models` are Large Language Model instances such as GPT-4, Claude, Llama, or custom-trained models
+    used for AI applications.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - LLM Models
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-llm-models-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-llm-services-api
+  name: Collate LLM Services API
+  description: >-
+    `LLM Service` is a service for Large Language Model providers such as OpenAI, Anthropic, Azure OpenAI,
+    AWS Bedrock, Google Vertex AI, or custom LLM deployments.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - LLM Services
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-llm-services-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-mcp-executions-api
+  name: Collate MCP Executions API
+  description: >-
+    `MCP Executions` are time-series records of MCP server execution sessions, capturing tool calls, resource
+    accesses, data lineage, compliance checks, and audit trails for AI governance.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - MCP Executions
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-mcp-executions-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-mcp-servers-api
+  name: Collate MCP Servers API
+  description: >-
+    `MCP Servers` are Model Context Protocol servers that expose tools, resources, and prompts for AI
+    applications. They enable AI governance including risk assessment, compliance tracking, and shadow
+    AI detection.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - MCP Servers
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-mcp-servers-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-mcp-services-api
+  name: Collate MCP Services API
+  description: >-
+    `MCP Service` is a service for discovering and managing MCP (Model Context Protocol) servers, their
+    tools, resources, and prompts for AI governance.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - MCP Services
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-mcp-services-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-mcp-usage-api
+  name: Collate MCP Usage API
+  description: MCP tool-call usage counters and breakdowns.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - MCP Usage
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-mcp-usage-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-messaging-services-api
+  name: Collate Messaging Services API
+  description: The Messaging Services API from Collate — 14 operation(s) for messaging services.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Messaging Services
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-messaging-services-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-metadata-api
+  name: Collate Metadata API
+  description: >-
+    These APIs are for managing custom property definitions in OpenMetadata. Use these APIs to create
+    custom properties with predefined data types (String, Integer, Date, etc.) that extend entity metadata.
+    Note: This does not support creating new custom data types - only custom properties using existing
+    OpenMetadata data types.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Metadata
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-metadata-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-metadata-services-api
+  name: Collate Metadata Services API
+  description: >-
+    APIs related to creating and managing other Metadata Services that OpenMetadata integrates with such
+    as `Apache Atlas`, `Amundsen`, etc.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Metadata Services
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-metadata-services-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-metrics-api
+  name: Collate Metrics API
+  description: >-
+    `Metrics` are measurements computed from data such as `Monthly Active Users`. Some of the metrics
+    that measures used to determine performance against an objective are called KPIs or Key Performance
+    Indicators, such as `User Retention`.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Metrics
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-metrics-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-ml-model-services-api
+  name: Collate ML Model Services API
+  description: The ML Model Services API from Collate — 14 operation(s) for ml model services.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - ML Model Services
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-ml-model-services-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-ml-models-api
+  name: Collate ML Models API
+  description: >-
+    `Machine Learning Models` are algorithms trained on data to find patterns or make predictions.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - ML Models
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-ml-models-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-notification-templates-api
+  name: Collate Notification Templates API
+  description: Notification templates for customizing event notifications
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Notification Templates
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-notification-templates-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-object-store-services-api
+  name: Collate Object Store Services API
+  description: APIs related `Object Store Service` entities, such as S3, GCS or AZURE.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Object Store Services
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-object-store-services-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-openlineage-api
+  name: Collate Open Lineage API
+  description: >-
+    OpenLineage API for receiving lineage events from external systems like Spark, Airflow, etc.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - OpenLineage
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-openlineage-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-openmetadata-apis-api
+  name: Collate OpenMetadata APIs API
+  description: The OpenMetadata APIs API from Collate — 1 operation(s) for openmetadata apis.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - OpenMetadata APIs
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-openmetadata-apis-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-permissions-api
+  name: Collate Permissions API
+  description: APIs related to getting access permission for a User.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Permissions
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-permissions-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-personas-api
+  name: Collate Personas API
+  description: >-
+    A `Persona` is to represent job function a user does.  OpenMetadata uses Persona to define customizable
+    experience in the UI.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Personas
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-personas-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-pipeline-services-api
+  name: Collate Pipeline Services API
+  description: The Pipeline Services API from Collate — 13 operation(s) for pipeline services.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Pipeline Services
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-pipeline-services-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-pipelines-api
+  name: Collate Pipelines API
+  description: >-
+    A `Pipeline` enables the flow of data from source to destination through a series of processing steps.
+    ETL is a type of pipeline where the series of steps Extract, Transform and Load the data.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Pipelines
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-pipelines-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-policies-api
+  name: Collate Policies API
+  description: A `Policy` defines control that needs to be applied across different Data Entities.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Policies
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-policies-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-prompt-templates-api
+  name: Collate Prompt Templates API
+  description: >-
+    `Prompt Templates` are reusable, parameterized templates for LLM interactions that ensure consistent
+    and effective prompting across AI agents.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Prompt Templates
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-prompt-templates-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-queries-api
+  name: Collate Queries API
+  description: A `Query` entity represents a SQL query associated with data assets it is run against.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Queries
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-queries-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-query-cost-record-manager-api
+  name: Collate Query Cost Record Manager API
+  description: APIs to query cost records from usage workflow.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Query Cost Record Manager
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-query-cost-record-manager-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-rdf-api
+  name: Collate RDF API
+  description: APIs for RDF and SPARQL operations
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - RDF
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-rdf-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-rdf-reindex-api
+  name: Collate RDF Reindex API
+  description: APIs related to RDF reindexing failures and status.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - RDF Reindex
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-rdf-reindex-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-rdf-sql-api
+  name: Collate RDF SQL API
+  description: Execute SQL queries over RDF data
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - RDF SQL
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-rdf-sql-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-reports-beta-api
+  name: Collate Reports (beta) API
+  description: >-
+    `Reports` are static information computed from data periodically that includes data in text, table,
+    and visual form.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Reports (beta)
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-reports-beta-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-roles-api
+  name: Collate Roles API
+  description: >-
+    A `Role` is a collection of `Policies` that provides access control. A user or a team can be assigned
+    one or multiple roles that provide privileges to a user and members of a team to perform the job function.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Roles
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-roles-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-scim-api
+  name: Collate SCIM API
+  description: SCIM 2.0 compliant user and group provisioning endpoints.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - SCIM
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-scim-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-search-api
+  name: Collate Search API
+  description: APIs related to search and suggest.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Search
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-search-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-search-reindex-api
+  name: Collate Search Reindex API
+  description: APIs related to search reindexing failures and status.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Search Reindex
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-search-reindex-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-search-services-api
+  name: Collate Search Services API
+  description: APIs related `Search Service` entities, such as ElasticSearch, OpenSearch.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Search Services
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-search-services-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-security-services-api
+  name: Collate Security Services API
+  description: APIs related to Security Service entities, such as Apache Ranger.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Security Services
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-security-services-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-services-api
+  name: Collate Services API
+  description: Cross-service-type APIs spanning every kind of service in one request.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Services
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-services-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-spreadsheets-api
+  name: Collate Spreadsheets API
+  description: >-
+    A `Spreadsheet` is a file format for organizing data in a tabular format, like Google Sheets or Excel
+    files.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Spreadsheets
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-spreadsheets-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-stored-procedures-api
+  name: Collate Stored Procedures API
+  description: >-
+    A `StoredProcedure` entity that contains the set of code statements with an assigned name .
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Stored Procedures
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-stored-procedures-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-swagger-json-api
+  name: Collate Swagger.json API
+  description: The Swagger.json API from Collate — 1 operation(s) for swagger.json.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Swagger.json
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-swagger-json-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-swagger-yaml-api
+  name: Collate Swagger.yaml API
+  description: The Swagger.yaml API from Collate — 1 operation(s) for swagger.yaml.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Swagger.yaml
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-swagger-yaml-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-system-api
+  name: Collate System API
+  description: System diagnostics providing a performance snapshot for load test correlation
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - System
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-system-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-tables-api
+  name: Collate Tables API
+  description: '`Table` organizes data in rows and columns and is defined in a `Database Schema`.'
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Tables
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-tables-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-task-form-schemas-api
+  name: Collate Task Form Schemas API
+  description: Form schemas for task types
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Task Form Schemas
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-task-form-schemas-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-tasks-api
+  name: Collate Tasks API
+  description: Tasks for data governance workflows
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Tasks
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-tasks-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-teams-api
+  name: Collate Teams API
+  description: >-
+    A `Team` is a group of zero or more users and/or other teams. Teams can own zero or more data assets.
+    Hierarchical teams are supported `Organization` -> `BusinessUnit` -> `Division` -> `Department`.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Teams
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-teams-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-test-case-incident-manager-api
+  name: Collate Test Case Incident Manager API
+  description: APIs to test case incident status from incident manager.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Test Case Incident Manager
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-test-case-incident-manager-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-test-case-results-api
+  name: Collate Test Case Results API
+  description: >-
+    Test case results are the results of running a test case on a dataset. This resource provides APIs
+    to manage test case results.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Test Case Results
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-test-case-results-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-test-cases-api
+  name: Collate Test Cases API
+  description: >-
+    Test case is a test definition to capture data quality tests against tables, columns, and other data
+    assets.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Test Cases
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-test-cases-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-test-definitions-api
+  name: Collate Test Definitions API
+  description: >-
+    `Test Definition` is a definition of a type of test using which test cases are created that run against
+    data to capture data quality.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Test Definitions
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-test-definitions-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-test-suites-api
+  name: Collate Test Suites API
+  description: '`TestSuite` is a set of test cases grouped together to capture data quality.'
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Test Suites
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-test-suites-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-testsupport-api
+  name: Collate Test Support API
+  description: Admin-only read-only search introspection for tests
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - TestSupport
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-testsupport-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-topics-api
+  name: Collate Topics API
+  description: >-
+    A `Topic` is a feed or an event stream in a `Messaging Service` into which publishers publish messages
+    and consumed by consumers.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Topics
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-topics-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-usage-api
+  name: Collate Usage API
+  description: APIs related usage of data assets.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Usage
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-usage-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-users-api
+  name: Collate Users API
+  description: >-
+    A `User` represents a user of OpenMetadata. A user can be part of 0 or more teams. A special type
+    of user called Bot is used for automation. A user can be an owner of zero or more data assets. A user
+    can also follow zero or more data assets.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Users
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-users-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-vector-search-api
+  name: Collate Vector Search API
+  description: APIs for vector-based semantic search.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Vector Search
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-vector-search-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-workflow-definitions-api
+  name: Collate Workflow Definitions API
+  description: A `Workflow Definition` is a configured workflow setup for a given governance task.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Workflow Definitions
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-workflow-definitions-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-workflow-instance-states-api
+  name: Collate Workflow Instance States API
+  description: A Workflow Instance State is a specific state of a Workflow Instance.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Workflow Instance States
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-workflow-instance-states-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-workflow-instances-api
+  name: Collate Workflow Instances API
+  description: A Workflow Instance is a specific instance of a Workflow Definition.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Workflow Instances
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-workflow-instances-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-worksheets-api
+  name: Collate Worksheets API
+  description: A `Worksheet` is an individual sheet or tab within a Spreadsheet.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Worksheets
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-worksheets-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
+- aid: collate:collate-search-index-api
+  name: Collate Search Index API
+  description: A `SearchIndex` is a index mapping for indexing documents in a `Search Service`.
+  humanURL: https://docs.open-metadata.org/latest/api-reference
+  baseURL: https://sandbox.open-metadata.org/api/v1
+  tags:
+  - Search Index
+  properties:
+  - type: OpenAPI
+    url: openapi/collate-search-index-api-openapi.yml
+  - type: Documentation
+    url: https://docs.open-metadata.org/latest/api-reference
+  - type: APIReference
+    url: https://docs.open-metadata.org/latest/api-reference
 common:
+- type: Overlay
+  url: overlays/collate-openmetadata-overlay.yaml
 - type: Website
   url: https://collate.com/
 - type: DeveloperPortal

@@ -1,0 +1,829 @@
+openapi: 3.2.0
+info:
+  title: OpenMetadata AI Framework Controls API
+  description: Common types and API definition for OpenMetadata
+  contact:
+    name: OpenMetadata
+    url: https://open-metadata.org
+    email: openmetadata-dev@googlegroups.com
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+  version: 2.0.5
+servers:
+- url: /api
+  description: Current Host
+- url: http://localhost:8585/api
+  description: Endpoint URL
+security:
+- BearerAuth: []
+tags:
+- name: AI Framework Controls
+  description: Controls within an AI Governance Framework (e.g. EU AI Act Article 10).
+paths:
+  /v1/aiFrameworkControls:
+    get:
+      tags:
+      - AI Framework Controls
+      summary: List controls
+      operationId: listAIFrameworkControls
+      parameters:
+      - name: fields
+        in: query
+        schema:
+          type: string
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          format: int32
+          default: 50
+      - name: before
+        in: query
+        schema:
+          type: string
+      - name: after
+        in: query
+        schema:
+          type: string
+      - name: framework
+        in: query
+        schema:
+          type: string
+      - name: include
+        in: query
+        schema:
+          type: string
+          default: non-deleted
+          enum:
+          - all
+          - deleted
+          - non-deleted
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResultListAIFrameworkControl'
+    put:
+      tags:
+      - AI Framework Controls
+      summary: Create or update a control
+      operationId: createOrUpdateAIFrameworkControl
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAIFrameworkControl'
+      responses:
+        default:
+          description: default response
+          content:
+            application/json: {}
+    post:
+      tags:
+      - AI Framework Controls
+      summary: Create a control
+      operationId: createAIFrameworkControl
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAIFrameworkControl'
+      responses:
+        default:
+          description: default response
+          content:
+            application/json: {}
+  /v1/aiFrameworkControls/{id}:
+    get:
+      tags:
+      - AI Framework Controls
+      summary: Get a control by id
+      operationId: getAIFrameworkControlById
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: fields
+        in: query
+        schema:
+          type: string
+      - name: include
+        in: query
+        schema:
+          type: string
+          default: non-deleted
+          enum:
+          - all
+          - deleted
+          - non-deleted
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AIFrameworkControl'
+    delete:
+      tags:
+      - AI Framework Controls
+      summary: Delete a control
+      operationId: deleteAIFrameworkControl
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: hardDelete
+        in: query
+        schema:
+          type: boolean
+          default: false
+      - name: recursive
+        in: query
+        schema:
+          type: boolean
+          default: false
+      responses:
+        default:
+          description: default response
+          content:
+            application/json: {}
+    patch:
+      tags:
+      - AI Framework Controls
+      summary: Update a control
+      operationId: patchAIFrameworkControl
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/JsonPatch'
+      responses:
+        default:
+          description: default response
+          content:
+            application/json: {}
+  /v1/aiFrameworkControls/{id}/context:
+    get:
+      tags:
+      - AI Framework Controls
+      summary: Get the AI context for an entity by id
+      description: Retrieve the LLM-ready AI Context (Context Profile) for the entity — its attached business knowledge (glossary terms, Context Center articles, applied metrics), type-specific structural context, and depth-1 lineage — as an OKF-style markdown document (default) or the structured AIContext JSON (`?format=json`).
+      operationId: getEntityAiContextById_1
+      parameters:
+      - name: id
+        in: path
+        description: Entity id
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: format
+        in: query
+        description: 'Output format: markdown (default) or json'
+        schema:
+          type: string
+          default: markdown
+      - name: query
+        in: query
+        description: Optional question; truncated knowledge items are excerpted to the passage most relevant to it instead of the positional lead
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Entity AI context
+        '404':
+          description: Entity not found
+  /v1/aiFrameworkControls/name/{fqn}/context:
+    get:
+      tags:
+      - AI Framework Controls
+      summary: Get the AI context for an entity by fully qualified name
+      description: Retrieve the LLM-ready AI Context (Context Profile) for the entity by FQN — see getEntityAiContextById. Returns an OKF-style markdown document by default, or the structured AIContext JSON with `?format=json`.
+      operationId: getEntityAiContextByName_1
+      parameters:
+      - name: fqn
+        in: path
+        description: Entity fully qualified name
+        required: true
+        schema:
+          type: string
+      - name: format
+        in: query
+        description: 'Output format: markdown (default) or json'
+        schema:
+          type: string
+          default: markdown
+      - name: query
+        in: query
+        description: Optional question; truncated knowledge items are excerpted to the passage most relevant to it instead of the positional lead
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Entity AI context
+        '404':
+          description: Entity not found
+  /v1/aiFrameworkControls/name/{fqn}:
+    get:
+      tags:
+      - AI Framework Controls
+      summary: Get a control by FQN
+      operationId: getAIFrameworkControlByFqn
+      parameters:
+      - name: fqn
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: fields
+        in: query
+        schema:
+          type: string
+      - name: include
+        in: query
+        schema:
+          type: string
+          default: non-deleted
+          enum:
+          - all
+          - deleted
+          - non-deleted
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AIFrameworkControl'
+  /v1/aiFrameworkControls/history:
+    get:
+      tags:
+      - AI Framework Controls
+      summary: List all entity versions within a time range
+      description: Get a paginated list of all entity versions within a given time range specified by `startTs` and `endTs` in milliseconds since epoch.
+      operationId: listAllEntityVersionsByTimestamp_1
+      parameters:
+      - name: startTs
+        in: query
+        description: Start timestamp in milliseconds since epoch
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: endTs
+        in: query
+        description: End timestamp in milliseconds since epoch
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: limit
+        in: query
+        description: Limit the number of entity returned (1 to 1000000, default = 10)
+        schema:
+          maximum: 500
+          minimum: 1
+          type: integer
+          format: int32
+          default: 10
+      - name: before
+        in: query
+        description: Returns list of entity versions before this cursor
+        schema:
+          type: string
+      - name: after
+        in: query
+        description: Returns list of entity versions after this cursor
+        schema:
+          type: string
+      responses:
+        '200':
+          description: List of all versions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResultList'
+components:
+  schemas:
+    TagLabel:
+      required:
+      - labelType
+      - source
+      - state
+      - tagFQN
+      type: object
+      properties:
+        tagFQN:
+          type: string
+        name:
+          type: string
+        displayName:
+          type: string
+        description:
+          type: string
+        style:
+          $ref: '#/components/schemas/Style'
+        source:
+          type: string
+          enum:
+          - Classification
+          - Glossary
+        labelType:
+          type: string
+          enum:
+          - Manual
+          - Propagated
+          - Automated
+          - Derived
+          - Generated
+        state:
+          type: string
+          enum:
+          - Suggested
+          - Confirmed
+        href:
+          type: string
+          format: uri
+        reason:
+          type: string
+        appliedAt:
+          type: string
+          format: date-time
+        appliedBy:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/TagLabelMetadata'
+    EntityReference:
+      required:
+      - id
+      - type
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+        name:
+          type: string
+        fullyQualifiedName:
+          type: string
+        description:
+          type: string
+        displayName:
+          type: string
+        deleted:
+          type: boolean
+        inherited:
+          type: boolean
+        href:
+          type: string
+          format: uri
+    TagLabelRecognizerMetadata:
+      required:
+      - recognizerId
+      - recognizerName
+      - score
+      type: object
+      properties:
+        recognizerId:
+          type: string
+          format: uuid
+        recognizerName:
+          type: string
+        score:
+          type: number
+          format: double
+        target:
+          type: string
+          enum:
+          - content
+          - column_name
+        patterns:
+          type: array
+          items:
+            $ref: '#/components/schemas/PatternMatch'
+    EntityError:
+      type: object
+      properties:
+        message:
+          type: string
+        entity:
+          type: object
+    CoverImage:
+      type: object
+      properties:
+        url:
+          type: string
+        position:
+          type: string
+    AccessDetails:
+      required:
+      - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: integer
+          format: int64
+        accessedBy:
+          $ref: '#/components/schemas/EntityReference'
+        accessedByAProcess:
+          type: string
+    Paging:
+      required:
+      - total
+      type: object
+      properties:
+        before:
+          type: string
+        after:
+          type: string
+        offset:
+          type: integer
+          format: int32
+        limit:
+          type: integer
+          format: int32
+        total:
+          type: integer
+          format: int32
+    AIFrameworkControl:
+      required:
+      - framework
+      - id
+      - name
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          maxLength: 256
+          minLength: 1
+          pattern: ^((?!::)[^>"\x00-\x1f])*$
+          type: string
+        fullyQualifiedName:
+          maxLength: 3072
+          minLength: 1
+          type: string
+        displayName:
+          type: string
+        description:
+          type: string
+        framework:
+          $ref: '#/components/schemas/EntityReference'
+        code:
+          type: string
+        category:
+          type: string
+          enum:
+          - Risk
+          - Process
+          - Data
+          - Transparency
+          - Quality
+          - Governance
+        evidenceRequirements:
+          type: array
+          items:
+            type: string
+        owners:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/TagLabel'
+        version:
+          type: number
+          format: double
+        updatedAt:
+          type: integer
+          format: int64
+        updatedBy:
+          type: string
+        href:
+          type: string
+          format: uri
+        changeDescription:
+          $ref: '#/components/schemas/ChangeDescription'
+        incrementalChangeDescription:
+          $ref: '#/components/schemas/ChangeDescription'
+        deleted:
+          type: boolean
+        extension:
+          type: object
+        domains:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        lifeCycle:
+          $ref: '#/components/schemas/LifeCycle'
+        sourceHash:
+          maxLength: 32
+          minLength: 1
+          type: string
+        reviewers:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        dataProducts:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        dataContract:
+          $ref: '#/components/schemas/EntityReference'
+        followers:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        votes:
+          $ref: '#/components/schemas/Votes'
+        usageSummary:
+          $ref: '#/components/schemas/UsageDetails'
+        experts:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        entityStatus:
+          type: string
+          enum:
+          - Draft
+          - In Review
+          - Approved
+          - Archived
+          - Deprecated
+          - Rejected
+          - Unprocessed
+        certification:
+          $ref: '#/components/schemas/AssetCertification'
+        impersonatedBy:
+          type: string
+        provider:
+          type: string
+          enum:
+          - system
+          - user
+          - automation
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        service:
+          $ref: '#/components/schemas/EntityReference'
+        style:
+          $ref: '#/components/schemas/Style'
+    ChangeSummaryMap:
+      type: object
+    LifeCycle:
+      type: object
+      properties:
+        created:
+          $ref: '#/components/schemas/AccessDetails'
+        updated:
+          $ref: '#/components/schemas/AccessDetails'
+        accessed:
+          $ref: '#/components/schemas/AccessDetails'
+    JsonPatch:
+      type: object
+    ChangeDescription:
+      type: object
+      properties:
+        fieldsAdded:
+          type: array
+          items:
+            $ref: '#/components/schemas/FieldChange'
+        fieldsUpdated:
+          type: array
+          items:
+            $ref: '#/components/schemas/FieldChange'
+        fieldsDeleted:
+          type: array
+          items:
+            $ref: '#/components/schemas/FieldChange'
+        previousVersion:
+          type: number
+          format: double
+        changeSummary:
+          $ref: '#/components/schemas/ChangeSummaryMap'
+    CreateAIFrameworkControl:
+      required:
+      - framework
+      - name
+      type: object
+      properties:
+        name:
+          maxLength: 256
+          minLength: 1
+          pattern: ^((?!::)[^>"\x00-\x1f])*$
+          type: string
+        displayName:
+          type: string
+        description:
+          type: string
+        framework:
+          maxLength: 3072
+          minLength: 1
+          type: string
+        code:
+          type: string
+        category:
+          type: string
+          enum:
+          - Risk
+          - Process
+          - Data
+          - Transparency
+          - Quality
+          - Governance
+        evidenceRequirements:
+          type: array
+          items:
+            type: string
+        owners:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/TagLabel'
+        domains:
+          type: array
+          items:
+            type: string
+        extension:
+          type: object
+        reviewers:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        dataProducts:
+          type: array
+          items:
+            type: string
+        lifeCycle:
+          $ref: '#/components/schemas/LifeCycle'
+    ResultList:
+      required:
+      - data
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+        paging:
+          $ref: '#/components/schemas/Paging'
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityError'
+        warningsCount:
+          type: integer
+          format: int32
+        warnings:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityError'
+    UsageStats:
+      required:
+      - count
+      type: object
+      properties:
+        count:
+          minimum: 0
+          type: integer
+          format: int32
+        percentileRank:
+          type: number
+          format: double
+    FieldChange:
+      type: object
+      properties:
+        name:
+          type: string
+        oldValue:
+          type: object
+        newValue:
+          type: object
+    UsageDetails:
+      required:
+      - dailyStats
+      - date
+      type: object
+      properties:
+        dailyStats:
+          $ref: '#/components/schemas/UsageStats'
+        weeklyStats:
+          $ref: '#/components/schemas/UsageStats'
+        monthlyStats:
+          $ref: '#/components/schemas/UsageStats'
+        date:
+          type: string
+    ResultListAIFrameworkControl:
+      required:
+      - data
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/AIFrameworkControl'
+        paging:
+          $ref: '#/components/schemas/Paging'
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityError'
+        warningsCount:
+          type: integer
+          format: int32
+        warnings:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityError'
+    PatternMatch:
+      required:
+      - name
+      - score
+      type: object
+      properties:
+        name:
+          type: string
+        regex:
+          type: string
+        score:
+          type: number
+          format: double
+    Style:
+      type: object
+      properties:
+        color:
+          type: string
+        iconURL:
+          type: string
+        coverImage:
+          $ref: '#/components/schemas/CoverImage'
+    Votes:
+      type: object
+      properties:
+        upVotes:
+          type: integer
+          format: int32
+        downVotes:
+          type: integer
+          format: int32
+        upVoters:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        downVoters:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+    AssetCertification:
+      required:
+      - appliedDate
+      - expiryDate
+      - tagLabel
+      type: object
+      properties:
+        tagLabel:
+          $ref: '#/components/schemas/TagLabel'
+        appliedDate:
+          type: integer
+          format: int64
+        expiryDate:
+          type: integer
+          format: int64
+    TagLabelMetadata:
+      type: object
+      properties:
+        recognizer:
+          $ref: '#/components/schemas/TagLabelRecognizerMetadata'
+        expiryDate:
+          type: integer
+          format: int64
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

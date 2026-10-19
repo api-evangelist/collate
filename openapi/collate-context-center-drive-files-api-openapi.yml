@@ -1,0 +1,1156 @@
+openapi: 3.2.0
+info:
+  title: OpenMetadata Context Center Drive Files API
+  description: Common types and API definition for OpenMetadata
+  contact:
+    name: OpenMetadata
+    url: https://open-metadata.org
+    email: openmetadata-dev@googlegroups.com
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+  version: 2.0.5
+servers:
+- url: /api
+  description: Current Host
+- url: http://localhost:8585/api
+  description: Endpoint URL
+security:
+- BearerAuth: []
+tags:
+- name: Context Center Drive Files
+  description: APIs for managing files in the Context Center Drive.
+paths:
+  /v1/contextCenter/drive/files/bulk/delete:
+    post:
+      tags:
+      - Context Center Drive Files
+      summary: Delete multiple drive files
+      description: Delete multiple drive files in one request.
+      operationId: bulkDeleteDriveFiles
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkDeleteFilesRequest'
+      responses:
+        default:
+          description: default response
+          content:
+            application/json: {}
+  /v1/contextCenter/drive/files/bulk/download:
+    post:
+      tags:
+      - Context Center Drive Files
+      summary: Download multiple drive files
+      description: Download multiple drive files as a zip archive.
+      operationId: bulkDownloadDriveFiles
+      parameters:
+      - name: include
+        in: query
+        schema:
+          type: string
+          default: non-deleted
+          enum:
+          - all
+          - deleted
+          - non-deleted
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkDownloadFilesRequest'
+      responses:
+        default:
+          description: default response
+          content:
+            application/zip: {}
+  /v1/contextCenter/drive/files/bulk/move:
+    put:
+      tags:
+      - Context Center Drive Files
+      summary: Move multiple drive files
+      description: Move multiple drive files to a new parent folder. When `folder` is omitted or null, files are moved to the drive root.
+      operationId: bulkMoveDriveFiles
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkMoveFilesRequest'
+      responses:
+        default:
+          description: default response
+          content:
+            application/json: {}
+  /v1/contextCenter/drive/files:
+    get:
+      tags:
+      - Context Center Drive Files
+      summary: List files
+      operationId: listDriveFiles
+      parameters:
+      - name: fields
+        in: query
+        schema:
+          type: string
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          format: int32
+          default: 10
+      - name: before
+        in: query
+        schema:
+          type: string
+      - name: after
+        in: query
+        schema:
+          type: string
+      - name: include
+        in: query
+        schema:
+          type: string
+          default: non-deleted
+          enum:
+          - all
+          - deleted
+          - non-deleted
+      - name: orderBy
+        in: query
+        description: 'Sort files by updatedAt. Supported values: ASC, DESC.'
+        schema:
+          type: string
+      - name: folderId
+        in: query
+        description: Filter files by folder ID.
+        schema:
+          type: string
+      - name: updatedBy
+        in: query
+        description: Filter files by the user who last updated them (their username). Combine with include=deleted to scope the archive page to files archived by that user - an archived file cannot be edited, so updatedBy stays the user who archived it.
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContextFileList'
+    put:
+      tags:
+      - Context Center Drive Files
+      summary: Create or update a file
+      operationId: createOrUpdateDriveFile
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateContextFile'
+      responses:
+        default:
+          description: default response
+          content:
+            application/json: {}
+    post:
+      tags:
+      - Context Center Drive Files
+      summary: Create a file entry
+      operationId: createDriveFile
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateContextFile'
+      responses:
+        default:
+          description: default response
+          content:
+            application/json: {}
+  /v1/contextCenter/drive/files/{id}:
+    get:
+      tags:
+      - Context Center Drive Files
+      summary: Get a file by ID
+      operationId: getDriveFile
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: fields
+        in: query
+        schema:
+          type: string
+      - name: include
+        in: query
+        schema:
+          type: string
+          default: non-deleted
+          enum:
+          - all
+          - deleted
+          - non-deleted
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContextFile'
+    delete:
+      tags:
+      - Context Center Drive Files
+      summary: Delete a file
+      operationId: deleteDriveFile
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: hardDelete
+        in: query
+        description: Permanently delete the file asynchronously.
+        schema:
+          type: boolean
+          default: false
+      responses:
+        default:
+          description: default response
+          content:
+            application/json: {}
+    patch:
+      tags:
+      - Context Center Drive Files
+      summary: Update a file via JSON Patch
+      operationId: patchDriveFile
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/JsonPatch'
+      responses:
+        default:
+          description: default response
+          content:
+            application/json: {}
+  /v1/contextCenter/drive/files/{id}/download:
+    get:
+      tags:
+      - Context Center Drive Files
+      summary: Download a file by ID
+      operationId: downloadDriveFile
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: include
+        in: query
+        schema:
+          type: string
+          default: non-deleted
+          enum:
+          - all
+          - deleted
+          - non-deleted
+      - name: redirect
+        in: query
+        schema:
+          type: boolean
+          default: true
+      - name: expiry
+        in: query
+        schema:
+          type: integer
+          format: int32
+          default: 300
+      responses:
+        default:
+          description: default response
+          content:
+            application/json: {}
+  /v1/contextCenter/drive/files/{id}/context:
+    get:
+      tags:
+      - Context Center Drive Files
+      summary: Get the AI context for an entity by id
+      description: Retrieve the LLM-ready AI Context (Context Profile) for the entity — its attached business knowledge (glossary terms, Context Center articles, applied metrics), type-specific structural context, and depth-1 lineage — as an OKF-style markdown document (default) or the structured AIContext JSON (`?format=json`).
+      operationId: getEntityAiContextById_28
+      parameters:
+      - name: id
+        in: path
+        description: Entity id
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: format
+        in: query
+        description: 'Output format: markdown (default) or json'
+        schema:
+          type: string
+          default: markdown
+      - name: query
+        in: query
+        description: Optional question; truncated knowledge items are excerpted to the passage most relevant to it instead of the positional lead
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Entity AI context
+        '404':
+          description: Entity not found
+  /v1/contextCenter/drive/files/name/{fqn}/context:
+    get:
+      tags:
+      - Context Center Drive Files
+      summary: Get the AI context for an entity by fully qualified name
+      description: Retrieve the LLM-ready AI Context (Context Profile) for the entity by FQN — see getEntityAiContextById. Returns an OKF-style markdown document by default, or the structured AIContext JSON with `?format=json`.
+      operationId: getEntityAiContextByName_28
+      parameters:
+      - name: fqn
+        in: path
+        description: Entity fully qualified name
+        required: true
+        schema:
+          type: string
+      - name: format
+        in: query
+        description: 'Output format: markdown (default) or json'
+        schema:
+          type: string
+          default: markdown
+      - name: query
+        in: query
+        description: Optional question; truncated knowledge items are excerpted to the passage most relevant to it instead of the positional lead
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Entity AI context
+        '404':
+          description: Entity not found
+  /v1/contextCenter/drive/files/name/{fqn}:
+    get:
+      tags:
+      - Context Center Drive Files
+      summary: Get a file by FQN
+      operationId: getDriveFileByFqn
+      parameters:
+      - name: fqn
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: fields
+        in: query
+        schema:
+          type: string
+      - name: include
+        in: query
+        schema:
+          type: string
+          default: non-deleted
+          enum:
+          - all
+          - deleted
+          - non-deleted
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContextFile'
+  /v1/contextCenter/drive/files/history:
+    get:
+      tags:
+      - Context Center Drive Files
+      summary: List all entity versions within a time range
+      description: Get a paginated list of all entity versions within a given time range specified by `startTs` and `endTs` in milliseconds since epoch.
+      operationId: listAllEntityVersionsByTimestamp_28
+      parameters:
+      - name: startTs
+        in: query
+        description: Start timestamp in milliseconds since epoch
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: endTs
+        in: query
+        description: End timestamp in milliseconds since epoch
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: limit
+        in: query
+        description: Limit the number of entity returned (1 to 1000000, default = 10)
+        schema:
+          maximum: 500
+          minimum: 1
+          type: integer
+          format: int32
+          default: 10
+      - name: before
+        in: query
+        description: Returns list of entity versions before this cursor
+        schema:
+          type: string
+      - name: after
+        in: query
+        description: Returns list of entity versions after this cursor
+        schema:
+          type: string
+      responses:
+        '200':
+          description: List of all versions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResultList'
+  /v1/contextCenter/drive/files/{id}/move:
+    put:
+      tags:
+      - Context Center Drive Files
+      summary: Move a drive file to a different folder
+      description: Move a drive file to a new parent folder. When the request body omits `folder` (or sets it to null), the file is moved to the drive root.
+      operationId: moveDriveFile
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MoveContextFileRequest'
+      responses:
+        '200':
+          description: The moved drive file
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContextFile'
+  /v1/contextCenter/drive/files/restore:
+    put:
+      tags:
+      - Context Center Drive Files
+      summary: Restore a soft deleted drive file
+      description: Restore a drive file from the trash.
+      operationId: restoreDriveFile
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RestoreEntity'
+      responses:
+        default:
+          description: default response
+          content:
+            application/json: {}
+  /v1/contextCenter/drive/files/upload:
+    post:
+      tags:
+      - Context Center Drive Files
+      summary: Upload a file to Drive
+      description: Uploads a file to S3 and creates a ContextFile entity.
+      operationId: uploadDriveFile
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  $ref: '#/components/schemas/FormDataContentDisposition'
+                displayName:
+                  type: string
+                description:
+                  type: string
+                folder:
+                  type: string
+      responses:
+        '201':
+          description: File uploaded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContextFile'
+components:
+  schemas:
+    TagLabel:
+      required:
+      - labelType
+      - source
+      - state
+      - tagFQN
+      type: object
+      properties:
+        tagFQN:
+          type: string
+        name:
+          type: string
+        displayName:
+          type: string
+        description:
+          type: string
+        style:
+          $ref: '#/components/schemas/Style'
+        source:
+          type: string
+          enum:
+          - Classification
+          - Glossary
+        labelType:
+          type: string
+          enum:
+          - Manual
+          - Propagated
+          - Automated
+          - Derived
+          - Generated
+        state:
+          type: string
+          enum:
+          - Suggested
+          - Confirmed
+        href:
+          type: string
+          format: uri
+        reason:
+          type: string
+        appliedAt:
+          type: string
+          format: date-time
+        appliedBy:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/TagLabelMetadata'
+    EntityReference:
+      required:
+      - id
+      - type
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+        name:
+          type: string
+        fullyQualifiedName:
+          type: string
+        description:
+          type: string
+        displayName:
+          type: string
+        deleted:
+          type: boolean
+        inherited:
+          type: boolean
+        href:
+          type: string
+          format: uri
+    RestoreEntity:
+      required:
+      - id
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+    TagLabelRecognizerMetadata:
+      required:
+      - recognizerId
+      - recognizerName
+      - score
+      type: object
+      properties:
+        recognizerId:
+          type: string
+          format: uuid
+        recognizerName:
+          type: string
+        score:
+          type: number
+          format: double
+        target:
+          type: string
+          enum:
+          - content
+          - column_name
+        patterns:
+          type: array
+          items:
+            $ref: '#/components/schemas/PatternMatch'
+    EntityError:
+      type: object
+      properties:
+        message:
+          type: string
+        entity:
+          type: object
+    CoverImage:
+      type: object
+      properties:
+        url:
+          type: string
+        position:
+          type: string
+    AccessDetails:
+      required:
+      - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: integer
+          format: int64
+        accessedBy:
+          $ref: '#/components/schemas/EntityReference'
+        accessedByAProcess:
+          type: string
+    Paging:
+      required:
+      - total
+      type: object
+      properties:
+        before:
+          type: string
+        after:
+          type: string
+        offset:
+          type: integer
+          format: int32
+        limit:
+          type: integer
+          format: int32
+        total:
+          type: integer
+          format: int32
+    ContextFile:
+      required:
+      - id
+      - name
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          maxLength: 256
+          minLength: 1
+          pattern: ^((?!::)[^>"\x00-\x1f])*$
+          type: string
+        fullyQualifiedName:
+          maxLength: 3072
+          minLength: 1
+          type: string
+        displayName:
+          type: string
+        description:
+          type: string
+        fileType:
+          type: string
+          enum:
+          - PDF
+          - Spreadsheet
+          - Presentation
+          - Image
+          - Document
+          - CSV
+          - Text
+          - Archive
+          - Other
+        fileSize:
+          minimum: 0
+          type: integer
+          format: int32
+        contentType:
+          type: string
+        fileExtension:
+          type: string
+        assetId:
+          type: string
+        headContentId:
+          type: string
+        processingStatus:
+          type: string
+          enum:
+          - Uploaded
+          - Analyzing
+          - ExtractingContext
+          - Processed
+          - Failed
+          - Unsupported
+        processingError:
+          type: string
+        extractionStats:
+          $ref: '#/components/schemas/ExtractionStats'
+        extractedText:
+          type: string
+        pageCount:
+          type: integer
+          format: int32
+        memoryCount:
+          type: integer
+          format: int32
+        sourceType:
+          type: string
+          enum:
+          - Upload
+          - DriveSync
+          - Confluence
+          - Notion
+        sourceId:
+          type: string
+        sourceUrl:
+          type: string
+          format: uri
+        folder:
+          $ref: '#/components/schemas/EntityReference'
+        owners:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/TagLabel'
+        version:
+          type: number
+          format: double
+        updatedAt:
+          type: integer
+          format: int64
+        updatedBy:
+          type: string
+        href:
+          type: string
+          format: uri
+        changeDescription:
+          $ref: '#/components/schemas/ChangeDescription'
+        incrementalChangeDescription:
+          $ref: '#/components/schemas/ChangeDescription'
+        deleted:
+          type: boolean
+        domains:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        followers:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        votes:
+          $ref: '#/components/schemas/Votes'
+        reviewers:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        dataProducts:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        dataContract:
+          $ref: '#/components/schemas/EntityReference'
+        lifeCycle:
+          $ref: '#/components/schemas/LifeCycle'
+        usageSummary:
+          $ref: '#/components/schemas/UsageDetails'
+        experts:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        entityStatus:
+          type: string
+          enum:
+          - Draft
+          - In Review
+          - Approved
+          - Archived
+          - Deprecated
+          - Rejected
+          - Unprocessed
+        certification:
+          $ref: '#/components/schemas/AssetCertification'
+        sourceHash:
+          type: string
+        impersonatedBy:
+          type: string
+        provider:
+          type: string
+          enum:
+          - system
+          - user
+          - automation
+        extension:
+          type: object
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        service:
+          $ref: '#/components/schemas/EntityReference'
+        style:
+          $ref: '#/components/schemas/Style'
+    ChangeSummaryMap:
+      type: object
+    LifeCycle:
+      type: object
+      properties:
+        created:
+          $ref: '#/components/schemas/AccessDetails'
+        updated:
+          $ref: '#/components/schemas/AccessDetails'
+        accessed:
+          $ref: '#/components/schemas/AccessDetails'
+    JsonPatch:
+      type: object
+    ChangeDescription:
+      type: object
+      properties:
+        fieldsAdded:
+          type: array
+          items:
+            $ref: '#/components/schemas/FieldChange'
+        fieldsUpdated:
+          type: array
+          items:
+            $ref: '#/components/schemas/FieldChange'
+        fieldsDeleted:
+          type: array
+          items:
+            $ref: '#/components/schemas/FieldChange'
+        previousVersion:
+          type: number
+          format: double
+        changeSummary:
+          $ref: '#/components/schemas/ChangeSummaryMap'
+    ContextFileList:
+      required:
+      - data
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContextFile'
+        paging:
+          $ref: '#/components/schemas/Paging'
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityError'
+        warningsCount:
+          type: integer
+          format: int32
+        warnings:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityError'
+    ResultList:
+      required:
+      - data
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+        paging:
+          $ref: '#/components/schemas/Paging'
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityError'
+        warningsCount:
+          type: integer
+          format: int32
+        warnings:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityError'
+    UsageStats:
+      required:
+      - count
+      type: object
+      properties:
+        count:
+          minimum: 0
+          type: integer
+          format: int32
+        percentileRank:
+          type: number
+          format: double
+    FieldChange:
+      type: object
+      properties:
+        name:
+          type: string
+        oldValue:
+          type: object
+        newValue:
+          type: object
+    UsageDetails:
+      required:
+      - dailyStats
+      - date
+      type: object
+      properties:
+        dailyStats:
+          $ref: '#/components/schemas/UsageStats'
+        weeklyStats:
+          $ref: '#/components/schemas/UsageStats'
+        monthlyStats:
+          $ref: '#/components/schemas/UsageStats'
+        date:
+          type: string
+    BulkDownloadFilesRequest:
+      type: object
+      properties:
+        ids:
+          type: array
+          items:
+            type: string
+            format: uuid
+        fileName:
+          type: string
+    FormDataContentDisposition:
+      type: object
+      properties:
+        type:
+          type: string
+        parameters:
+          type: object
+          additionalProperties:
+            type: string
+        fileName:
+          type: string
+        creationDate:
+          type: string
+          format: date-time
+        modificationDate:
+          type: string
+          format: date-time
+        readDate:
+          type: string
+          format: date-time
+        size:
+          type: integer
+          format: int64
+        name:
+          type: string
+    BulkDeleteFilesRequest:
+      type: object
+      properties:
+        ids:
+          type: array
+          items:
+            type: string
+            format: uuid
+        hardDelete:
+          type: boolean
+    ExtractionStats:
+      type: object
+      properties:
+        chunksTotal:
+          type: integer
+          format: int32
+        chunksProcessed:
+          type: integer
+          format: int32
+        pillsCreated:
+          type: integer
+          format: int32
+        lastExtractedAt:
+          type: integer
+          format: int64
+        sourceHash:
+          type: string
+    PatternMatch:
+      required:
+      - name
+      - score
+      type: object
+      properties:
+        name:
+          type: string
+        regex:
+          type: string
+        score:
+          type: number
+          format: double
+    Style:
+      type: object
+      properties:
+        color:
+          type: string
+        iconURL:
+          type: string
+        coverImage:
+          $ref: '#/components/schemas/CoverImage'
+    Votes:
+      type: object
+      properties:
+        upVotes:
+          type: integer
+          format: int32
+        downVotes:
+          type: integer
+          format: int32
+        upVoters:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        downVoters:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+    AssetCertification:
+      required:
+      - appliedDate
+      - expiryDate
+      - tagLabel
+      type: object
+      properties:
+        tagLabel:
+          $ref: '#/components/schemas/TagLabel'
+        appliedDate:
+          type: integer
+          format: int64
+        expiryDate:
+          type: integer
+          format: int64
+    CreateContextFile:
+      required:
+      - name
+      type: object
+      properties:
+        name:
+          maxLength: 256
+          minLength: 1
+          pattern: ^((?!::)[^>"\x00-\x1f])*$
+          type: string
+        displayName:
+          type: string
+        description:
+          type: string
+        fileType:
+          type: string
+          enum:
+          - PDF
+          - Spreadsheet
+          - Presentation
+          - Image
+          - Document
+          - CSV
+          - Text
+          - Archive
+          - Other
+        fileSize:
+          minimum: 0
+          type: integer
+          format: int32
+        contentType:
+          type: string
+        fileExtension:
+          type: string
+        assetId:
+          type: string
+        processingStatus:
+          type: string
+          enum:
+          - Uploaded
+          - Analyzing
+          - ExtractingContext
+          - Processed
+          - Failed
+          - Unsupported
+        sourceType:
+          type: string
+          enum:
+          - Upload
+          - DriveSync
+          - Confluence
+          - Notion
+        sourceId:
+          type: string
+        sourceUrl:
+          type: string
+          format: uri
+        folder:
+          maxLength: 3072
+          minLength: 1
+          type: string
+        owners:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/TagLabel'
+        domains:
+          type: array
+          items:
+            type: string
+        reviewers:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        dataProducts:
+          type: array
+          items:
+            type: string
+        lifeCycle:
+          $ref: '#/components/schemas/LifeCycle'
+        extension:
+          type: object
+    BulkMoveFilesRequest:
+      type: object
+      properties:
+        ids:
+          type: array
+          items:
+            type: string
+            format: uuid
+        folder:
+          $ref: '#/components/schemas/EntityReference'
+    TagLabelMetadata:
+      type: object
+      properties:
+        recognizer:
+          $ref: '#/components/schemas/TagLabelRecognizerMetadata'
+        expiryDate:
+          type: integer
+          format: int64
+    MoveContextFileRequest:
+      type: object
+      properties:
+        folder:
+          $ref: '#/components/schemas/EntityReference'
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

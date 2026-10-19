@@ -1,0 +1,391 @@
+openapi: 3.2.0
+info:
+  title: OpenMetadata Services API
+  description: Common types and API definition for OpenMetadata
+  contact:
+    name: OpenMetadata
+    url: https://open-metadata.org
+    email: openmetadata-dev@googlegroups.com
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+  version: 2.0.5
+servers:
+- url: /api
+  description: Current Host
+- url: http://localhost:8585/api
+  description: Endpoint URL
+security:
+- BearerAuth: []
+tags:
+- name: Services
+  description: Cross-service-type APIs spanning every kind of service in one request.
+paths:
+  /v1/services/overview:
+    get:
+      tags:
+      - Services
+      summary: Get service counts and one merged, name-sorted page of services
+      description: 'Returns per-entity-type counts, a per-connector-type breakdown, an optional per-health-state breakdown, and one page of services sorted by name across every requested service type. Connection configuration is never returned.
+
+
+        Filter semantics: `q` narrows the count maps as well as the list. The three selectors (`listEntityType`, `serviceType`, `health`) narrow only `data` and `paging.total`, so a client can use each count map as the option list for its own filter control without that control eating its own menu.
+
+
+        `offset` + `limit` must not exceed 10000; use the per-service-type list APIs with cursor paging for deeper traversal.'
+      operationId: getServicesOverview
+      parameters:
+      - name: entityType
+        in: query
+        description: Service entity types forming the universe for the count maps. Repeatable. Defaults to all.
+        schema:
+          maxItems: 32
+          minItems: 0
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+      - name: listEntityType
+        in: query
+        description: Restrict `data` to these service entity types. Repeatable. Defaults to the universe.
+        schema:
+          maxItems: 32
+          minItems: 0
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+      - name: serviceType
+        in: query
+        description: Connector type, e.g. `Snowflake`. Repeatable. Affects `data` only.
+        schema:
+          maxItems: 32
+          minItems: 0
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+      - name: health
+        in: query
+        description: Health state. Repeatable. Affects `data` only. Implies `includeHealth`.
+        schema:
+          maxItems: 32
+          minItems: 0
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+            enum:
+            - failed
+            - partialSuccess
+            - success
+            - notRun
+      - name: q
+        in: query
+        description: Case-insensitive substring match on name and displayName.
+        schema:
+          maxLength: 256
+          minLength: 0
+          type: string
+      - name: includeHealth
+        in: query
+        description: Compute per-service health. Costs three extra batched queries.
+        schema:
+          type: boolean
+          default: false
+      - name: limit
+        in: query
+        schema:
+          maximum: 1000
+          minimum: 0
+          type: integer
+          format: int32
+          default: 500
+      - name: offset
+        in: query
+        schema:
+          minimum: 0
+          type: integer
+          format: int32
+          default: 0
+      - name: sortOrder
+        in: query
+        description: Sort direction on name.
+        schema:
+          type: string
+          default: asc
+      - name: include
+        in: query
+        schema:
+          type: string
+          default: non-deleted
+          enum:
+          - all
+          - deleted
+          - non-deleted
+      - name: domain
+        in: query
+        description: Fully qualified name of a domain to restrict results to.
+        schema:
+          type: string
+      - name: excludeProvider
+        in: query
+        description: Exclude services with this provider, e.g. `system`.
+        schema:
+          type: string
+          enum:
+          - system
+          - user
+          - automation
+      responses:
+        '200':
+          description: Service counts and one page of services
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServicesOverview'
+components:
+  schemas:
+    TagLabel:
+      required:
+      - labelType
+      - source
+      - state
+      - tagFQN
+      type: object
+      properties:
+        tagFQN:
+          type: string
+        name:
+          type: string
+        displayName:
+          type: string
+        description:
+          type: string
+        style:
+          $ref: '#/components/schemas/Style'
+        source:
+          type: string
+          enum:
+          - Classification
+          - Glossary
+        labelType:
+          type: string
+          enum:
+          - Manual
+          - Propagated
+          - Automated
+          - Derived
+          - Generated
+        state:
+          type: string
+          enum:
+          - Suggested
+          - Confirmed
+        href:
+          type: string
+          format: uri
+        reason:
+          type: string
+        appliedAt:
+          type: string
+          format: date-time
+        appliedBy:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/TagLabelMetadata'
+    EntityReference:
+      required:
+      - id
+      - type
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+        name:
+          type: string
+        fullyQualifiedName:
+          type: string
+        description:
+          type: string
+        displayName:
+          type: string
+        deleted:
+          type: boolean
+        inherited:
+          type: boolean
+        href:
+          type: string
+          format: uri
+    PatternMatch:
+      required:
+      - name
+      - score
+      type: object
+      properties:
+        name:
+          type: string
+        regex:
+          type: string
+        score:
+          type: number
+          format: double
+    ServiceSummary:
+      required:
+      - entityType
+      - id
+      - name
+      - serviceType
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        entityType:
+          type: string
+        name:
+          maxLength: 256
+          minLength: 1
+          pattern: ^((?!::)[^>"\x00-\x1f])*$
+          type: string
+        displayName:
+          type: string
+        fullyQualifiedName:
+          maxLength: 3072
+          minLength: 1
+          type: string
+        description:
+          type: string
+        serviceType:
+          type: string
+        owners:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/TagLabel'
+        updatedAt:
+          type: integer
+          format: int64
+        deleted:
+          type: boolean
+        health:
+          type: string
+          enum:
+          - failed
+          - partialSuccess
+          - success
+          - notRun
+    Style:
+      type: object
+      properties:
+        color:
+          type: string
+        iconURL:
+          type: string
+        coverImage:
+          $ref: '#/components/schemas/CoverImage'
+    TagLabelRecognizerMetadata:
+      required:
+      - recognizerId
+      - recognizerName
+      - score
+      type: object
+      properties:
+        recognizerId:
+          type: string
+          format: uuid
+        recognizerName:
+          type: string
+        score:
+          type: number
+          format: double
+        target:
+          type: string
+          enum:
+          - content
+          - column_name
+        patterns:
+          type: array
+          items:
+            $ref: '#/components/schemas/PatternMatch'
+    CoverImage:
+      type: object
+      properties:
+        url:
+          type: string
+        position:
+          type: string
+    Paging:
+      required:
+      - total
+      type: object
+      properties:
+        before:
+          type: string
+        after:
+          type: string
+        offset:
+          type: integer
+          format: int32
+        limit:
+          type: integer
+          format: int32
+        total:
+          type: integer
+          format: int32
+    ServicesOverview:
+      required:
+      - counts
+      - data
+      - paging
+      - serviceTypeCounts
+      - total
+      type: object
+      properties:
+        counts:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int32
+        serviceTypeCounts:
+          type: object
+          additionalProperties:
+            type: object
+            additionalProperties:
+              type: integer
+              format: int32
+        healthCounts:
+          type: object
+          additionalProperties:
+            type: object
+            additionalProperties:
+              type: integer
+              format: int32
+        total:
+          type: integer
+          format: int32
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ServiceSummary'
+        paging:
+          $ref: '#/components/schemas/Paging'
+    TagLabelMetadata:
+      type: object
+      properties:
+        recognizer:
+          $ref: '#/components/schemas/TagLabelRecognizerMetadata'
+        expiryDate:
+          type: integer
+          format: int64
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

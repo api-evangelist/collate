@@ -1,0 +1,148 @@
+openapi: 3.2.0
+info:
+  title: OpenMetadata MCP Usage API
+  description: Common types and API definition for OpenMetadata
+  contact:
+    name: OpenMetadata
+    url: https://open-metadata.org
+    email: openmetadata-dev@googlegroups.com
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+  version: 2.0.5
+servers:
+- url: /api
+  description: Current Host
+- url: http://localhost:8585/api
+  description: Endpoint URL
+security:
+- BearerAuth: []
+tags:
+- name: MCP Usage
+  description: MCP tool-call usage counters and breakdowns.
+paths:
+  /v1/mcp/usage/breakdown/tools:
+    get:
+      tags:
+      - MCP Usage
+      summary: Per-tool call counts with errors + latency
+      description: 'Returns per-tool aggregates in the form { tool: { calls, errors, latencyP50, latencyP95 } }. Latency fields are present once rows recorded by the Phase 3 DefaultToolContext are in the window; otherwise the fields are omitted. Admin only.'
+      operationId: getMcpUsageByTool
+      parameters:
+      - name: startTs
+        in: query
+        schema:
+          type: integer
+          format: int64
+      - name: endTs
+        in: query
+        schema:
+          type: integer
+          format: int64
+      responses:
+        default:
+          description: default response
+          content:
+            application/json: {}
+  /v1/mcp/usage/breakdown/users:
+    get:
+      tags:
+      - MCP Usage
+      summary: Per-user call counts with client name
+      description: 'Returns per-user aggregates in the form { user: { calls, client } } where client is the most-recent MCP client (Claude Desktop / Cursor / VS Code / CLI) the user connected with. Bot principals (suffix ''Bot'') are excluded. Admin only.'
+      operationId: getMcpUsageByUser
+      parameters:
+      - name: startTs
+        in: query
+        schema:
+          type: integer
+          format: int64
+      - name: endTs
+        in: query
+        schema:
+          type: integer
+          format: int64
+      responses:
+        default:
+          description: default response
+          content:
+            application/json: {}
+  /v1/mcp/usage/history:
+    get:
+      tags:
+      - MCP Usage
+      summary: Daily MCP usage counts
+      description: Returns a map keyed by ISO date string (YYYY-MM-DD, UTC) to an object with 'ok' and 'fail' counters. Empty days are seeded with zeros so the series is continuous. Admin access required.
+      operationId: getMcpUsageHistory
+      parameters:
+      - name: startTs
+        in: query
+        schema:
+          type: integer
+          format: int64
+      - name: endTs
+        in: query
+        schema:
+          type: integer
+          format: int64
+      responses:
+        default:
+          description: default response
+          content:
+            application/json: {}
+  /v1/mcp/usage/me:
+    get:
+      tags:
+      - MCP Usage
+      summary: Self-service MCP usage counters
+      description: Returns the calling user's total MCP call count and per-tool breakdown for the supplied window. Any authenticated user.
+      operationId: getMcpUsageForMe
+      parameters:
+      - name: startTs
+        in: query
+        schema:
+          type: integer
+          format: int64
+      - name: endTs
+        in: query
+        schema:
+          type: integer
+          format: int64
+      responses:
+        default:
+          description: default response
+          content:
+            application/json: {}
+  /v1/mcp/usage/summary:
+    get:
+      tags:
+      - MCP Usage
+      summary: Get aggregate MCP usage counters
+      description: Returns total/success/failed counts and unique-user count for the supplied window. Defaults to the last 30 days. Admin access required.
+      operationId: getMcpUsageSummary
+      parameters:
+      - name: startTs
+        in: query
+        description: Window start (epoch millis). Defaults to 30 days ago.
+        schema:
+          type: integer
+          format: int64
+      - name: endTs
+        in: query
+        description: Window end exclusive (epoch millis). Defaults to now.
+        schema:
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: Aggregate counters
+          content:
+            application/json: {}
+        '403':
+          description: Forbidden. Admin only.
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

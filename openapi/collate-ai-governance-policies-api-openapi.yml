@@ -1,0 +1,1429 @@
+openapi: 3.2.0
+info:
+  title: OpenMetadata AI Governance Policies API
+  description: Common types and API definition for OpenMetadata
+  contact:
+    name: OpenMetadata
+    url: https://open-metadata.org
+    email: openmetadata-dev@googlegroups.com
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+  version: 2.0.5
+servers:
+- url: /api
+  description: Current Host
+- url: http://localhost:8585/api
+  description: Endpoint URL
+security:
+- BearerAuth: []
+tags:
+- name: AI Governance Policies
+  description: '`AI Governance Policies` define rules, compliance requirements, bias thresholds, and control measures for AI agents and models.'
+paths:
+  /v1/aiGovernancePolicies/{id}/followers:
+    put:
+      tags:
+      - AI Governance Policies
+      summary: Add a follower
+      description: Add a user identified by `userId` as follower of this policy
+      operationId: addFollower_1
+      parameters:
+      - name: id
+        in: path
+        description: Id of the AI Governance Policy
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        description: Id of the user to be added as follower
+        content:
+          application/json:
+            schema:
+              type: string
+              format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeEvent'
+        '404':
+          description: policy for instance {id} is not found
+  /v1/aiGovernancePolicies:
+    get:
+      tags:
+      - AI Governance Policies
+      summary: List AI governance policies
+      description: Get a list of AI governance policies. Use `fields` parameter to get only necessary fields. Use cursor-based pagination to limit the number entries in the list using `limit` and `before` or `after` query params.
+      operationId: listAIGovernancePolicies
+      parameters:
+      - name: fields
+        in: query
+        description: Fields requested in the returned resource
+        schema:
+          type: string
+          example: owners,followers,tags,extension,domains
+      - name: limit
+        in: query
+        description: Limit the number policies returned. (1 to 1000000, default = 10)
+        schema:
+          maximum: 1000000
+          minimum: 0
+          type: integer
+          format: int32
+          default: 10
+      - name: before
+        in: query
+        description: Returns list of policies before this cursor
+        schema:
+          type: string
+      - name: after
+        in: query
+        description: Returns list of policies after this cursor
+        schema:
+          type: string
+      - name: include
+        in: query
+        description: Include all, deleted, or non-deleted entities.
+        schema:
+          type: string
+          default: non-deleted
+          enum:
+          - all
+          - deleted
+          - non-deleted
+      responses:
+        '200':
+          description: List of policies
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AIGovernancePolicyList'
+    put:
+      tags:
+      - AI Governance Policies
+      summary: Create or update an AI governance policy
+      description: Create a new AI governance policy, if it does not exist or update an existing policy.
+      operationId: createOrUpdateAIGovernancePolicy
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAIGovernancePolicy'
+      responses:
+        '200':
+          description: The policy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AIGovernancePolicy'
+        '400':
+          description: Bad request
+    post:
+      tags:
+      - AI Governance Policies
+      summary: Create an AI governance policy
+      description: Create a new AI governance policy.
+      operationId: createAIGovernancePolicy
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAIGovernancePolicy'
+      responses:
+        '200':
+          description: AI Governance Policy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AIGovernancePolicy'
+        '400':
+          description: Bad request
+  /v1/aiGovernancePolicies/{id}:
+    get:
+      tags:
+      - AI Governance Policies
+      summary: Get an AI governance policy by Id
+      description: Get an AI governance policy by `Id`.
+      operationId: getAIGovernancePolicyByID
+      parameters:
+      - name: id
+        in: path
+        description: Id of the AI Governance Policy
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: fields
+        in: query
+        description: Fields requested in the returned resource
+        schema:
+          type: string
+          example: owners,followers,tags,extension,domains
+      - name: include
+        in: query
+        description: Include all, deleted, or non-deleted entities.
+        schema:
+          type: string
+          default: non-deleted
+          enum:
+          - all
+          - deleted
+          - non-deleted
+      - name: includeRelations
+        in: query
+        description: 'Per-relation include control. Format: field:value,field2:value2. Example: owners:non-deleted,followers:all. Valid values: all, deleted, non-deleted. If not specified for a field, uses the entity''s include value.'
+        schema:
+          type: string
+          example: owners:non-deleted,followers:all
+      responses:
+        '200':
+          description: The policy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AIGovernancePolicy'
+        '404':
+          description: Policy for instance {id} is not found
+    delete:
+      tags:
+      - AI Governance Policies
+      summary: Delete an AI governance policy by Id
+      description: Delete an AI governance policy by `Id`.
+      operationId: deleteAIGovernancePolicy
+      parameters:
+      - name: hardDelete
+        in: query
+        description: Hard delete the entity. (Default = `false`)
+        schema:
+          type: boolean
+          default: false
+      - name: id
+        in: path
+        description: Id of the AI Governance Policy
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: policy for instance {id} is not found
+    patch:
+      tags:
+      - AI Governance Policies
+      summary: Update an AI governance policy
+      description: Update an existing AI governance policy using JsonPatch.
+      externalDocs:
+        description: JsonPatch RFC
+        url: https://tools.ietf.org/html/rfc6902
+      operationId: patchAIGovernancePolicy_1
+      parameters:
+      - name: id
+        in: path
+        description: Id of the AI Governance Policy
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        description: JsonPatch with array of operations
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/JsonPatch'
+            example: '[{op:remove, path:/a},{op:add, path: /b, value: val}]'
+      responses:
+        default:
+          description: default response
+          content:
+            application/json: {}
+  /v1/aiGovernancePolicies/name/{fqn}:
+    get:
+      tags:
+      - AI Governance Policies
+      summary: Get an AI governance policy by fully qualified name
+      description: Get an AI governance policy by fully qualified name.
+      operationId: getAIGovernancePolicyByFQN
+      parameters:
+      - name: fqn
+        in: path
+        description: Fully qualified name of AI Governance Policy
+        required: true
+        schema:
+          type: string
+      - name: fields
+        in: query
+        description: Fields requested in the returned resource
+        schema:
+          type: string
+          example: owners,followers,tags,extension,domains
+      - name: include
+        in: query
+        description: Include all, deleted, or non-deleted entities.
+        schema:
+          type: string
+          default: non-deleted
+          enum:
+          - all
+          - deleted
+          - non-deleted
+      - name: includeRelations
+        in: query
+        description: 'Per-relation include control. Format: field:value,field2:value2. Example: owners:non-deleted,followers:all. Valid values: all, deleted, non-deleted. If not specified for a field, uses the entity''s include value.'
+        schema:
+          type: string
+          example: owners:non-deleted,followers:all
+      responses:
+        '200':
+          description: The policy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AIGovernancePolicy'
+        '404':
+          description: Policy for instance {fqn} is not found
+    delete:
+      tags:
+      - AI Governance Policies
+      summary: Delete an AI governance policy by fully qualified name
+      description: Delete an AI governance policy by `fullyQualifiedName`.
+      operationId: deleteAIGovernancePolicyByFQN
+      parameters:
+      - name: hardDelete
+        in: query
+        description: Hard delete the entity. (Default = `false`)
+        schema:
+          type: boolean
+          default: false
+      - name: recursive
+        in: query
+        description: Recursively delete this entity and it's children. (Default `false`)
+        schema:
+          type: boolean
+          default: false
+      - name: fqn
+        in: path
+        description: Name of the AI Governance Policy
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: policy for instance {fqn} is not found
+    patch:
+      tags:
+      - AI Governance Policies
+      summary: Update an AI governance policy by name
+      description: Update an existing AI governance policy using JsonPatch.
+      externalDocs:
+        description: JsonPatch RFC
+        url: https://tools.ietf.org/html/rfc6902
+      operationId: patchAIGovernancePolicy
+      parameters:
+      - name: fqn
+        in: path
+        description: Name of the AI Governance Policy
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: JsonPatch with array of operations
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/JsonPatch'
+            example: '[{op:remove, path:/a},{op:add, path: /b, value: val}]'
+      responses:
+        default:
+          description: default response
+          content:
+            application/json: {}
+  /v1/aiGovernancePolicies/async/{id}:
+    delete:
+      tags:
+      - AI Governance Policies
+      summary: Asynchronously delete an AI governance policy by Id
+      description: Asynchronously delete an AI governance policy by `Id`.
+      operationId: deleteAIGovernancePolicyAsync
+      parameters:
+      - name: hardDelete
+        in: query
+        description: Hard delete the entity. (Default = `false`)
+        schema:
+          type: boolean
+          default: false
+      - name: recursive
+        in: query
+        description: Recursively delete this entity and it's children. (Default `false`)
+        schema:
+          type: boolean
+          default: false
+      - name: id
+        in: path
+        description: Id of the AI Governance Policy
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '202':
+          description: Accepted
+        '404':
+          description: policy for instance {id} is not found
+  /v1/aiGovernancePolicies/{id}/followers/{userId}:
+    delete:
+      tags:
+      - AI Governance Policies
+      summary: Remove a follower
+      description: Remove the user identified `userId` as a follower of the policy.
+      operationId: deleteFollower_1
+      parameters:
+      - name: id
+        in: path
+        description: Id of the AI Governance Policy
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: userId
+        in: path
+        description: Id of the user being removed as follower
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeEvent'
+  /v1/aiGovernancePolicies/{id}/context:
+    get:
+      tags:
+      - AI Governance Policies
+      summary: Get the AI context for an entity by id
+      description: Retrieve the LLM-ready AI Context (Context Profile) for the entity — its attached business knowledge (glossary terms, Context Center articles, applied metrics), type-specific structural context, and depth-1 lineage — as an OKF-style markdown document (default) or the structured AIContext JSON (`?format=json`).
+      operationId: getEntityAiContextById_3
+      parameters:
+      - name: id
+        in: path
+        description: Entity id
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: format
+        in: query
+        description: 'Output format: markdown (default) or json'
+        schema:
+          type: string
+          default: markdown
+      - name: query
+        in: query
+        description: Optional question; truncated knowledge items are excerpted to the passage most relevant to it instead of the positional lead
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Entity AI context
+        '404':
+          description: Entity not found
+  /v1/aiGovernancePolicies/name/{fqn}/context:
+    get:
+      tags:
+      - AI Governance Policies
+      summary: Get the AI context for an entity by fully qualified name
+      description: Retrieve the LLM-ready AI Context (Context Profile) for the entity by FQN — see getEntityAiContextById. Returns an OKF-style markdown document by default, or the structured AIContext JSON with `?format=json`.
+      operationId: getEntityAiContextByName_3
+      parameters:
+      - name: fqn
+        in: path
+        description: Entity fully qualified name
+        required: true
+        schema:
+          type: string
+      - name: format
+        in: query
+        description: 'Output format: markdown (default) or json'
+        schema:
+          type: string
+          default: markdown
+      - name: query
+        in: query
+        description: Optional question; truncated knowledge items are excerpted to the passage most relevant to it instead of the positional lead
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Entity AI context
+        '404':
+          description: Entity not found
+  /v1/aiGovernancePolicies/{id}/versions/{version}:
+    get:
+      tags:
+      - AI Governance Policies
+      summary: Get a version of the AI governance policy
+      description: Get a version of the AI governance policy by given `id`
+      operationId: getSpecificAIGovernancePolicyVersion
+      parameters:
+      - name: id
+        in: path
+        description: Id of the AI Governance Policy
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: version
+        in: path
+        description: AI Governance Policy version number in the form `major`.`minor`
+        required: true
+        schema:
+          type: string
+          example: 0.1 or 1.1
+      responses:
+        '200':
+          description: AIGovernancePolicy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AIGovernancePolicy'
+        '404':
+          description: AI Governance Policy for instance {id} and version {version} is not found
+  /v1/aiGovernancePolicies/history:
+    get:
+      tags:
+      - AI Governance Policies
+      summary: List all entity versions within a time range
+      description: Get a paginated list of all entity versions within a given time range specified by `startTs` and `endTs` in milliseconds since epoch.
+      operationId: listAllEntityVersionsByTimestamp_3
+      parameters:
+      - name: startTs
+        in: query
+        description: Start timestamp in milliseconds since epoch
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: endTs
+        in: query
+        description: End timestamp in milliseconds since epoch
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: limit
+        in: query
+        description: Limit the number of entity returned (1 to 1000000, default = 10)
+        schema:
+          maximum: 500
+          minimum: 1
+          type: integer
+          format: int32
+          default: 10
+      - name: before
+        in: query
+        description: Returns list of entity versions before this cursor
+        schema:
+          type: string
+      - name: after
+        in: query
+        description: Returns list of entity versions after this cursor
+        schema:
+          type: string
+      responses:
+        '200':
+          description: List of all versions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResultList'
+  /v1/aiGovernancePolicies/{id}/versions:
+    get:
+      tags:
+      - AI Governance Policies
+      summary: List AI governance policy versions
+      description: Get a list of all the versions of an AI Governance Policy identified by `id`
+      operationId: listAllAIGovernancePolicyVersion
+      parameters:
+      - name: id
+        in: path
+        description: Id of the AI Governance Policy
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: List of AI Governance Policy versions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityHistory'
+  /v1/aiGovernancePolicies/restore:
+    put:
+      tags:
+      - AI Governance Policies
+      summary: Restore a soft deleted AI governance policy
+      description: Restore a soft deleted AI Governance Policy.
+      operationId: restore_1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RestoreEntity'
+      responses:
+        '200':
+          description: 'Successfully restored the AIGovernancePolicy '
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AIGovernancePolicy'
+components:
+  schemas:
+    TagLabel:
+      required:
+      - labelType
+      - source
+      - state
+      - tagFQN
+      type: object
+      properties:
+        tagFQN:
+          type: string
+        name:
+          type: string
+        displayName:
+          type: string
+        description:
+          type: string
+        style:
+          $ref: '#/components/schemas/Style'
+        source:
+          type: string
+          enum:
+          - Classification
+          - Glossary
+        labelType:
+          type: string
+          enum:
+          - Manual
+          - Propagated
+          - Automated
+          - Derived
+          - Generated
+        state:
+          type: string
+          enum:
+          - Suggested
+          - Confirmed
+        href:
+          type: string
+          format: uri
+        reason:
+          type: string
+        appliedAt:
+          type: string
+          format: date-time
+        appliedBy:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/TagLabelMetadata'
+    EntityReference:
+      required:
+      - id
+      - type
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+        name:
+          type: string
+        fullyQualifiedName:
+          type: string
+        description:
+          type: string
+        displayName:
+          type: string
+        deleted:
+          type: boolean
+        inherited:
+          type: boolean
+        href:
+          type: string
+          format: uri
+    RestoreEntity:
+      required:
+      - id
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+    TagLabelRecognizerMetadata:
+      required:
+      - recognizerId
+      - recognizerName
+      - score
+      type: object
+      properties:
+        recognizerId:
+          type: string
+          format: uuid
+        recognizerName:
+          type: string
+        score:
+          type: number
+          format: double
+        target:
+          type: string
+          enum:
+          - content
+          - column_name
+        patterns:
+          type: array
+          items:
+            $ref: '#/components/schemas/PatternMatch'
+    EntityError:
+      type: object
+      properties:
+        message:
+          type: string
+        entity:
+          type: object
+    CoverImage:
+      type: object
+      properties:
+        url:
+          type: string
+        position:
+          type: string
+    AccessDetails:
+      required:
+      - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: integer
+          format: int64
+        accessedBy:
+          $ref: '#/components/schemas/EntityReference'
+        accessedByAProcess:
+          type: string
+    Paging:
+      required:
+      - total
+      type: object
+      properties:
+        before:
+          type: string
+        after:
+          type: string
+        offset:
+          type: integer
+          format: int32
+        limit:
+          type: integer
+          format: int32
+        total:
+          type: integer
+          format: int32
+    PolicyViolation:
+      type: object
+      properties:
+        violatedRule:
+          type: string
+        violatingEntity:
+          $ref: '#/components/schemas/EntityReference'
+        timestamp:
+          type: integer
+          format: int64
+        details:
+          type: string
+        resolved:
+          type: boolean
+        resolvedBy:
+          type: string
+        resolvedAt:
+          type: integer
+          format: int64
+    ChangeEvent:
+      required:
+      - entityId
+      - entityType
+      - eventType
+      - id
+      - timestamp
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        eventType:
+          type: string
+          enum:
+          - entityCreated
+          - entityUpdated
+          - entityFieldsChanged
+          - entityNoChange
+          - entitySoftDeleted
+          - entityDeleted
+          - entityRestored
+          - threadCreated
+          - threadUpdated
+          - postCreated
+          - postUpdated
+          - taskCreated
+          - taskUpdated
+          - taskResolved
+          - taskClosed
+          - logicalTestCaseAdded
+          - suggestionCreated
+          - suggestionUpdated
+          - suggestionAccepted
+          - suggestionRejected
+          - suggestionDeleted
+          - userLogin
+          - userLogout
+          - entityLineageAdded
+          - entityLineageDeleted
+          - entityLineageUpdated
+        entityType:
+          type: string
+        entityId:
+          type: string
+          format: uuid
+        domains:
+          type: array
+          items:
+            type: string
+            format: uuid
+        entityFullyQualifiedName:
+          type: string
+        previousVersion:
+          type: number
+          format: double
+        currentVersion:
+          type: number
+          format: double
+        userName:
+          type: string
+        impersonatedBy:
+          type: string
+        timestamp:
+          type: integer
+          format: int64
+        changeDescription:
+          $ref: '#/components/schemas/ChangeDescription'
+        incrementalChangeDescription:
+          $ref: '#/components/schemas/ChangeDescription'
+        recursive:
+          type: boolean
+        entity:
+          type: object
+    CreateAIGovernancePolicy:
+      required:
+      - name
+      - policyType
+      type: object
+      properties:
+        name:
+          maxLength: 256
+          minLength: 1
+          pattern: ^((?!::)[^>"\x00-\x1f])*$
+          type: string
+        displayName:
+          type: string
+        description:
+          type: string
+        policyType:
+          type: string
+          enum:
+          - ModelApproval
+          - DataAccess
+          - BiasThreshold
+          - ComplianceCheck
+          - CostControl
+          - PerformanceStandard
+          - SecurityControl
+        rules:
+          type: array
+          items:
+            $ref: '#/components/schemas/PolicyRule'
+        biasThresholds:
+          $ref: '#/components/schemas/BiasThreshold'
+        dataAccessControls:
+          $ref: '#/components/schemas/DataAccessControl'
+        costControls:
+          $ref: '#/components/schemas/CostControl'
+        complianceRequirements:
+          type: array
+          items:
+            $ref: '#/components/schemas/ComplianceRequirement'
+        performanceStandards:
+          $ref: '#/components/schemas/PerformanceStandard'
+        appliesTo:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        enforcementLevel:
+          type: string
+          enum:
+          - Advisory
+          - Warning
+          - Blocking
+        enabled:
+          type: boolean
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/TagLabel'
+        owners:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        extension:
+          type: object
+        domains:
+          type: array
+          items:
+            type: string
+        reviewers:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        dataProducts:
+          type: array
+          items:
+            type: string
+        lifeCycle:
+          $ref: '#/components/schemas/LifeCycle'
+    ComplianceRequirement:
+      type: object
+      properties:
+        standard:
+          type: string
+          enum:
+          - GDPR
+          - HIPAA
+          - SOC2
+          - ISO27001
+          - NIST_AI_RMF
+          - EU_AI_Act
+          - OWASP_LLM_Top10
+          - Custom
+        requirements:
+          type: array
+          items:
+            type: string
+        attestationRequired:
+          type: boolean
+        auditFrequency:
+          type: string
+          enum:
+          - Continuous
+          - Weekly
+          - Monthly
+          - Quarterly
+          - Annually
+    ChangeSummaryMap:
+      type: object
+    LifeCycle:
+      type: object
+      properties:
+        created:
+          $ref: '#/components/schemas/AccessDetails'
+        updated:
+          $ref: '#/components/schemas/AccessDetails'
+        accessed:
+          $ref: '#/components/schemas/AccessDetails'
+    JsonPatch:
+      type: object
+    PerformanceStandard:
+      type: object
+      properties:
+        minAccuracy:
+          type: number
+          format: double
+        maxLatencyMs:
+          type: number
+          format: double
+        minSuccessRate:
+          type: number
+          format: double
+        maxErrorRate:
+          type: number
+          format: double
+        evaluationDataset:
+          $ref: '#/components/schemas/EntityReference'
+    BiasThreshold:
+      type: object
+      properties:
+        maxOverallBiasScore:
+          type: number
+          format: double
+        dimensionThresholds:
+          $ref: '#/components/schemas/DimensionThresholds'
+        evaluationFrequency:
+          type: string
+          enum:
+          - Continuous
+          - Daily
+          - Weekly
+          - Monthly
+          - OnDemand
+    ChangeDescription:
+      type: object
+      properties:
+        fieldsAdded:
+          type: array
+          items:
+            $ref: '#/components/schemas/FieldChange'
+        fieldsUpdated:
+          type: array
+          items:
+            $ref: '#/components/schemas/FieldChange'
+        fieldsDeleted:
+          type: array
+          items:
+            $ref: '#/components/schemas/FieldChange'
+        previousVersion:
+          type: number
+          format: double
+        changeSummary:
+          $ref: '#/components/schemas/ChangeSummaryMap'
+    ResultList:
+      required:
+      - data
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+        paging:
+          $ref: '#/components/schemas/Paging'
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityError'
+        warningsCount:
+          type: integer
+          format: int32
+        warnings:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityError'
+    DimensionThresholds:
+      type: object
+      properties:
+        gender:
+          type: number
+          format: double
+        race:
+          type: number
+          format: double
+        age:
+          type: number
+          format: double
+        religion:
+          type: number
+          format: double
+        disability:
+          type: number
+          format: double
+        nationality:
+          type: number
+          format: double
+        socioeconomic:
+          type: number
+          format: double
+    UsageStats:
+      required:
+      - count
+      type: object
+      properties:
+        count:
+          minimum: 0
+          type: integer
+          format: int32
+        percentileRank:
+          type: number
+          format: double
+    FieldChange:
+      type: object
+      properties:
+        name:
+          type: string
+        oldValue:
+          type: object
+        newValue:
+          type: object
+    UsageDetails:
+      required:
+      - dailyStats
+      - date
+      type: object
+      properties:
+        dailyStats:
+          $ref: '#/components/schemas/UsageStats'
+        weeklyStats:
+          $ref: '#/components/schemas/UsageStats'
+        monthlyStats:
+          $ref: '#/components/schemas/UsageStats'
+        date:
+          type: string
+    PolicyRule:
+      required:
+      - action
+      - name
+      - ruleType
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        ruleType:
+          type: string
+          enum:
+          - Threshold
+          - Approval
+          - Prohibition
+          - Requirement
+          - Notification
+        condition:
+          type: string
+        action:
+          type: string
+          enum:
+          - Block
+          - Warn
+          - Notify
+          - Require_Approval
+          - Log
+        severity:
+          type: string
+          enum:
+          - Low
+          - Medium
+          - High
+          - Critical
+        enabled:
+          type: boolean
+    PatternMatch:
+      required:
+      - name
+      - score
+      type: object
+      properties:
+        name:
+          type: string
+        regex:
+          type: string
+        score:
+          type: number
+          format: double
+    Style:
+      type: object
+      properties:
+        color:
+          type: string
+        iconURL:
+          type: string
+        coverImage:
+          $ref: '#/components/schemas/CoverImage'
+    Votes:
+      type: object
+      properties:
+        upVotes:
+          type: integer
+          format: int32
+        downVotes:
+          type: integer
+          format: int32
+        upVoters:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        downVoters:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+    AssetCertification:
+      required:
+      - appliedDate
+      - expiryDate
+      - tagLabel
+      type: object
+      properties:
+        tagLabel:
+          $ref: '#/components/schemas/TagLabel'
+        appliedDate:
+          type: integer
+          format: int64
+        expiryDate:
+          type: integer
+          format: int64
+    AIGovernancePolicyList:
+      required:
+      - data
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/AIGovernancePolicy'
+        paging:
+          $ref: '#/components/schemas/Paging'
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityError'
+        warningsCount:
+          type: integer
+          format: int32
+        warnings:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityError'
+    DataAccessControl:
+      type: object
+      properties:
+        allowedDataSources:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        prohibitedDataSources:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        maxSensitivityLevel:
+          type: string
+          enum:
+          - Public
+          - Internal
+          - Confidential
+          - Restricted
+        piiAccessAllowed:
+          type: boolean
+        requireApprovalForSensitiveData:
+          type: boolean
+        dataRetentionDays:
+          type: integer
+          format: int32
+    AIGovernancePolicy:
+      required:
+      - id
+      - name
+      - policyType
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          maxLength: 256
+          minLength: 1
+          pattern: ^((?!::)[^>"\x00-\x1f])*$
+          type: string
+        fullyQualifiedName:
+          maxLength: 3072
+          minLength: 1
+          type: string
+        displayName:
+          type: string
+        description:
+          type: string
+        policyType:
+          type: string
+          enum:
+          - ModelApproval
+          - DataAccess
+          - BiasThreshold
+          - ComplianceCheck
+          - CostControl
+          - PerformanceStandard
+          - SecurityControl
+        rules:
+          type: array
+          items:
+            $ref: '#/components/schemas/PolicyRule'
+        biasThresholds:
+          $ref: '#/components/schemas/BiasThreshold'
+        dataAccessControls:
+          $ref: '#/components/schemas/DataAccessControl'
+        costControls:
+          $ref: '#/components/schemas/CostControl'
+        complianceRequirements:
+          type: array
+          items:
+            $ref: '#/components/schemas/ComplianceRequirement'
+        performanceStandards:
+          $ref: '#/components/schemas/PerformanceStandard'
+        appliesTo:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        enforcementLevel:
+          type: string
+          enum:
+          - Advisory
+          - Warning
+          - Blocking
+        enabled:
+          type: boolean
+        effectiveDate:
+          type: integer
+          format: int64
+        expirationDate:
+          type: integer
+          format: int64
+        approvedBy:
+          type: string
+        violations:
+          type: array
+          items:
+            $ref: '#/components/schemas/PolicyViolation'
+        owners:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        followers:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        domain:
+          $ref: '#/components/schemas/EntityReference'
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/TagLabel'
+        version:
+          type: number
+          format: double
+        updatedAt:
+          type: integer
+          format: int64
+        updatedBy:
+          type: string
+        href:
+          type: string
+          format: uri
+        changeDescription:
+          $ref: '#/components/schemas/ChangeDescription'
+        incrementalChangeDescription:
+          $ref: '#/components/schemas/ChangeDescription'
+        deleted:
+          type: boolean
+        extension:
+          type: object
+        domains:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        votes:
+          $ref: '#/components/schemas/Votes'
+        lifeCycle:
+          $ref: '#/components/schemas/LifeCycle'
+        sourceHash:
+          maxLength: 32
+          minLength: 1
+          type: string
+        reviewers:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        dataProducts:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        dataContract:
+          $ref: '#/components/schemas/EntityReference'
+        usageSummary:
+          $ref: '#/components/schemas/UsageDetails'
+        experts:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        entityStatus:
+          type: string
+          enum:
+          - Draft
+          - In Review
+          - Approved
+          - Archived
+          - Deprecated
+          - Rejected
+          - Unprocessed
+        certification:
+          $ref: '#/components/schemas/AssetCertification'
+        impersonatedBy:
+          type: string
+        provider:
+          type: string
+          enum:
+          - system
+          - user
+          - automation
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        service:
+          $ref: '#/components/schemas/EntityReference'
+        style:
+          $ref: '#/components/schemas/Style'
+    EntityHistory:
+      required:
+      - entityType
+      - versions
+      type: object
+      properties:
+        entityType:
+          type: string
+        versions:
+          type: array
+          items:
+            type: object
+    CostControl:
+      type: object
+      properties:
+        dailyBudget:
+          type: number
+          format: double
+        monthlyBudget:
+          type: number
+          format: double
+        perExecutionLimit:
+          type: number
+          format: double
+        warningThreshold:
+          type: number
+          format: double
+        currency:
+          type: string
+    TagLabelMetadata:
+      type: object
+      properties:
+        recognizer:
+          $ref: '#/components/schemas/TagLabelRecognizerMetadata'
+        expiryDate:
+          type: integer
+          format: int64
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

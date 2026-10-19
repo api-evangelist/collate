@@ -1,0 +1,181 @@
+openapi: 3.2.0
+info:
+  title: OpenMetadata CSV Async Jobs API
+  description: Common types and API definition for OpenMetadata
+  contact:
+    name: OpenMetadata
+    url: https://open-metadata.org
+    email: openmetadata-dev@googlegroups.com
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+  version: 2.0.5
+servers:
+- url: /api
+  description: Current Host
+- url: http://localhost:8585/api
+  description: Endpoint URL
+security:
+- BearerAuth: []
+tags:
+- name: CSV Async Jobs
+  description: CSV import and export job status APIs.
+paths:
+  /v1/csvAsyncJobs/{jobId}/cancel:
+    put:
+      tags:
+      - CSV Async Jobs
+      summary: Cancel a CSV import or export job
+      operationId: cancelCsvAsyncJob
+      parameters:
+      - name: jobId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CsvAsyncJob'
+  /v1/csvAsyncJobs/{jobId}:
+    get:
+      tags:
+      - CSV Async Jobs
+      summary: Get a CSV import or export job
+      operationId: getCsvAsyncJob
+      parameters:
+      - name: jobId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CsvAsyncJob'
+  /v1/csvAsyncJobs/{jobId}/result:
+    get:
+      tags:
+      - CSV Async Jobs
+      summary: Download the CSV produced by a completed export job
+      operationId: getCsvAsyncJobResult
+      parameters:
+      - name: jobId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        default:
+          description: default response
+          content:
+            text/csv: {}
+  /v1/csvAsyncJobs:
+    get:
+      tags:
+      - CSV Async Jobs
+      summary: List CSV import and export jobs
+      operationId: listCsvAsyncJobs
+      parameters:
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          format: int32
+          default: 20
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CsvAsyncJob'
+components:
+  schemas:
+    CsvAsyncJobLog:
+      type: object
+      properties:
+        logId:
+          type: string
+        jobId:
+          type: string
+        createdAt:
+          type: integer
+          format: int64
+        level:
+          type: string
+          enum:
+          - INFO
+          - WARN
+          - ERROR
+        message:
+          type: string
+    CsvAsyncJob:
+      type: object
+      properties:
+        jobId:
+          type: string
+        operation:
+          type: string
+          enum:
+          - IMPORT
+          - EXPORT
+        entityType:
+          type: string
+        targetFqn:
+          type: string
+        createdBy:
+          type: string
+        status:
+          type: string
+          enum:
+          - QUEUED
+          - RUNNING
+          - CANCELLING
+          - CANCELLED
+          - COMPLETED
+          - FAILED
+        progress:
+          type: integer
+          format: int32
+        total:
+          type: integer
+          format: int32
+        dryRun:
+          type: boolean
+        recursive:
+          type: boolean
+        result:
+          type: string
+        error:
+          type: string
+        message:
+          type: string
+        cancelRequested:
+          type: boolean
+        createdAt:
+          type: integer
+          format: int64
+        updatedAt:
+          type: integer
+          format: int64
+        completedAt:
+          type: integer
+          format: int64
+        logs:
+          type: array
+          items:
+            $ref: '#/components/schemas/CsvAsyncJobLog'
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

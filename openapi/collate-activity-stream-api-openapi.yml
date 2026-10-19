@@ -1,0 +1,671 @@
+openapi: 3.2.0
+info:
+  title: OpenMetadata Activity Stream API
+  description: Common types and API definition for OpenMetadata
+  contact:
+    name: OpenMetadata
+    url: https://open-metadata.org
+    email: openmetadata-dev@googlegroups.com
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+  version: 2.0.5
+servers:
+- url: /api
+  description: Current Host
+- url: http://localhost:8585/api
+  description: Endpoint URL
+security:
+- BearerAuth: []
+tags:
+- name: Activity Stream
+  description: Lightweight activity notifications for dashboards and feeds.
+paths:
+  /v1/activity/{id}/reaction/{reactionType}:
+    put:
+      tags:
+      - Activity Stream
+      summary: Add a reaction to an activity event
+      description: Add a reaction (emoji) to an activity event.
+      operationId: addReactionToActivity
+      parameters:
+      - name: id
+        in: path
+        description: Activity event ID
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: reactionType
+        in: path
+        description: Reaction type to add
+        required: true
+        schema:
+          type: string
+          enum:
+          - thumbsUp
+          - thumbsDown
+          - hooray
+          - laugh
+          - confused
+          - heart
+          - rocket
+          - eyes
+      responses:
+        '200':
+          description: Activity event with updated reactions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivityEvent'
+        '404':
+          description: Activity event not found
+    delete:
+      tags:
+      - Activity Stream
+      summary: Remove a reaction from an activity event
+      description: Remove a reaction (emoji) from an activity event.
+      operationId: removeReactionFromActivity
+      parameters:
+      - name: id
+        in: path
+        description: Activity event ID
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: reactionType
+        in: path
+        description: Reaction type to remove
+        required: true
+        schema:
+          type: string
+          enum:
+          - thumbsUp
+          - thumbsDown
+          - hooray
+          - laugh
+          - confused
+          - heart
+          - rocket
+          - eyes
+      responses:
+        '200':
+          description: Activity event with updated reactions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivityEvent'
+        '404':
+          description: Activity event not found
+  /v1/activity/about:
+    get:
+      tags:
+      - Activity Stream
+      summary: Get activity for a specific entity or field
+      description: 'Get activity events for a specific entity, column, or field using EntityLink format. Example:'
+      operationId: getActivityByEntityLink
+      parameters:
+      - name: entityLink
+        in: query
+        description: EntityLink string
+        required: true
+        schema:
+          type: string
+      - name: domain
+        in: query
+        description: Filter by domain FQN
+        schema:
+          type: string
+      - name: days
+        in: query
+        description: Number of days to look back
+        schema:
+          maximum: 90
+          minimum: 1
+          type: integer
+          format: int32
+          default: 30
+      - name: limit
+        in: query
+        description: Maximum number of events to return
+        schema:
+          maximum: 200
+          minimum: 1
+          type: integer
+          format: int32
+          default: 50
+      responses:
+        '200':
+          description: Activity events for the EntityLink
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivityEventList'
+  /v1/activity/count:
+    get:
+      tags:
+      - Activity Stream
+      summary: Get activity event count
+      description: Get the count of activity events in a time period.
+      operationId: getActivityCount
+      parameters:
+      - name: domain
+        in: query
+        description: Filter by domain FQN
+        schema:
+          type: string
+      - name: days
+        in: query
+        description: Number of days to look back
+        schema:
+          maximum: 30
+          minimum: 1
+          type: integer
+          format: int32
+          default: 7
+      responses:
+        '200':
+          description: Count of activity events
+          content:
+            application/json:
+              schema:
+                type: integer
+                format: int32
+  /v1/activity/entity/{entityType}/name/{fqn}:
+    get:
+      tags:
+      - Activity Stream
+      summary: Get activity for a specific entity by fully qualified name
+      description: Get recent activity events for a specific entity using its FQN.
+      operationId: getEntityActivityByFqn
+      parameters:
+      - name: entityType
+        in: path
+        description: Entity type
+        required: true
+        schema:
+          type: string
+      - name: fqn
+        in: path
+        description: Entity fully qualified name
+        required: true
+        schema:
+          type: string
+      - name: domain
+        in: query
+        description: Filter by domain FQN
+        schema:
+          type: string
+      - name: days
+        in: query
+        description: Number of days to look back
+        schema:
+          maximum: 90
+          minimum: 1
+          type: integer
+          format: int32
+          default: 30
+      - name: limit
+        in: query
+        description: Maximum number of events to return. Pass 0 for a count-only response (empty data array, accurate paging.total). Frontend tab-badge fetches use this path so first paint isn't blocked on a 100-row list query.
+        schema:
+          maximum: 200
+          minimum: 0
+          type: integer
+          format: int32
+          default: 50
+      responses:
+        '200':
+          description: List of activity events for the entity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivityEventList'
+  /v1/activity/entity/{entityType}/{entityId}:
+    get:
+      tags:
+      - Activity Stream
+      summary: Get activity for a specific entity by ID
+      description: Get recent activity events for a specific entity using its UUID.
+      operationId: getEntityActivityById
+      parameters:
+      - name: entityType
+        in: path
+        description: Entity type
+        required: true
+        schema:
+          type: string
+      - name: entityId
+        in: path
+        description: Entity ID (UUID)
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: domain
+        in: query
+        description: Filter by domain FQN
+        schema:
+          type: string
+      - name: days
+        in: query
+        description: Number of days to look back
+        schema:
+          maximum: 90
+          minimum: 1
+          type: integer
+          format: int32
+          default: 30
+      - name: limit
+        in: query
+        description: Maximum number of events to return. Pass 0 for a count-only response (empty data array, accurate paging.total).
+        schema:
+          maximum: 200
+          minimum: 0
+          type: integer
+          format: int32
+          default: 50
+      responses:
+        '200':
+          description: List of activity events for the entity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivityEventList'
+  /v1/activity/following:
+    get:
+      tags:
+      - Activity Stream
+      summary: Get activity feed for entities the current user follows
+      description: Get activity events for entities the current user follows.
+      operationId: getFollowingActivityFeed
+      parameters:
+      - name: domain
+        in: query
+        description: Filter by domain FQN
+        schema:
+          type: string
+      - name: days
+        in: query
+        description: Number of days to look back
+        schema:
+          maximum: 30
+          minimum: 1
+          type: integer
+          format: int32
+          default: 7
+      - name: limit
+        in: query
+        description: Maximum number of events to return
+        schema:
+          maximum: 200
+          minimum: 1
+          type: integer
+          format: int32
+          default: 50
+      responses:
+        '200':
+          description: Activity feed for followed entities
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivityEventList'
+  /v1/activity/my-feed:
+    get:
+      tags:
+      - Activity Stream
+      summary: Get personalized activity feed for current user
+      description: Get activity events for entities owned by the current user or their teams.
+      operationId: getMyActivityFeed
+      parameters:
+      - name: domain
+        in: query
+        description: Filter by domain FQN
+        schema:
+          type: string
+      - name: days
+        in: query
+        description: Number of days to look back
+        schema:
+          maximum: 30
+          minimum: 1
+          type: integer
+          format: int32
+          default: 7
+      - name: limit
+        in: query
+        description: Maximum number of events to return
+        schema:
+          maximum: 200
+          minimum: 1
+          type: integer
+          format: int32
+          default: 50
+      responses:
+        '200':
+          description: Personalized activity feed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivityEventList'
+  /v1/activity/user/{userId}:
+    get:
+      tags:
+      - Activity Stream
+      summary: Get activity by a specific user
+      description: Get recent activity events performed by a specific user.
+      operationId: getUserActivity
+      parameters:
+      - name: userId
+        in: path
+        description: User ID
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: domain
+        in: query
+        description: Filter by domain FQN
+        schema:
+          type: string
+      - name: days
+        in: query
+        description: Number of days to look back
+        schema:
+          maximum: 90
+          minimum: 1
+          type: integer
+          format: int32
+          default: 30
+      - name: limit
+        in: query
+        description: Maximum number of events to return
+        schema:
+          maximum: 200
+          minimum: 1
+          type: integer
+          format: int32
+          default: 50
+      responses:
+        '200':
+          description: List of activity events by the user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivityEventList'
+  /v1/activity/test-insert:
+    post:
+      tags:
+      - Activity Stream
+      summary: Insert an activity event (for testing only)
+      description: This endpoint is for integration tests to create activity events directly.
+      operationId: insertActivityEventForTesting
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActivityEvent'
+      responses:
+        '200':
+          description: Created activity event
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivityEvent'
+  /v1/activity:
+    get:
+      tags:
+      - Activity Stream
+      summary: List activity events
+      description: Get a list of recent activity events. Domain filtering is automatically applied for users with domain-only access policies.
+      operationId: listActivityEvents
+      parameters:
+      - name: entityType
+        in: query
+        description: Filter by entity type
+        schema:
+          type: string
+      - name: entityId
+        in: query
+        description: Filter by entity ID
+        schema:
+          type: string
+          format: uuid
+      - name: actorId
+        in: query
+        description: Filter by actor (user) ID
+        schema:
+          type: string
+          format: uuid
+      - name: domains
+        in: query
+        description: Filter by domain IDs (comma-separated)
+        schema:
+          type: string
+      - name: domain
+        in: query
+        description: Filter by domain FQN
+        schema:
+          type: string
+      - name: days
+        in: query
+        description: Number of days to look back (default 7, max 30)
+        schema:
+          maximum: 30
+          minimum: 1
+          type: integer
+          format: int32
+          default: 7
+      - name: limit
+        in: query
+        description: Maximum number of events to return
+        schema:
+          maximum: 200
+          minimum: 1
+          type: integer
+          format: int32
+          default: 50
+      responses:
+        '200':
+          description: List of activity events
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivityEventList'
+components:
+  schemas:
+    EntityReference:
+      required:
+      - id
+      - type
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+        name:
+          type: string
+        fullyQualifiedName:
+          type: string
+        description:
+          type: string
+        displayName:
+          type: string
+        deleted:
+          type: boolean
+        inherited:
+          type: boolean
+        href:
+          type: string
+          format: uri
+    EntityError:
+      type: object
+      properties:
+        message:
+          type: string
+        entity:
+          type: object
+    FieldChange:
+      type: object
+      properties:
+        name:
+          type: string
+        oldValue:
+          type: object
+        newValue:
+          type: object
+    Paging:
+      required:
+      - total
+      type: object
+      properties:
+        before:
+          type: string
+        after:
+          type: string
+        offset:
+          type: integer
+          format: int32
+        limit:
+          type: integer
+          format: int32
+        total:
+          type: integer
+          format: int32
+    ChangeDescription:
+      type: object
+      properties:
+        fieldsAdded:
+          type: array
+          items:
+            $ref: '#/components/schemas/FieldChange'
+        fieldsUpdated:
+          type: array
+          items:
+            $ref: '#/components/schemas/FieldChange'
+        fieldsDeleted:
+          type: array
+          items:
+            $ref: '#/components/schemas/FieldChange'
+        previousVersion:
+          type: number
+          format: double
+        changeSummary:
+          $ref: '#/components/schemas/ChangeSummaryMap'
+    Reaction:
+      required:
+      - reactionType
+      - user
+      type: object
+      properties:
+        reactionType:
+          type: string
+          enum:
+          - thumbsUp
+          - thumbsDown
+          - hooray
+          - laugh
+          - confused
+          - heart
+          - rocket
+          - eyes
+        user:
+          $ref: '#/components/schemas/EntityReference'
+    ActivityEvent:
+      required:
+      - entity
+      - eventType
+      - id
+      - timestamp
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        eventType:
+          type: string
+          enum:
+          - EntityCreated
+          - EntityUpdated
+          - EntityDeleted
+          - EntitySoftDeleted
+          - EntityRestored
+          - DescriptionUpdated
+          - TagsUpdated
+          - OwnerUpdated
+          - DomainUpdated
+          - TierUpdated
+          - CustomPropertyUpdated
+          - ColumnDescriptionUpdated
+          - ColumnTagsUpdated
+          - TestCaseStatusChanged
+          - PipelineStatusChanged
+        entity:
+          $ref: '#/components/schemas/EntityReference'
+        about:
+          maxLength: 2048
+          minLength: 0
+          type: string
+        domains:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        actor:
+          $ref: '#/components/schemas/EntityReference'
+        timestamp:
+          type: integer
+          format: int64
+        summary:
+          maxLength: 500
+          minLength: 0
+          type: string
+        fieldName:
+          maxLength: 256
+          minLength: 0
+          type: string
+        oldValue:
+          maxLength: 1000
+          minLength: 0
+          type: string
+        newValue:
+          maxLength: 1000
+          minLength: 0
+          type: string
+        changeDescription:
+          $ref: '#/components/schemas/ChangeDescription'
+        reactions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Reaction'
+    ActivityEventList:
+      required:
+      - data
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ActivityEvent'
+        paging:
+          $ref: '#/components/schemas/Paging'
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityError'
+        warningsCount:
+          type: integer
+          format: int32
+        warnings:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityError'
+    ChangeSummaryMap:
+      type: object
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

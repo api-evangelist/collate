@@ -1,0 +1,149 @@
+openapi: 3.2.0
+info:
+  title: OpenMetadata Test Support API
+  description: Common types and API definition for OpenMetadata
+  contact:
+    name: OpenMetadata
+    url: https://open-metadata.org
+    email: openmetadata-dev@googlegroups.com
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+  version: 2.0.5
+servers:
+- url: /api
+  description: Current Host
+- url: http://localhost:8585/api
+  description: Endpoint URL
+security:
+- BearerAuth: []
+tags:
+- name: TestSupport
+  description: Admin-only read-only search introspection for tests
+paths:
+  /v1/test-support/search/alias:
+    get:
+      tags:
+      - TestSupport
+      summary: Backing indices for an alias
+      operationId: testSupportSearchAlias
+      parameters:
+      - name: name
+        in: query
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Raw engine alias response
+  /v1/test-support/search/cluster-alias:
+    get:
+      tags:
+      - TestSupport
+      summary: The server's configured search cluster alias (index name prefix)
+      operationId: testSupportClusterAlias
+      responses:
+        '200':
+          description: '{"clusterAlias": string}'
+  /v1/test-support/search/count:
+    get:
+      tags:
+      - TestSupport
+      summary: Document count for an index/alias
+      operationId: testSupportSearchCount
+      parameters:
+      - name: index
+        in: query
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Raw engine count response
+    post:
+      tags:
+      - TestSupport
+      summary: Document count for an index/alias matching a query
+      operationId: testSupportSearchCountWithQuery
+      parameters:
+      - name: index
+        in: query
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+      responses:
+        '200':
+          description: Raw engine count response
+  /v1/test-support/search/exists:
+    get:
+      tags:
+      - TestSupport
+      summary: Whether an index or alias exists
+      operationId: testSupportSearchExists
+      parameters:
+      - name: index
+        in: query
+        schema:
+          type: string
+      - name: alias
+        in: query
+        schema:
+          type: string
+      responses:
+        '200':
+          description: '{"exists": boolean}'
+  /v1/test-support/search/indices:
+    get:
+      tags:
+      - TestSupport
+      summary: Index names matching a pattern (_cat/indices)
+      operationId: testSupportSearchIndices
+      parameters:
+      - name: pattern
+        in: query
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Raw engine _cat response
+  /v1/test-support/search/mapping:
+    get:
+      tags:
+      - TestSupport
+      summary: Mapping for an index/alias
+      operationId: testSupportSearchMapping
+      parameters:
+      - name: index
+        in: query
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Raw engine mapping response
+  /v1/test-support/search/search:
+    post:
+      tags:
+      - TestSupport
+      summary: Search an index/alias with a query body
+      operationId: testSupportSearchQuery
+      parameters:
+      - name: index
+        in: query
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+      responses:
+        '200':
+          description: Raw engine search response
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

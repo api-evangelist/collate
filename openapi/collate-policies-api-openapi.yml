@@ -1,0 +1,1324 @@
+openapi: 3.2.0
+info:
+  title: OpenMetadata Policies API
+  description: Common types and API definition for OpenMetadata
+  contact:
+    name: OpenMetadata
+    url: https://open-metadata.org
+    email: openmetadata-dev@googlegroups.com
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+  version: 2.0.5
+servers:
+- url: /api
+  description: Current Host
+- url: http://localhost:8585/api
+  description: Endpoint URL
+security:
+- BearerAuth: []
+tags:
+- name: Policies
+  description: A `Policy` defines control that needs to be applied across different Data Entities.
+paths:
+  /v1/policies:
+    get:
+      tags:
+      - Policies
+      summary: List policies
+      description: Get a list of policies. Use `fields` parameter to get only necessary fields. Use cursor-based pagination to limit the number entries in the list using `limit` and `before` or `after` query params.
+      operationId: listPolicies
+      parameters:
+      - name: fields
+        in: query
+        description: Fields requested in the returned resource
+        schema:
+          type: string
+          example: owners,location,teams,roles
+      - name: limit
+        in: query
+        description: Limit the number policies returned. (1 to 1000000, default = 10)
+        schema:
+          maximum: 1000000
+          minimum: 0
+          type: integer
+          format: int32
+          default: 10
+      - name: before
+        in: query
+        description: Returns list of policies before this cursor
+        schema:
+          type: string
+      - name: after
+        in: query
+        description: Returns list of policies after this cursor
+        schema:
+          type: string
+      - name: include
+        in: query
+        description: Include all, deleted, or non-deleted entities.
+        schema:
+          type: string
+          default: non-deleted
+          enum:
+          - all
+          - deleted
+          - non-deleted
+      responses:
+        '200':
+          description: List of policies
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolicyList'
+    put:
+      tags:
+      - Policies
+      summary: Create or update a policy
+      description: Create a new policy, if it does not exist or update an existing policy.
+      operationId: createOrUpdatePolicy
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePolicy'
+      responses:
+        '200':
+          description: The policy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Policy'
+        '400':
+          description: Bad request
+    post:
+      tags:
+      - Policies
+      summary: Create a policy
+      description: Create a new policy.
+      operationId: createPolicy
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePolicy'
+      responses:
+        '200':
+          description: The policy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Policy'
+        '400':
+          description: Bad request
+  /v1/policies/name/{fqn}:
+    get:
+      tags:
+      - Policies
+      summary: Get a policy by fully qualified name
+      description: Get a policy by fully qualified name.
+      operationId: getPolicyByFQN
+      parameters:
+      - name: fqn
+        in: path
+        description: Fully qualified name of the policy
+        required: true
+        schema:
+          type: string
+      - name: fields
+        in: query
+        description: Fields requested in the returned resource
+        schema:
+          type: string
+          example: owners,location,teams,roles
+      - name: include
+        in: query
+        description: Include all, deleted, or non-deleted entities.
+        schema:
+          type: string
+          default: non-deleted
+          enum:
+          - all
+          - deleted
+          - non-deleted
+      - name: includeRelations
+        in: query
+        description: 'Per-relation include control. Format: field:value,field2:value2. Example: owners:non-deleted,followers:all. Valid values: all, deleted, non-deleted. If not specified for a field, uses the entity''s include value.'
+        schema:
+          type: string
+          example: owners:non-deleted,followers:all
+      responses:
+        '200':
+          description: The policy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Policy'
+        '404':
+          description: Policy for instance {fqn} is not found
+    delete:
+      tags:
+      - Policies
+      summary: Delete a policy by fully qualified name
+      description: Delete a policy by `fullyQualifiedName`.
+      operationId: deletePolicyByFQN
+      parameters:
+      - name: hardDelete
+        in: query
+        description: Hard delete the entity. (Default = `false`)
+        schema:
+          type: boolean
+          default: false
+      - name: fqn
+        in: path
+        description: Fully qualified name of the policy
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: policy for instance {fqn} is not found
+    patch:
+      tags:
+      - Policies
+      summary: Update a policy by name
+      description: Update an existing policy using JsonPatch.
+      externalDocs:
+        description: JsonPatch RFC
+        url: https://tools.ietf.org/html/rfc6902
+      operationId: patchPolicy
+      parameters:
+      - name: fqn
+        in: path
+        description: Name of the policy
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: JsonPatch with array of operations
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/JsonPatch'
+            example: '[{op:remove, path:/a},{op:add, path: /b, value: val}]'
+      responses:
+        default:
+          description: default response
+          content:
+            application/json: {}
+  /v1/policies/{id}:
+    get:
+      tags:
+      - Policies
+      summary: Get a policy by id
+      description: Get a policy by `Id`.
+      operationId: getPolicyByID
+      parameters:
+      - name: id
+        in: path
+        description: Id of the policy
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: fields
+        in: query
+        description: Fields requested in the returned resource
+        schema:
+          type: string
+          example: owners,location,teams,roles
+      - name: include
+        in: query
+        description: Include all, deleted, or non-deleted entities.
+        schema:
+          type: string
+          default: non-deleted
+          enum:
+          - all
+          - deleted
+          - non-deleted
+      - name: includeRelations
+        in: query
+        description: 'Per-relation include control. Format: field:value,field2:value2. Example: owners:non-deleted,followers:all. Valid values: all, deleted, non-deleted. If not specified for a field, uses the entity''s include value.'
+        schema:
+          type: string
+          example: owners:non-deleted,followers:all
+      responses:
+        '200':
+          description: The policy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Policy'
+        '404':
+          description: Policy for instance {id} is not found
+    delete:
+      tags:
+      - Policies
+      summary: Delete a policy by Id
+      description: Delete a policy by `Id`.
+      operationId: deletePolicy
+      parameters:
+      - name: hardDelete
+        in: query
+        description: Hard delete the entity. (Default = `false`)
+        schema:
+          type: boolean
+          default: false
+      - name: id
+        in: path
+        description: Id of the policy
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: policy for instance {id} is not found
+    patch:
+      tags:
+      - Policies
+      summary: Update a policy
+      description: Update an existing policy using JsonPatch.
+      externalDocs:
+        description: JsonPatch RFC
+        url: https://tools.ietf.org/html/rfc6902
+      operationId: patchPolicy_1
+      parameters:
+      - name: id
+        in: path
+        description: Id of the policy
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        description: JsonPatch with array of operations
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/JsonPatch'
+            example: '[{op:remove, path:/a},{op:add, path: /b, value: val}]'
+      responses:
+        default:
+          description: default response
+          content:
+            application/json: {}
+  /v1/policies/async/{id}:
+    delete:
+      tags:
+      - Policies
+      summary: Asynchronously delete a policy by Id
+      description: Asynchronously delete a policy by `Id`.
+      operationId: deletePolicyAsync
+      parameters:
+      - name: hardDelete
+        in: query
+        description: Hard delete the entity. (Default = `false`)
+        schema:
+          type: boolean
+          default: false
+      - name: id
+        in: path
+        description: Id of the policy
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: policy for instance {id} is not found
+  /v1/policies/{id}/context:
+    get:
+      tags:
+      - Policies
+      summary: Get the AI context for an entity by id
+      description: Retrieve the LLM-ready AI Context (Context Profile) for the entity — its attached business knowledge (glossary terms, Context Center articles, applied metrics), type-specific structural context, and depth-1 lineage — as an OKF-style markdown document (default) or the structured AIContext JSON (`?format=json`).
+      operationId: getEntityAiContextById_47
+      parameters:
+      - name: id
+        in: path
+        description: Entity id
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: format
+        in: query
+        description: 'Output format: markdown (default) or json'
+        schema:
+          type: string
+          default: markdown
+      - name: query
+        in: query
+        description: Optional question; truncated knowledge items are excerpted to the passage most relevant to it instead of the positional lead
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Entity AI context
+        '404':
+          description: Entity not found
+  /v1/policies/name/{fqn}/context:
+    get:
+      tags:
+      - Policies
+      summary: Get the AI context for an entity by fully qualified name
+      description: Retrieve the LLM-ready AI Context (Context Profile) for the entity by FQN — see getEntityAiContextById. Returns an OKF-style markdown document by default, or the structured AIContext JSON with `?format=json`.
+      operationId: getEntityAiContextByName_47
+      parameters:
+      - name: fqn
+        in: path
+        description: Entity fully qualified name
+        required: true
+        schema:
+          type: string
+      - name: format
+        in: query
+        description: 'Output format: markdown (default) or json'
+        schema:
+          type: string
+          default: markdown
+      - name: query
+        in: query
+        description: Optional question; truncated knowledge items are excerpted to the passage most relevant to it instead of the positional lead
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Entity AI context
+        '404':
+          description: Entity not found
+  /v1/policies/{id}/versions/{version}:
+    get:
+      tags:
+      - Policies
+      summary: Get a version of the policy by Id
+      description: Get a version of the policy by given `Id`
+      operationId: getSpecificPolicyVersion
+      parameters:
+      - name: id
+        in: path
+        description: Id of the policy
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: version
+        in: path
+        description: policy version number in the form `major`.`minor`
+        required: true
+        schema:
+          type: string
+          example: 0.1 or 1.1
+      responses:
+        '200':
+          description: policy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Policy'
+        '404':
+          description: Policy for instance {id} and version {version} is not found
+  /v1/policies/history:
+    get:
+      tags:
+      - Policies
+      summary: List all entity versions within a time range
+      description: Get a paginated list of all entity versions within a given time range specified by `startTs` and `endTs` in milliseconds since epoch.
+      operationId: listAllEntityVersionsByTimestamp_46
+      parameters:
+      - name: startTs
+        in: query
+        description: Start timestamp in milliseconds since epoch
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: endTs
+        in: query
+        description: End timestamp in milliseconds since epoch
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: limit
+        in: query
+        description: Limit the number of entity returned (1 to 1000000, default = 10)
+        schema:
+          maximum: 500
+          minimum: 1
+          type: integer
+          format: int32
+          default: 10
+      - name: before
+        in: query
+        description: Returns list of entity versions before this cursor
+        schema:
+          type: string
+      - name: after
+        in: query
+        description: Returns list of entity versions after this cursor
+        schema:
+          type: string
+      responses:
+        '200':
+          description: List of all versions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResultList'
+  /v1/policies/functions:
+    get:
+      tags:
+      - Policies
+      summary: Get list of policy functions used in authoring conditions in policy rules
+      description: Get list of policy functions used in authoring conditions in policy rules.
+      operationId: listPolicyFunctions
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResultListFunction'
+  /v1/policies/resources:
+    get:
+      tags:
+      - Policies
+      summary: Get list of policy resources used in authoring a policy
+      description: Get list of policy resources used in authoring a policy.
+      operationId: listPolicyResources
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResultListResourceDescriptor'
+  /v1/policies/{id}/versions:
+    get:
+      tags:
+      - Policies
+      summary: List policy versions
+      description: Get a list of all the versions of a policy identified by `id`
+      operationId: listAllPolicyVersion
+      parameters:
+      - name: id
+        in: path
+        description: Id of the policy
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: List of policy versions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityHistory'
+  /v1/policies/restore:
+    put:
+      tags:
+      - Policies
+      summary: Restore a soft deleted policy
+      description: Restore a soft deleted policy.
+      operationId: restore_28
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RestoreEntity'
+      responses:
+        '200':
+          description: 'Successfully restored the Policy '
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Policy'
+  /v1/policies/validation/condition/{expression}:
+    get:
+      tags:
+      - Policies
+      summary: Validate a given condition
+      description: Validate a given condition expression used in authoring rules.
+      operationId: validateCondition
+      parameters:
+      - name: expression
+        in: path
+        description: Expression of validating rule
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: No value is returned
+        '400':
+          description: Invalid expression
+components:
+  schemas:
+    TagLabel:
+      required:
+      - labelType
+      - source
+      - state
+      - tagFQN
+      type: object
+      properties:
+        tagFQN:
+          type: string
+        name:
+          type: string
+        displayName:
+          type: string
+        description:
+          type: string
+        style:
+          $ref: '#/components/schemas/Style'
+        source:
+          type: string
+          enum:
+          - Classification
+          - Glossary
+        labelType:
+          type: string
+          enum:
+          - Manual
+          - Propagated
+          - Automated
+          - Derived
+          - Generated
+        state:
+          type: string
+          enum:
+          - Suggested
+          - Confirmed
+        href:
+          type: string
+          format: uri
+        reason:
+          type: string
+        appliedAt:
+          type: string
+          format: date-time
+        appliedBy:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/TagLabelMetadata'
+    EntityReference:
+      required:
+      - id
+      - type
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+        name:
+          type: string
+        fullyQualifiedName:
+          type: string
+        description:
+          type: string
+        displayName:
+          type: string
+        deleted:
+          type: boolean
+        inherited:
+          type: boolean
+        href:
+          type: string
+          format: uri
+    CreatePolicy:
+      required:
+      - name
+      - rules
+      type: object
+      properties:
+        name:
+          maxLength: 256
+          minLength: 1
+          pattern: ^((?!::)[^>"\x00-\x1f])*$
+          type: string
+        displayName:
+          type: string
+        description:
+          type: string
+        owners:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        rules:
+          type: array
+          items:
+            $ref: '#/components/schemas/Rule'
+        enabled:
+          type: boolean
+        location:
+          type: string
+          format: uuid
+        domains:
+          type: array
+          items:
+            type: string
+        reviewers:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        dataProducts:
+          type: array
+          items:
+            type: string
+        lifeCycle:
+          $ref: '#/components/schemas/LifeCycle'
+        extension:
+          type: object
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/TagLabel'
+    RestoreEntity:
+      required:
+      - id
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+    TagLabelRecognizerMetadata:
+      required:
+      - recognizerId
+      - recognizerName
+      - score
+      type: object
+      properties:
+        recognizerId:
+          type: string
+          format: uuid
+        recognizerName:
+          type: string
+        score:
+          type: number
+          format: double
+        target:
+          type: string
+          enum:
+          - content
+          - column_name
+        patterns:
+          type: array
+          items:
+            $ref: '#/components/schemas/PatternMatch'
+    EntityError:
+      type: object
+      properties:
+        message:
+          type: string
+        entity:
+          type: object
+    Policy:
+      required:
+      - id
+      - name
+      - rules
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          maxLength: 256
+          minLength: 1
+          pattern: ^((?!::)[^>"\x00-\x1f])*$
+          type: string
+        fullyQualifiedName:
+          maxLength: 256
+          minLength: 1
+          pattern: ^((?!::)[^>"\x00-\x1f])*$
+          type: string
+        displayName:
+          type: string
+        description:
+          type: string
+        owners:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        href:
+          type: string
+          format: uri
+        enabled:
+          type: boolean
+        version:
+          type: number
+          format: double
+        updatedAt:
+          type: integer
+          format: int64
+        updatedBy:
+          type: string
+        impersonatedBy:
+          type: string
+        changeDescription:
+          $ref: '#/components/schemas/ChangeDescription'
+        incrementalChangeDescription:
+          $ref: '#/components/schemas/ChangeDescription'
+        rules:
+          type: array
+          items:
+            $ref: '#/components/schemas/Rule'
+        teams:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        location:
+          $ref: '#/components/schemas/EntityReference'
+        allowDelete:
+          type: boolean
+        allowEdit:
+          type: boolean
+        deleted:
+          type: boolean
+        provider:
+          type: string
+          enum:
+          - system
+          - user
+          - automation
+        disabled:
+          type: boolean
+        domains:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        reviewers:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        dataProducts:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        dataContract:
+          $ref: '#/components/schemas/EntityReference'
+        followers:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        votes:
+          $ref: '#/components/schemas/Votes'
+        lifeCycle:
+          $ref: '#/components/schemas/LifeCycle'
+        usageSummary:
+          $ref: '#/components/schemas/UsageDetails'
+        experts:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        entityStatus:
+          type: string
+          enum:
+          - Draft
+          - In Review
+          - Approved
+          - Archived
+          - Deprecated
+          - Rejected
+          - Unprocessed
+        certification:
+          $ref: '#/components/schemas/AssetCertification'
+        sourceHash:
+          type: string
+        extension:
+          type: object
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        service:
+          $ref: '#/components/schemas/EntityReference'
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/TagLabel'
+        style:
+          $ref: '#/components/schemas/Style'
+    CoverImage:
+      type: object
+      properties:
+        url:
+          type: string
+        position:
+          type: string
+    Paging:
+      required:
+      - total
+      type: object
+      properties:
+        before:
+          type: string
+        after:
+          type: string
+        offset:
+          type: integer
+          format: int32
+        limit:
+          type: integer
+          format: int32
+        total:
+          type: integer
+          format: int32
+    AccessDetails:
+      required:
+      - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: integer
+          format: int64
+        accessedBy:
+          $ref: '#/components/schemas/EntityReference'
+        accessedByAProcess:
+          type: string
+    PolicyList:
+      required:
+      - data
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Policy'
+        paging:
+          $ref: '#/components/schemas/Paging'
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityError'
+        warningsCount:
+          type: integer
+          format: int32
+        warnings:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityError'
+    ParamAdditionalContext:
+      type: object
+      properties:
+        data:
+          type: object
+    ChangeSummaryMap:
+      type: object
+    LifeCycle:
+      type: object
+      properties:
+        created:
+          $ref: '#/components/schemas/AccessDetails'
+        updated:
+          $ref: '#/components/schemas/AccessDetails'
+        accessed:
+          $ref: '#/components/schemas/AccessDetails'
+    JsonPatch:
+      type: object
+    Rule:
+      required:
+      - effect
+      - name
+      - operations
+      - resources
+      type: object
+      properties:
+        name:
+          type: string
+        fullyQualifiedName:
+          maxLength: 3072
+          minLength: 1
+          type: string
+        description:
+          type: string
+        effect:
+          type: string
+          enum:
+          - allow
+          - deny
+        operations:
+          type: array
+          items:
+            type: string
+            enum:
+            - All
+            - Create
+            - BulkCreate
+            - CreateIngestionPipelineAutomator
+            - CreateTests
+            - Delete
+            - ViewAll
+            - ViewBasic
+            - ViewUsage
+            - ViewTests
+            - ViewQueries
+            - ViewDataProfile
+            - ViewProfilerGlobalConfiguration
+            - ViewSampleData
+            - ViewTestCaseFailedRowsSample
+            - ViewCustomFields
+            - EditAll
+            - BulkUpdate
+            - EditCustomFields
+            - EditDataProfile
+            - EditDescription
+            - EditDisplayName
+            - EditLineage
+            - EditEntityRelationship
+            - EditPolicy
+            - EditOwners
+            - EditQueries
+            - EditReviewers
+            - EditRole
+            - EditSampleData
+            - EditStatus
+            - EditTags
+            - EditGlossaryTerms
+            - EditTeams
+            - EditTier
+            - EditCertification
+            - CreateTask
+            - EditTask
+            - EditTests
+            - EditUsage
+            - EditUsers
+            - EditLifeCycle
+            - EditKnowledgePanel
+            - EditPage
+            - EditIngestionPipelineStatus
+            - EditUserNotificationTemplate
+            - DeleteTestCaseFailedRowsSample
+            - Deploy
+            - Trigger
+            - Kill
+            - GenerateToken
+            - EditScim
+            - CreateScim
+            - DeleteScim
+            - ViewScim
+            - Impersonate
+            - AuditLogs
+            - ViewTestDefinitionLibrary
+            - EditTestDefinitionLibrary
+            - ResolveTask
+            - CloseTask
+            - ReassignTask
+        resources:
+          type: array
+          items:
+            type: string
+        condition:
+          type: string
+    ChangeDescription:
+      type: object
+      properties:
+        fieldsAdded:
+          type: array
+          items:
+            $ref: '#/components/schemas/FieldChange'
+        fieldsUpdated:
+          type: array
+          items:
+            $ref: '#/components/schemas/FieldChange'
+        fieldsDeleted:
+          type: array
+          items:
+            $ref: '#/components/schemas/FieldChange'
+        previousVersion:
+          type: number
+          format: double
+        changeSummary:
+          $ref: '#/components/schemas/ChangeSummaryMap'
+    ResourceDescriptor:
+      type: object
+      properties:
+        name:
+          type: string
+        operations:
+          type: array
+          items:
+            type: string
+            enum:
+            - All
+            - Create
+            - BulkCreate
+            - CreateIngestionPipelineAutomator
+            - CreateTests
+            - Delete
+            - ViewAll
+            - ViewBasic
+            - ViewUsage
+            - ViewTests
+            - ViewQueries
+            - ViewDataProfile
+            - ViewProfilerGlobalConfiguration
+            - ViewSampleData
+            - ViewTestCaseFailedRowsSample
+            - ViewCustomFields
+            - EditAll
+            - BulkUpdate
+            - EditCustomFields
+            - EditDataProfile
+            - EditDescription
+            - EditDisplayName
+            - EditLineage
+            - EditEntityRelationship
+            - EditPolicy
+            - EditOwners
+            - EditQueries
+            - EditReviewers
+            - EditRole
+            - EditSampleData
+            - EditStatus
+            - EditTags
+            - EditGlossaryTerms
+            - EditTeams
+            - EditTier
+            - EditCertification
+            - CreateTask
+            - EditTask
+            - EditTests
+            - EditUsage
+            - EditUsers
+            - EditLifeCycle
+            - EditKnowledgePanel
+            - EditPage
+            - EditIngestionPipelineStatus
+            - EditUserNotificationTemplate
+            - DeleteTestCaseFailedRowsSample
+            - Deploy
+            - Trigger
+            - Kill
+            - GenerateToken
+            - EditScim
+            - CreateScim
+            - DeleteScim
+            - ViewScim
+            - Impersonate
+            - AuditLogs
+            - ViewTestDefinitionLibrary
+            - EditTestDefinitionLibrary
+            - ResolveTask
+            - CloseTask
+            - ReassignTask
+    ResultList:
+      required:
+      - data
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+        paging:
+          $ref: '#/components/schemas/Paging'
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityError'
+        warningsCount:
+          type: integer
+          format: int32
+        warnings:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityError'
+    UsageStats:
+      required:
+      - count
+      type: object
+      properties:
+        count:
+          minimum: 0
+          type: integer
+          format: int32
+        percentileRank:
+          type: number
+          format: double
+    FieldChange:
+      type: object
+      properties:
+        name:
+          type: string
+        oldValue:
+          type: object
+        newValue:
+          type: object
+    UsageDetails:
+      required:
+      - dailyStats
+      - date
+      type: object
+      properties:
+        dailyStats:
+          $ref: '#/components/schemas/UsageStats'
+        weeklyStats:
+          $ref: '#/components/schemas/UsageStats'
+        monthlyStats:
+          $ref: '#/components/schemas/UsageStats'
+        date:
+          type: string
+    Function:
+      type: object
+      properties:
+        name:
+          type: string
+        input:
+          type: string
+        description:
+          type: string
+        examples:
+          type: array
+          items:
+            type: object
+        parameterInputType:
+          type: string
+          enum:
+          - NotRequired
+          - AllIndexElasticSearch
+          - SpecificIndexElasticSearch
+          - ReadFromParamContext
+          - ReadFromParamContextPerEntity
+        paramAdditionalContext:
+          $ref: '#/components/schemas/ParamAdditionalContext'
+    ResultListResourceDescriptor:
+      required:
+      - data
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResourceDescriptor'
+        paging:
+          $ref: '#/components/schemas/Paging'
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityError'
+        warningsCount:
+          type: integer
+          format: int32
+        warnings:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityError'
+    PatternMatch:
+      required:
+      - name
+      - score
+      type: object
+      properties:
+        name:
+          type: string
+        regex:
+          type: string
+        score:
+          type: number
+          format: double
+    Style:
+      type: object
+      properties:
+        color:
+          type: string
+        iconURL:
+          type: string
+        coverImage:
+          $ref: '#/components/schemas/CoverImage'
+    Votes:
+      type: object
+      properties:
+        upVotes:
+          type: integer
+          format: int32
+        downVotes:
+          type: integer
+          format: int32
+        upVoters:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        downVoters:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+    AssetCertification:
+      required:
+      - appliedDate
+      - expiryDate
+      - tagLabel
+      type: object
+      properties:
+        tagLabel:
+          $ref: '#/components/schemas/TagLabel'
+        appliedDate:
+          type: integer
+          format: int64
+        expiryDate:
+          type: integer
+          format: int64
+    ResultListFunction:
+      required:
+      - data
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Function'
+        paging:
+          $ref: '#/components/schemas/Paging'
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityError'
+        warningsCount:
+          type: integer
+          format: int32
+        warnings:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityError'
+    EntityHistory:
+      required:
+      - entityType
+      - versions
+      type: object
+      properties:
+        entityType:
+          type: string
+        versions:
+          type: array
+          items:
+            type: object
+    TagLabelMetadata:
+      type: object
+      properties:
+        recognizer:
+          $ref: '#/components/schemas/TagLabelRecognizerMetadata'
+        expiryDate:
+          type: integer
+          format: int64
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

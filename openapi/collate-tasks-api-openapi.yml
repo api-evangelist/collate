@@ -1,0 +1,2182 @@
+openapi: 3.2.0
+info:
+  title: OpenMetadata Tasks API
+  description: Common types and API definition for OpenMetadata
+  contact:
+    name: OpenMetadata
+    url: https://open-metadata.org
+    email: openmetadata-dev@googlegroups.com
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+  version: 2.0.5
+servers:
+- url: /api
+  description: Current Host
+- url: http://localhost:8585/api
+  description: Endpoint URL
+security:
+- BearerAuth: []
+tags:
+- name: Tasks
+  description: Tasks for data governance workflows
+paths:
+  /v1/tasks/{id}/comments:
+    post:
+      tags:
+      - Tasks
+      summary: Add a comment to a task
+      description: Add a comment to a task. Anyone who can view the task can add comments.
+      operationId: addTaskComment
+      parameters:
+      - name: id
+        in: path
+        description: Task Id
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTaskComment'
+      responses:
+        '200':
+          description: The task with the new comment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '404':
+          description: Task not found
+  /v1/tasks/{id}/suggestion/apply:
+    put:
+      tags:
+      - Tasks
+      summary: Apply a suggestion task
+      description: Apply a suggestion task to its target entity. This approves the suggestion and applies the suggested change to the entity. Only works for tasks with type=Suggestion and SuggestionPayload.
+      operationId: applySuggestion
+      parameters:
+      - name: id
+        in: path
+        description: Task Id
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: comment
+        in: query
+        description: Comment for the approval
+        schema:
+          type: string
+      responses:
+        '200':
+          description: The applied suggestion task
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '400':
+          description: Task is not a suggestion task
+        '404':
+          description: Task not found
+        '403':
+          description: User not authorized to apply suggestion
+  /v1/tasks/bulk:
+    post:
+      tags:
+      - Tasks
+      summary: Perform bulk operations on tasks
+      description: 'Perform bulk operations on multiple tasks. Supported operations: Approve, Reject, Assign, UpdatePriority, Cancel. For suggestion tasks, Approve will also apply the suggestion to the target entity.'
+      operationId: bulkTaskOperation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkTaskOperation'
+      responses:
+        '200':
+          description: Bulk operation results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulkTaskOperationResult'
+        '400':
+          description: Invalid operation or parameters
+  /v1/tasks/{id}/close:
+    post:
+      tags:
+      - Tasks
+      summary: Close a task without resolution
+      description: Close a task without applying any changes. Only the creator or assignee can close.
+      operationId: closeTask_1
+      parameters:
+      - name: id
+        in: path
+        description: Task Id
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: comment
+        in: query
+        description: Comment for closing the task
+        schema:
+          type: string
+      responses:
+        '200':
+          description: The closed task
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '404':
+          description: Task not found
+        '403':
+          description: User not authorized to close task
+  /v1/tasks:
+    get:
+      tags:
+      - Tasks
+      summary: List tasks
+      description: Get a list of tasks with filters for status, category, type, domain, and assignee.
+      operationId: listTasks
+      parameters:
+      - name: fields
+        in: query
+        description: Fields to include in response
+        schema:
+          type: string
+          default: assignees,about,createdBy
+      - name: status
+        in: query
+        description: Filter by task status
+        schema:
+          type: string
+          enum:
+          - Open
+          - InProgress
+          - Pending
+          - Approved
+          - Granted
+          - ManualRevoke
+          - Rejected
+          - Completed
+          - Cancelled
+          - Failed
+          - Revoked
+          - Expired
+      - name: statusGroup
+        in: query
+        description: 'Filter by status group: ''open'' for Open tasks, ''closed'' for Approved/Rejected/Completed/Cancelled/Failed tasks'
+        schema:
+          type: string
+      - name: category
+        in: query
+        description: Filter by task category
+        schema:
+          type: string
+          enum:
+          - Approval
+          - DataAccess
+          - MetadataUpdate
+          - Incident
+          - Review
+          - Custom
+      - name: type
+        in: query
+        description: Filter by task type
+        schema:
+          type: string
+          enum:
+          - GlossaryApproval
+          - RequestApproval
+          - DataAccessRequest
+          - DescriptionUpdate
+          - TagUpdate
+          - OwnershipUpdate
+          - TierUpdate
+          - DomainUpdate
+          - Suggestion
+          - TestCaseResolution
+          - IncidentResolution
+          - PipelineReview
+          - DataQualityReview
+          - RecognizerFeedbackApproval
+          - CustomTask
+      - name: domain
+        in: query
+        description: Filter by domain FQN
+        schema:
+          type: string
+      - name: priority
+        in: query
+        description: Filter by priority
+        schema:
+          type: string
+          enum:
+          - Critical
+          - High
+          - Medium
+          - Low
+      - name: assignee
+        in: query
+        description: Filter by assignee (user or team FQN)
+        schema:
+          type: string
+      - name: createdBy
+        in: query
+        description: Filter by creator FQN
+        schema:
+          type: string
+      - name: createdById
+        in: query
+        description: Filter by creator user id
+        schema:
+          type: string
+          format: uuid
+      - name: aboutEntity
+        in: query
+        description: Filter by entity FQN the task is about
+        schema:
+          type: string
+      - name: aboutService
+        in: query
+        description: Filter by parent service FQN of the entity the task is about
+        schema:
+          type: string
+      - name: approver
+        in: query
+        description: Filter by approver FQN (user who approved the task)
+        schema:
+          type: string
+      - name: approverId
+        in: query
+        description: Filter by approver user id
+        schema:
+          type: string
+          format: uuid
+      - name: mentionedUser
+        in: query
+        description: Filter by user FQN who was mentioned in task comments
+        schema:
+          type: string
+      - name: limit
+        in: query
+        description: Limit the number results
+        schema:
+          maximum: 1000000
+          minimum: 0
+          type: integer
+          format: int64
+          default: 10
+      - name: before
+        in: query
+        description: Returns list of tasks before this cursor
+        schema:
+          type: string
+      - name: after
+        in: query
+        description: Returns list of tasks after this cursor
+        schema:
+          type: string
+      - name: startTs
+        in: query
+        description: Filter by tasks created on or after this timestamp (epoch millis)
+        schema:
+          type: integer
+          format: int64
+      - name: endTs
+        in: query
+        description: Filter by tasks created on or before this timestamp (epoch millis)
+        schema:
+          type: integer
+          format: int64
+      - name: include
+        in: query
+        description: Include deleted tasks
+        schema:
+          type: string
+          default: non-deleted
+          enum:
+          - all
+          - deleted
+          - non-deleted
+      responses:
+        '200':
+          description: List of tasks
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskList'
+    put:
+      tags:
+      - Tasks
+      summary: Create or update a task
+      description: Create a task if it does not exist, otherwise update existing.
+      operationId: createOrUpdateTask
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTask'
+      responses:
+        '200':
+          description: The task
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '400':
+          description: Bad request
+        '403':
+          description: Domain-only user cannot create task on entity outside their domain
+    post:
+      tags:
+      - Tasks
+      summary: Create a task
+      description: Create a new task for data governance workflows.
+      operationId: createTask
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTask'
+      responses:
+        '200':
+          description: The task
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '400':
+          description: Bad request
+        '403':
+          description: Domain-only user cannot create task on entity outside their domain
+  /v1/tasks/{id}:
+    get:
+      tags:
+      - Tasks
+      summary: Get a task by id
+      description: Get a task by `id`.
+      operationId: getTaskById
+      parameters:
+      - name: id
+        in: path
+        description: Task Id
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: fields
+        in: query
+        description: Fields to include in response
+        schema:
+          type: string
+          default: assignees,reviewers,watchers,about,domains,comments,createdBy,payload,availableTransitions
+      - name: include
+        in: query
+        description: Include deleted task
+        schema:
+          type: string
+          default: non-deleted
+          enum:
+          - all
+          - deleted
+          - non-deleted
+      responses:
+        '200':
+          description: The task
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '404':
+          description: Task for instance {id} is not found
+    delete:
+      tags:
+      - Tasks
+      summary: Delete a task
+      description: Delete a task by `id`.
+      operationId: deleteTask
+      parameters:
+      - name: hardDelete
+        in: query
+        description: Hard delete the task
+        schema:
+          type: boolean
+          default: false
+      - name: id
+        in: path
+        description: Task Id
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Task not found
+    patch:
+      tags:
+      - Tasks
+      summary: Update a task
+      description: Update an existing task using JsonPatch.
+      externalDocs:
+        description: JsonPatch RFC
+        url: https://tools.ietf.org/html/rfc6902
+      operationId: patchTask
+      parameters:
+      - name: id
+        in: path
+        description: Task Id
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        description: JsonPatch with array of operations
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/JsonPatch'
+            example:
+            - op: add
+              path: /status
+              value: InProgress
+      responses:
+        default:
+          description: default response
+          content:
+            application/json: {}
+  /v1/tasks/{id}/comments/{commentId}:
+    delete:
+      tags:
+      - Tasks
+      summary: Delete a task comment
+      description: Delete a comment from a task. The comment author or an admin can delete a comment.
+      operationId: deleteTaskComment
+      parameters:
+      - name: id
+        in: path
+        description: Task Id
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: commentId
+        in: path
+        description: Comment Id
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: The task with the comment removed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '404':
+          description: Task or comment not found
+        '403':
+          description: User not authorized to delete this comment
+    patch:
+      tags:
+      - Tasks
+      summary: Edit a task comment
+      description: Edit a comment on a task. Only the comment author can edit their own comment.
+      operationId: editTaskComment
+      parameters:
+      - name: id
+        in: path
+        description: Task Id
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: commentId
+        in: path
+        description: Comment Id
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTaskComment'
+      responses:
+        '200':
+          description: The task with the updated comment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '404':
+          description: Task or comment not found
+        '403':
+          description: User not authorized to edit this comment
+  /v1/tasks/{id}/context:
+    get:
+      tags:
+      - Tasks
+      summary: Get the AI context for an entity by id
+      description: Retrieve the LLM-ready AI Context (Context Profile) for the entity — its attached business knowledge (glossary terms, Context Center articles, applied metrics), type-specific structural context, and depth-1 lineage — as an OKF-style markdown document (default) or the structured AIContext JSON (`?format=json`).
+      operationId: getEntityAiContextById_68
+      parameters:
+      - name: id
+        in: path
+        description: Entity id
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: format
+        in: query
+        description: 'Output format: markdown (default) or json'
+        schema:
+          type: string
+          default: markdown
+      - name: query
+        in: query
+        description: Optional question; truncated knowledge items are excerpted to the passage most relevant to it instead of the positional lead
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Entity AI context
+        '404':
+          description: Entity not found
+  /v1/tasks/name/{fqn}/context:
+    get:
+      tags:
+      - Tasks
+      summary: Get the AI context for an entity by fully qualified name
+      description: Retrieve the LLM-ready AI Context (Context Profile) for the entity by FQN — see getEntityAiContextById. Returns an OKF-style markdown document by default, or the structured AIContext JSON with `?format=json`.
+      operationId: getEntityAiContextByName_68
+      parameters:
+      - name: fqn
+        in: path
+        description: Entity fully qualified name
+        required: true
+        schema:
+          type: string
+      - name: format
+        in: query
+        description: 'Output format: markdown (default) or json'
+        schema:
+          type: string
+          default: markdown
+      - name: query
+        in: query
+        description: Optional question; truncated knowledge items are excerpted to the passage most relevant to it instead of the positional lead
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Entity AI context
+        '404':
+          description: Entity not found
+  /v1/tasks/name/{taskId}:
+    get:
+      tags:
+      - Tasks
+      summary: Get a task by task ID
+      description: Get a task by human-readable task ID (e.g., TASK-00001).
+      operationId: getTaskByTaskId
+      parameters:
+      - name: taskId
+        in: path
+        description: Task ID (e.g., TASK-00001)
+        required: true
+        schema:
+          type: string
+      - name: fields
+        in: query
+        description: Fields to include in response
+        schema:
+          type: string
+          default: assignees,reviewers,watchers,about,domains,comments,createdBy,payload,availableTransitions
+      - name: include
+        in: query
+        description: Include deleted task
+        schema:
+          type: string
+          default: non-deleted
+          enum:
+          - all
+          - deleted
+          - non-deleted
+      responses:
+        '200':
+          description: The task
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '404':
+          description: Task not found
+  /v1/tasks/count:
+    get:
+      tags:
+      - Tasks
+      summary: Get task counts by status
+      description: Get counts of tasks grouped by status with optional filters.
+      operationId: getTaskCount
+      parameters:
+      - name: assignee
+        in: query
+        description: Filter by assignee FQN
+        schema:
+          type: string
+      - name: createdBy
+        in: query
+        description: Filter by creator FQN
+        schema:
+          type: string
+      - name: domain
+        in: query
+        description: Filter by domain FQN
+        schema:
+          type: string
+      - name: view
+        in: query
+        description: 'Count view: visible, assigned, owned, created, mentioned, entity, or all'
+        schema:
+          type: string
+      - name: aboutEntity
+        in: query
+        description: Filter by entity FQN the task is about
+        schema:
+          type: string
+      - name: mentionedUser
+        in: query
+        description: Filter by user FQN who was mentioned in task comments
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Task counts
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskCount'
+  /v1/tasks/{id}/versions/{version}:
+    get:
+      tags:
+      - Tasks
+      summary: Get a specific version of the task
+      description: Get a version of the task by given `id`.
+      operationId: getTaskVersion
+      parameters:
+      - name: id
+        in: path
+        description: Task Id
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: version
+        in: path
+        description: Task version number in the form `major`.`minor`
+        required: true
+        schema:
+          type: string
+          example: 0.1 or 1.1
+      responses:
+        '200':
+          description: Task
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '404':
+          description: Task for instance {id} and version {version} is not found
+  /v1/tasks/dataAccessRequests:
+    get:
+      tags:
+      - Tasks
+      summary: List data access requests
+      description: Get a paginated list of Data Access Request tasks with DAR-specific filters. Pre-applies category=DataAccess and type=DataAccessRequest. Pagination is offset-based and results are sorted by createdAt (default DESC).
+      operationId: listDataAccessRequests
+      parameters:
+      - name: fields
+        in: query
+        description: Fields to include in response
+        schema:
+          type: string
+          default: assignees,about,createdBy
+      - name: status
+        in: query
+        description: Filter by task status. Accepts a comma-separated list (e.g. 'Approved,Granted') which is matched as SQL IN(...). Allowed values match TaskEntityStatus.
+        schema:
+          type: string
+      - name: statusGroup
+        in: query
+        description: Filter by status group. 'open' = Open/InProgress/Pending only (still awaiting review). 'active' = Open/InProgress/Pending/Approved/Granted (full non-terminal DAR lifecycle — use this when looking for DARs that are still 'in progress', including awaiting-grant and granted-with-active-access). 'closed' = Approved/Rejected/Completed/Cancelled/Failed/Revoked (mirrors the legacy closed bucket, which includes Approved for backward compatibility with non-DAR workflows where Approved is terminal).
+        schema:
+          type: string
+          enum:
+          - open
+          - active
+          - closed
+      - name: dataset
+        in: query
+        description: Filter by dataset FQN (entity the DAR is about). Accepts a comma-separated list; matches each via FQN-hash prefix and OR's the results.
+        schema:
+          type: string
+      - name: service
+        in: query
+        description: Filter by parent service FQN of the dataset. Accepts a comma-separated list (OR-joined).
+        schema:
+          type: string
+      - name: requestedBy
+        in: query
+        description: Filter by requester FQN. Accepts a comma-separated list (OR-joined).
+        schema:
+          type: string
+      - name: requestedById
+        in: query
+        description: Filter by requester user id. Accepts a comma-separated list of UUIDs matched via SQL IN(...).
+        schema:
+          type: string
+      - name: approver
+        in: query
+        description: Filter by approver FQN. Accepts a comma-separated list (OR-joined).
+        schema:
+          type: string
+      - name: approverId
+        in: query
+        description: Filter by approver user id. Accepts a comma-separated list of UUIDs matched via SQL IN(...).
+        schema:
+          type: string
+      - name: accessType
+        in: query
+        description: Filter by access type. Accepts a comma-separated list (e.g. 'FullAccess,Masked') matched via SQL IN(...). Allowed values match DataAccessType.
+        schema:
+          type: string
+      - name: assignee
+        in: query
+        description: Filter by assignee FQN (user or team). Accepts a comma-separated list (OR-joined).
+        schema:
+          type: string
+      - name: assigneeId
+        in: query
+        description: Filter by assignee user/team id (single UUID).
+        schema:
+          type: string
+          format: uuid
+      - name: domain
+        in: query
+        description: Filter by domain FQN
+        schema:
+          type: string
+      - name: q
+        in: query
+        description: Free-text search. Database-only (DARs are not indexed into Elasticsearch). Matches case-insensitive against task name, displayName, payload.reason, about.displayName, and about.fullyQualifiedName.
+        schema:
+          type: string
+      - name: sortOrder
+        in: query
+        description: Sort order on createdAt
+        schema:
+          type: string
+          default: desc
+          enum:
+          - asc
+          - desc
+      - name: limit
+        in: query
+        description: Limit the number of results
+        schema:
+          maximum: 1000000
+          minimum: 0
+          type: integer
+          format: int64
+          default: 10
+      - name: offset
+        in: query
+        description: Offset into the result set
+        schema:
+          minimum: 0
+          type: integer
+          format: int64
+          default: 0
+      - name: include
+        in: query
+        description: Include deleted tasks
+        schema:
+          type: string
+          default: non-deleted
+          enum:
+          - all
+          - deleted
+          - non-deleted
+      responses:
+        '200':
+          description: List of Data Access Requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskList'
+  /v1/tasks/history:
+    get:
+      tags:
+      - Tasks
+      summary: List all entity versions within a time range
+      description: Get a paginated list of all entity versions within a given time range specified by `startTs` and `endTs` in milliseconds since epoch.
+      operationId: listAllEntityVersionsByTimestamp_67
+      parameters:
+      - name: startTs
+        in: query
+        description: Start timestamp in milliseconds since epoch
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: endTs
+        in: query
+        description: End timestamp in milliseconds since epoch
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: limit
+        in: query
+        description: Limit the number of entity returned (1 to 1000000, default = 10)
+        schema:
+          maximum: 500
+          minimum: 1
+          type: integer
+          format: int32
+          default: 10
+      - name: before
+        in: query
+        description: Returns list of entity versions before this cursor
+        schema:
+          type: string
+      - name: after
+        in: query
+        description: Returns list of entity versions after this cursor
+        schema:
+          type: string
+      responses:
+        '200':
+          description: List of all versions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResultList'
+  /v1/tasks/assigned:
+    get:
+      tags:
+      - Tasks
+      summary: List tasks assigned to the current user
+      description: Get tasks assigned to the current user or their teams. Includes tasks where the user is a direct assignee or a member of an assigned team.
+      operationId: listMyAssignedTasks
+      parameters:
+      - name: fields
+        in: query
+        description: Fields to include in response
+        schema:
+          type: string
+          default: assignees,about,createdBy
+      - name: status
+        in: query
+        description: Filter by task status
+        schema:
+          type: string
+          enum:
+          - Open
+          - InProgress
+          - Pending
+          - Approved
+          - Granted
+          - ManualRevoke
+          - Rejected
+          - Completed
+          - Cancelled
+          - Failed
+          - Revoked
+          - Expired
+      - name: statusGroup
+        in: query
+        description: 'Filter by status group: ''open'' for open tasks, ''closed'' for terminal tasks'
+        schema:
+          type: string
+      - name: domain
+        in: query
+        description: Filter by domain FQN
+        schema:
+          type: string
+      - name: limit
+        in: query
+        description: Limit the number results
+        schema:
+          maximum: 1000000
+          minimum: 0
+          type: integer
+          format: int64
+          default: 10
+      - name: before
+        in: query
+        description: Returns list of tasks before this cursor
+        schema:
+          type: string
+      - name: after
+        in: query
+        description: Returns list of tasks after this cursor
+        schema:
+          type: string
+      - name: startTs
+        in: query
+        description: Filter by tasks created on or after this timestamp (epoch millis)
+        schema:
+          type: integer
+          format: int64
+      - name: endTs
+        in: query
+        description: Filter by tasks created on or before this timestamp (epoch millis)
+        schema:
+          type: integer
+          format: int64
+      - name: include
+        in: query
+        description: Include deleted tasks
+        schema:
+          type: string
+          default: non-deleted
+          enum:
+          - all
+          - deleted
+          - non-deleted
+      responses:
+        '200':
+          description: List of assigned tasks
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskList'
+  /v1/tasks/created:
+    get:
+      tags:
+      - Tasks
+      summary: List tasks created by the current user
+      description: Get tasks created by the current user.
+      operationId: listMyCreatedTasks
+      parameters:
+      - name: fields
+        in: query
+        description: Fields to include in response
+        schema:
+          type: string
+          default: assignees,about,createdBy
+      - name: status
+        in: query
+        description: Filter by task status
+        schema:
+          type: string
+          enum:
+          - Open
+          - InProgress
+          - Pending
+          - Approved
+          - Granted
+          - ManualRevoke
+          - Rejected
+          - Completed
+          - Cancelled
+          - Failed
+          - Revoked
+          - Expired
+      - name: statusGroup
+        in: query
+        description: 'Filter by status group: ''open'' for open tasks, ''closed'' for terminal tasks'
+        schema:
+          type: string
+      - name: domain
+        in: query
+        description: Filter by domain FQN
+        schema:
+          type: string
+      - name: limit
+        in: query
+        description: Limit the number results
+        schema:
+          maximum: 1000000
+          minimum: 0
+          type: integer
+          format: int64
+          default: 10
+      - name: before
+        in: query
+        description: Returns list of tasks before this cursor
+        schema:
+          type: string
+      - name: after
+        in: query
+        description: Returns list of tasks after this cursor
+        schema:
+          type: string
+      - name: startTs
+        in: query
+        description: Filter by tasks created on or after this timestamp (epoch millis)
+        schema:
+          type: integer
+          format: int64
+      - name: endTs
+        in: query
+        description: Filter by tasks created on or before this timestamp (epoch millis)
+        schema:
+          type: integer
+          format: int64
+      - name: include
+        in: query
+        description: Include deleted tasks
+        schema:
+          type: string
+          default: non-deleted
+          enum:
+          - all
+          - deleted
+          - non-deleted
+      responses:
+        '200':
+          description: List of created tasks
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskList'
+  /v1/tasks/owned:
+    get:
+      tags:
+      - Tasks
+      summary: List tasks for entities owned by the current user
+      description: Get tasks for entities owned by the current user or their teams. Includes tasks where the task target entity is owned by the user or their teams.
+      operationId: listMyOwnedTasks
+      parameters:
+      - name: fields
+        in: query
+        description: Fields to include in response
+        schema:
+          type: string
+          default: assignees,about,createdBy
+      - name: status
+        in: query
+        description: Filter by task status
+        schema:
+          type: string
+          enum:
+          - Open
+          - InProgress
+          - Pending
+          - Approved
+          - Granted
+          - ManualRevoke
+          - Rejected
+          - Completed
+          - Cancelled
+          - Failed
+          - Revoked
+          - Expired
+      - name: statusGroup
+        in: query
+        description: 'Filter by status group: ''open'' for open tasks, ''closed'' for terminal tasks'
+        schema:
+          type: string
+      - name: domain
+        in: query
+        description: Filter by domain FQN
+        schema:
+          type: string
+      - name: limit
+        in: query
+        description: Limit the number results
+        schema:
+          maximum: 1000000
+          minimum: 0
+          type: integer
+          format: int64
+          default: 10
+      - name: before
+        in: query
+        description: Returns list of tasks before this cursor
+        schema:
+          type: string
+      - name: after
+        in: query
+        description: Returns list of tasks after this cursor
+        schema:
+          type: string
+      - name: startTs
+        in: query
+        description: Filter by tasks created on or after this timestamp (epoch millis)
+        schema:
+          type: integer
+          format: int64
+      - name: endTs
+        in: query
+        description: Filter by tasks created on or before this timestamp (epoch millis)
+        schema:
+          type: integer
+          format: int64
+      - name: include
+        in: query
+        description: Include deleted tasks
+        schema:
+          type: string
+          default: non-deleted
+          enum:
+          - all
+          - deleted
+          - non-deleted
+      responses:
+        '200':
+          description: List of owned tasks
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskList'
+  /v1/tasks/visible:
+    get:
+      tags:
+      - Tasks
+      summary: List tasks visible to the current user
+      description: Get tasks visible to the current user. This includes tasks assigned to the user or their teams, and tasks about entities owned by the user or their teams.
+      operationId: listMyVisibleTasks
+      parameters:
+      - name: fields
+        in: query
+        description: Fields to include in response
+        schema:
+          type: string
+          default: assignees,about,createdBy
+      - name: status
+        in: query
+        description: Filter by task status
+        schema:
+          type: string
+          enum:
+          - Open
+          - InProgress
+          - Pending
+          - Approved
+          - Granted
+          - ManualRevoke
+          - Rejected
+          - Completed
+          - Cancelled
+          - Failed
+          - Revoked
+          - Expired
+      - name: statusGroup
+        in: query
+        description: 'Filter by status group: ''open'' for open tasks, ''closed'' for terminal tasks'
+        schema:
+          type: string
+      - name: domain
+        in: query
+        description: Filter by domain FQN
+        schema:
+          type: string
+      - name: limit
+        in: query
+        description: Limit the number results
+        schema:
+          maximum: 1000000
+          minimum: 0
+          type: integer
+          format: int64
+          default: 10
+      - name: before
+        in: query
+        description: Returns list of tasks before this cursor
+        schema:
+          type: string
+      - name: after
+        in: query
+        description: Returns list of tasks after this cursor
+        schema:
+          type: string
+      - name: startTs
+        in: query
+        description: Filter by tasks created on or after this timestamp (epoch millis)
+        schema:
+          type: integer
+          format: int64
+      - name: endTs
+        in: query
+        description: Filter by tasks created on or before this timestamp (epoch millis)
+        schema:
+          type: integer
+          format: int64
+      - name: include
+        in: query
+        description: Include deleted tasks
+        schema:
+          type: string
+          default: non-deleted
+          enum:
+          - all
+          - deleted
+          - non-deleted
+      responses:
+        '200':
+          description: List of visible tasks
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskList'
+  /v1/tasks/{id}/versions:
+    get:
+      tags:
+      - Tasks
+      summary: List task versions
+      description: Get a list of all the versions of a task identified by `id`.
+      operationId: listTaskVersions
+      parameters:
+      - name: id
+        in: path
+        description: Task Id
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: List of task versions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityHistory'
+  /v1/tasks/{id}/resolve:
+    post:
+      tags:
+      - Tasks
+      summary: Resolve a task
+      description: Resolve a task with approval, rejection, or completion.
+      operationId: resolveTask_1
+      parameters:
+      - name: id
+        in: path
+        description: Task Id
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResolveTask'
+      responses:
+        '200':
+          description: The resolved task
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '404':
+          description: Task not found
+        '403':
+          description: User not authorized to resolve task
+components:
+  schemas:
+    TagLabel:
+      required:
+      - labelType
+      - source
+      - state
+      - tagFQN
+      type: object
+      properties:
+        tagFQN:
+          type: string
+        name:
+          type: string
+        displayName:
+          type: string
+        description:
+          type: string
+        style:
+          $ref: '#/components/schemas/Style'
+        source:
+          type: string
+          enum:
+          - Classification
+          - Glossary
+        labelType:
+          type: string
+          enum:
+          - Manual
+          - Propagated
+          - Automated
+          - Derived
+          - Generated
+        state:
+          type: string
+          enum:
+          - Suggested
+          - Confirmed
+        href:
+          type: string
+          format: uri
+        reason:
+          type: string
+        appliedAt:
+          type: string
+          format: date-time
+        appliedBy:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/TagLabelMetadata'
+    EntityReference:
+      required:
+      - id
+      - type
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+        name:
+          type: string
+        fullyQualifiedName:
+          type: string
+        description:
+          type: string
+        displayName:
+          type: string
+        deleted:
+          type: boolean
+        inherited:
+          type: boolean
+        href:
+          type: string
+          format: uri
+    TagLabelRecognizerMetadata:
+      required:
+      - recognizerId
+      - recognizerName
+      - score
+      type: object
+      properties:
+        recognizerId:
+          type: string
+          format: uuid
+        recognizerName:
+          type: string
+        score:
+          type: number
+          format: double
+        target:
+          type: string
+          enum:
+          - content
+          - column_name
+        patterns:
+          type: array
+          items:
+            $ref: '#/components/schemas/PatternMatch'
+    EntityError:
+      type: object
+      properties:
+        message:
+          type: string
+        entity:
+          type: object
+    CreateTask:
+      required:
+      - category
+      - type
+      type: object
+      properties:
+        name:
+          maxLength: 256
+          minLength: 1
+          pattern: ^((?!::)[^>"\x00-\x1f])*$
+          type: string
+        displayName:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+          enum:
+          - Approval
+          - DataAccess
+          - MetadataUpdate
+          - Incident
+          - Review
+          - Custom
+        type:
+          type: string
+          enum:
+          - GlossaryApproval
+          - RequestApproval
+          - DataAccessRequest
+          - DescriptionUpdate
+          - TagUpdate
+          - OwnershipUpdate
+          - TierUpdate
+          - DomainUpdate
+          - Suggestion
+          - TestCaseResolution
+          - IncidentResolution
+          - PipelineReview
+          - DataQualityReview
+          - RecognizerFeedbackApproval
+          - CustomTask
+        priority:
+          type: string
+          enum:
+          - Critical
+          - High
+          - Medium
+          - Low
+        about:
+          pattern: (?U)^<#E::\w+::(?:[^:<>|]|:[^:<>|])+(?:::(?:[^:<>|]|:[^:<>|])+)*>$
+          type: string
+        domain:
+          type: string
+        assignees:
+          type: array
+          items:
+            type: string
+        reviewers:
+          type: array
+          items:
+            type: string
+        payload:
+          type: object
+        dueDate:
+          type: integer
+          format: int64
+        externalReference:
+          $ref: '#/components/schemas/TaskExternalReference'
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/TagLabel'
+    CoverImage:
+      type: object
+      properties:
+        url:
+          type: string
+        position:
+          type: string
+    AccessDetails:
+      required:
+      - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: integer
+          format: int64
+        accessedBy:
+          $ref: '#/components/schemas/EntityReference'
+        accessedByAProcess:
+          type: string
+    Paging:
+      required:
+      - total
+      type: object
+      properties:
+        before:
+          type: string
+        after:
+          type: string
+        offset:
+          type: integer
+          format: int32
+        limit:
+          type: integer
+          format: int32
+        total:
+          type: integer
+          format: int32
+    Task:
+      required:
+      - category
+      - createdBy
+      - id
+      - name
+      - status
+      - type
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        taskId:
+          pattern: ^TASK-[0-9]+$
+          type: string
+        name:
+          maxLength: 256
+          minLength: 1
+          pattern: ^((?!::)[^>"\x00-\x1f])*$
+          type: string
+        displayName:
+          type: string
+        fullyQualifiedName:
+          maxLength: 3072
+          minLength: 1
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+          enum:
+          - Approval
+          - DataAccess
+          - MetadataUpdate
+          - Incident
+          - Review
+          - Custom
+        type:
+          type: string
+          enum:
+          - GlossaryApproval
+          - RequestApproval
+          - DataAccessRequest
+          - DescriptionUpdate
+          - TagUpdate
+          - OwnershipUpdate
+          - TierUpdate
+          - DomainUpdate
+          - Suggestion
+          - TestCaseResolution
+          - IncidentResolution
+          - PipelineReview
+          - DataQualityReview
+          - RecognizerFeedbackApproval
+          - CustomTask
+        status:
+          type: string
+          enum:
+          - Open
+          - InProgress
+          - Pending
+          - Approved
+          - Granted
+          - ManualRevoke
+          - Rejected
+          - Completed
+          - Cancelled
+          - Failed
+          - Revoked
+          - Expired
+        priority:
+          type: string
+          enum:
+          - Critical
+          - High
+          - Medium
+          - Low
+        about:
+          $ref: '#/components/schemas/EntityReference'
+        aboutFqnHash:
+          type: string
+        domains:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        createdBy:
+          $ref: '#/components/schemas/EntityReference'
+        createdById:
+          type: string
+        approvedBy:
+          $ref: '#/components/schemas/EntityReference'
+        approvedById:
+          type: string
+        approvedAt:
+          type: integer
+          format: int64
+        assignees:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        reviewers:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        watchers:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        payload:
+          type: object
+        resolution:
+          $ref: '#/components/schemas/TaskResolution'
+        dueDate:
+          type: integer
+          format: int64
+        externalReference:
+          $ref: '#/components/schemas/TaskExternalReference'
+        workflowInstanceId:
+          type: string
+          format: uuid
+        workflowDefinitionId:
+          type: string
+          format: uuid
+        workflowStageId:
+          type: string
+        workflowStageDisplayName:
+          type: string
+        availableTransitions:
+          type: array
+          items:
+            $ref: '#/components/schemas/TaskAvailableTransition'
+        taskFormSchemaId:
+          type: string
+          format: uuid
+        taskFormSchemaVersion:
+          type: number
+          format: double
+        comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/TaskComment'
+        commentCount:
+          type: integer
+          format: int32
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/TagLabel'
+        createdAt:
+          type: integer
+          format: int64
+        version:
+          type: number
+          format: double
+        updatedAt:
+          type: integer
+          format: int64
+        updatedBy:
+          type: string
+        href:
+          type: string
+          format: uri
+        changeDescription:
+          $ref: '#/components/schemas/ChangeDescription'
+        deleted:
+          type: boolean
+        incrementalChangeDescription:
+          $ref: '#/components/schemas/ChangeDescription'
+        dataProducts:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        followers:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        votes:
+          $ref: '#/components/schemas/Votes'
+        lifeCycle:
+          $ref: '#/components/schemas/LifeCycle'
+        experts:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        certification:
+          $ref: '#/components/schemas/AssetCertification'
+        extension:
+          type: object
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        service:
+          $ref: '#/components/schemas/EntityReference'
+        style:
+          $ref: '#/components/schemas/Style'
+        owners:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        dataContract:
+          $ref: '#/components/schemas/EntityReference'
+        usageSummary:
+          $ref: '#/components/schemas/UsageDetails'
+        entityStatus:
+          type: string
+          enum:
+          - Draft
+          - In Review
+          - Approved
+          - Archived
+          - Deprecated
+          - Rejected
+          - Unprocessed
+        sourceHash:
+          type: string
+        impersonatedBy:
+          type: string
+        provider:
+          type: string
+          enum:
+          - system
+          - user
+          - automation
+    ChangeSummaryMap:
+      type: object
+    LifeCycle:
+      type: object
+      properties:
+        created:
+          $ref: '#/components/schemas/AccessDetails'
+        updated:
+          $ref: '#/components/schemas/AccessDetails'
+        accessed:
+          $ref: '#/components/schemas/AccessDetails'
+    JsonPatch:
+      type: object
+    BulkTaskOperationResult:
+      type: object
+      properties:
+        totalRequested:
+          type: integer
+          format: int32
+        successful:
+          type: integer
+          format: int32
+        failed:
+          type: integer
+          format: int32
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/BulkTaskOperationResultItem'
+    CreateTaskComment:
+      required:
+      - message
+      type: object
+      properties:
+        message:
+          maxLength: 2147483647
+          minLength: 1
+          type: string
+    ChangeDescription:
+      type: object
+      properties:
+        fieldsAdded:
+          type: array
+          items:
+            $ref: '#/components/schemas/FieldChange'
+        fieldsUpdated:
+          type: array
+          items:
+            $ref: '#/components/schemas/FieldChange'
+        fieldsDeleted:
+          type: array
+          items:
+            $ref: '#/components/schemas/FieldChange'
+        previousVersion:
+          type: number
+          format: double
+        changeSummary:
+          $ref: '#/components/schemas/ChangeSummaryMap'
+    ResolveTask:
+      type: object
+      properties:
+        transitionId:
+          type: string
+        resolutionType:
+          type: string
+          enum:
+          - Approved
+          - Rejected
+          - Completed
+          - Cancelled
+          - TimedOut
+          - AutoApproved
+          - AutoRejected
+          - Revoked
+          - Expired
+        comment:
+          type: string
+        newValue:
+          type: string
+        payload:
+          $ref: '#/components/schemas/Payload'
+    ResultList:
+      required:
+      - data
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+        paging:
+          $ref: '#/components/schemas/Paging'
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityError'
+        warningsCount:
+          type: integer
+          format: int32
+        warnings:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityError'
+    TaskExternalReference:
+      required:
+      - externalId
+      - system
+      type: object
+      properties:
+        system:
+          type: string
+        externalId:
+          type: string
+        externalUrl:
+          type: string
+          format: uri
+        syncStatus:
+          type: string
+          enum:
+          - synced
+          - pending
+          - conflict
+          - error
+        lastSyncedAt:
+          type: integer
+          format: int64
+    UsageStats:
+      required:
+      - count
+      type: object
+      properties:
+        count:
+          minimum: 0
+          type: integer
+          format: int32
+        percentileRank:
+          type: number
+          format: double
+    FieldChange:
+      type: object
+      properties:
+        name:
+          type: string
+        oldValue:
+          type: object
+        newValue:
+          type: object
+    UsageDetails:
+      required:
+      - dailyStats
+      - date
+      type: object
+      properties:
+        dailyStats:
+          $ref: '#/components/schemas/UsageStats'
+        weeklyStats:
+          $ref: '#/components/schemas/UsageStats'
+        monthlyStats:
+          $ref: '#/components/schemas/UsageStats'
+        date:
+          type: string
+    BulkTaskOperation:
+      required:
+      - operation
+      - taskIds
+      type: object
+      properties:
+        taskIds:
+          maxItems: 2147483647
+          minItems: 1
+          type: array
+          items:
+            type: string
+        operation:
+          type: string
+          enum:
+          - Approve
+          - Reject
+          - Assign
+          - UpdatePriority
+          - Cancel
+        params:
+          $ref: '#/components/schemas/BulkTaskOperationParams'
+    BulkTaskOperationParams:
+      type: object
+      properties:
+        comment:
+          type: string
+        assignees:
+          type: array
+          items:
+            type: string
+        priority:
+          type: string
+          enum:
+          - Critical
+          - High
+          - Medium
+          - Low
+    TaskList:
+      required:
+      - data
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Task'
+        paging:
+          $ref: '#/components/schemas/Paging'
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityError'
+        warningsCount:
+          type: integer
+          format: int32
+        warnings:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityError'
+    PatternMatch:
+      required:
+      - name
+      - score
+      type: object
+      properties:
+        name:
+          type: string
+        regex:
+          type: string
+        score:
+          type: number
+          format: double
+    TaskResolution:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+          - Approved
+          - Rejected
+          - Completed
+          - Cancelled
+          - TimedOut
+          - AutoApproved
+          - AutoRejected
+          - Revoked
+          - Expired
+        resolvedBy:
+          $ref: '#/components/schemas/EntityReference'
+        resolvedAt:
+          type: integer
+          format: int64
+        comment:
+          type: string
+        newValue:
+          type: string
+        payload:
+          type: object
+    Style:
+      type: object
+      properties:
+        color:
+          type: string
+        iconURL:
+          type: string
+        coverImage:
+          $ref: '#/components/schemas/CoverImage'
+    Votes:
+      type: object
+      properties:
+        upVotes:
+          type: integer
+          format: int32
+        downVotes:
+          type: integer
+          format: int32
+        upVoters:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        downVoters:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+    Payload:
+      type: object
+    AssetCertification:
+      required:
+      - appliedDate
+      - expiryDate
+      - tagLabel
+      type: object
+      properties:
+        tagLabel:
+          $ref: '#/components/schemas/TagLabel'
+        appliedDate:
+          type: integer
+          format: int64
+        expiryDate:
+          type: integer
+          format: int64
+    TaskComment:
+      required:
+      - author
+      - createdAt
+      - id
+      - message
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        message:
+          type: string
+        author:
+          $ref: '#/components/schemas/EntityReference'
+        createdAt:
+          type: integer
+          format: int64
+        reactions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Reaction'
+    Reaction:
+      required:
+      - reactionType
+      - user
+      type: object
+      properties:
+        reactionType:
+          type: string
+          enum:
+          - thumbsUp
+          - thumbsDown
+          - hooray
+          - laugh
+          - confused
+          - heart
+          - rocket
+          - eyes
+        user:
+          $ref: '#/components/schemas/EntityReference'
+    TaskCount:
+      type: object
+      properties:
+        open:
+          minimum: 0
+          type: integer
+          format: int32
+        inProgress:
+          minimum: 0
+          type: integer
+          format: int32
+        approved:
+          minimum: 0
+          type: integer
+          format: int32
+        granted:
+          minimum: 0
+          type: integer
+          format: int32
+        completed:
+          minimum: 0
+          type: integer
+          format: int32
+        total:
+          minimum: 0
+          type: integer
+          format: int32
+    BulkTaskOperationResultItem:
+      type: object
+      properties:
+        taskId:
+          type: string
+        status:
+          type: string
+          enum:
+          - success
+          - failed
+        error:
+          type: string
+    EntityHistory:
+      required:
+      - entityType
+      - versions
+      type: object
+      properties:
+        entityType:
+          type: string
+        versions:
+          type: array
+          items:
+            type: object
+    TagLabelMetadata:
+      type: object
+      properties:
+        recognizer:
+          $ref: '#/components/schemas/TagLabelRecognizerMetadata'
+        expiryDate:
+          type: integer
+          format: int64
+    TaskAvailableTransition:
+      required:
+      - id
+      - label
+      - targetStageId
+      - targetTaskStatus
+      type: object
+      properties:
+        id:
+          type: string
+        label:
+          type: string
+        targetStageId:
+          type: string
+        targetTaskStatus:
+          type: string
+          enum:
+          - Open
+          - InProgress
+          - Pending
+          - Approved
+          - Granted
+          - ManualRevoke
+          - Rejected
+          - Completed
+          - Cancelled
+          - Failed
+          - Revoked
+          - Expired
+        resolutionType:
+          type: string
+          enum:
+          - Approved
+          - Rejected
+          - Completed
+          - Cancelled
+          - TimedOut
+          - AutoApproved
+          - AutoRejected
+          - Revoked
+          - Expired
+        formRef:
+          type: string
+        requiresComment:
+          type: boolean
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

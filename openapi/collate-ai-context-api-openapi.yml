@@ -1,0 +1,159 @@
+openapi: 3.2.0
+info:
+  title: OpenMetadata AI Context API
+  description: Common types and API definition for OpenMetadata
+  contact:
+    name: OpenMetadata
+    url: https://open-metadata.org
+    email: openmetadata-dev@googlegroups.com
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+  version: 2.0.5
+servers:
+- url: /api
+  description: Current Host
+- url: http://localhost:8585/api
+  description: Endpoint URL
+security:
+- BearerAuth: []
+tags:
+- name: AI Context
+  description: 'Question-anchored AI context discovery: semantically search the company-knowledge layer (glossary terms, metrics, articles) and route each hit to the candidate data assets it points to. Asset-anchored context is served per entity at /v1/{entities}/name/{fqn}/context.'
+paths:
+  /v1/ai/context/attachedKnowledge:
+    post:
+      tags:
+      - AI Context
+      summary: Batch-resolve the knowledge attached to a set of assets
+      description: 'For each asset (fqn + entityType), returns the knowledge linked to it: glossary terms from asset and column tags, metrics applied to it, and articles about it. Deliberately lightweight (no profile, lineage, or budgeting; item content capped) so search layers can annotate a whole result page in one call. Assets the caller cannot view are skipped.'
+      operationId: getAttachedKnowledgeBatch
+      requestBody:
+        description: Assets to resolve, as {fullyQualifiedName, entityType} pairs
+        content:
+          application/json:
+            schema:
+              maxItems: 50
+              minItems: 1
+              type: array
+              items:
+                $ref: '#/components/schemas/AssetKey'
+        required: true
+      responses:
+        '200':
+          description: Per-asset attached knowledge items
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssetKnowledge'
+  /v1/ai/context/find:
+    get:
+      tags:
+      - AI Context
+      summary: Find company knowledge relevant to a question, routed to candidate assets
+      description: REST surface of the find_context MCP tool. Runs a semantic search over the knowledge layer (glossary terms, metrics, articles) and returns the matching definitions together with the candidate data assets each item routes to (glossary terms via tag usage, metrics via APPLIED_TO, articles via HAS). Candidate assets are filtered to those the caller can view.
+      operationId: findAiContext
+      parameters:
+      - name: q
+        in: query
+        description: Natural-language question to find knowledge for
+        required: true
+        schema:
+          minLength: 1
+          type: string
+      - name: size
+        in: query
+        description: Maximum knowledge items to return
+        schema:
+          maximum: 50
+          minimum: 1
+          type: integer
+          format: int32
+          default: 10
+      responses:
+        '200':
+          description: Knowledge items and the candidate assets they route to
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FoundContext'
+        '503':
+          description: Vector embeddings are not enabled
+components:
+  schemas:
+    AssetKey:
+      type: object
+      properties:
+        fullyQualifiedName:
+          type: string
+        entityType:
+          type: string
+    KnowledgeItem:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum:
+          - glossaryTerm
+          - metric
+          - page
+          - contextMemory
+        name:
+          type: string
+        displayName:
+          type: string
+        fullyQualifiedName:
+          maxLength: 3072
+          minLength: 1
+          type: string
+        content:
+          type: string
+        contentTruncated:
+          type: boolean
+        stale:
+          type: boolean
+        staleReasons:
+          type: array
+          items:
+            type: string
+    FoundContext:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/KnowledgeItem'
+        candidateAssets:
+          type: array
+          items:
+            $ref: '#/components/schemas/CandidateAsset'
+        empty:
+          type: boolean
+    AssetKnowledge:
+      type: object
+      properties:
+        fullyQualifiedName:
+          type: string
+        entityType:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/KnowledgeItem'
+    CandidateAsset:
+      type: object
+      properties:
+        fullyQualifiedName:
+          type: string
+        entityType:
+          type: string
+        via:
+          type: string
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

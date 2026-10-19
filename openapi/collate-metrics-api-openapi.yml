@@ -1,0 +1,1572 @@
+openapi: 3.2.0
+info:
+  title: OpenMetadata Metrics API
+  description: Common types and API definition for OpenMetadata
+  contact:
+    name: OpenMetadata
+    url: https://open-metadata.org
+    email: openmetadata-dev@googlegroups.com
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+  version: 2.0.5
+servers:
+- url: /api
+  description: Current Host
+- url: http://localhost:8585/api
+  description: Endpoint URL
+security:
+- BearerAuth: []
+tags:
+- name: Metrics
+  description: '`Metrics` are measurements computed from data such as `Monthly Active Users`. Some of the metrics that measures used to determine performance against an objective are called KPIs or Key Performance Indicators, such as `User Retention`.'
+paths:
+  /v1/metrics/{id}/followers:
+    put:
+      tags:
+      - Metrics
+      summary: Add a follower
+      description: Add a user identified by `userId` as followed of this Metric.
+      operationId: addFollower_8
+      parameters:
+      - name: id
+        in: path
+        description: Id of the Metric
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        description: Id of the user to be added as follower
+        content:
+          application/json:
+            schema:
+              type: string
+              format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeEvent'
+        '404':
+          description: APIEndpoint for instance {id} is not found
+  /v1/metrics/bulk:
+    put:
+      tags:
+      - Metrics
+      summary: Bulk create or update metrics
+      description: Create or update multiple metrics in a single operation.
+      operationId: bulkCreateOrUpdateMetrics
+      parameters:
+      - name: overrideMetadata
+        in: query
+        description: When true, allows the bulk update to overwrite user-curated fields (description, displayName, owners, tags) that bot-driven updates normally preserve, and disables the sourceHash fast-path so unchanged entities are re-evaluated. Defaults to false.
+        schema:
+          type: boolean
+          default: false
+      - name: async
+        in: query
+        schema:
+          type: boolean
+          default: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/CreateMetric'
+      responses:
+        '200':
+          description: Bulk operation results
+        '202':
+          description: Bulk operation accepted for async processing
+        '400':
+          description: Bad request
+  /v1/metrics:
+    get:
+      tags:
+      - Metrics
+      summary: List metrics
+      description: Get a list of metrics. Use `fields` parameter to get only necessary fields.
+      operationId: listMetrics
+      parameters:
+      - name: fields
+        in: query
+        description: Fields requested in the returned resource
+        schema:
+          type: string
+          example: owners,reviewers,relatedMetrics,followers,tags,extension,domains,dataProducts
+      - name: limit
+        in: query
+        schema:
+          maximum: 1000000
+          minimum: 0
+          type: integer
+          format: int32
+          default: 10
+      - name: before
+        in: query
+        description: Returns list of metrics before this cursor
+        schema:
+          type: string
+      - name: after
+        in: query
+        description: Returns list of metrics after this cursor
+        schema:
+          type: string
+      - name: include
+        in: query
+        description: Include all, deleted, or non-deleted entities.
+        schema:
+          type: string
+          default: non-deleted
+          enum:
+          - all
+          - deleted
+          - non-deleted
+      responses:
+        '200':
+          description: List of metrics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetricsList'
+    put:
+      tags:
+      - Metrics
+      summary: Create or update a metric
+      description: Create a new metric, if it does not exist or update an existing metric.
+      operationId: createOrUpdateMetric
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMetric'
+      responses:
+        '200':
+          description: The metric
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Metric'
+        '400':
+          description: Bad request
+    post:
+      tags:
+      - Metrics
+      summary: Create a Metric
+      description: Create a Metric.
+      operationId: createMetric
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMetric'
+      responses:
+        '200':
+          description: The Metric
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Metric'
+        '400':
+          description: Bad request
+  /v1/metrics/name/{fqn}:
+    get:
+      tags:
+      - Metrics
+      summary: Get a Metric by fully qualified name
+      description: Get a Metric by fully qualified name.
+      operationId: getMetricByFQN
+      parameters:
+      - name: fqn
+        in: path
+        description: Fully qualified name of the Metric
+        required: true
+        schema:
+          type: string
+      - name: fields
+        in: query
+        description: Fields requested in the returned resource
+        schema:
+          type: string
+          example: owners,reviewers,relatedMetrics,followers,tags,extension,domains,dataProducts
+      - name: include
+        in: query
+        description: Include all, deleted, or non-deleted entities.
+        schema:
+          type: string
+          default: non-deleted
+          enum:
+          - all
+          - deleted
+          - non-deleted
+      - name: includeRelations
+        in: query
+        description: 'Per-relation include control. Format: field:value,field2:value2. Example: owners:non-deleted,followers:all. Valid values: all, deleted, non-deleted. If not specified for a field, uses the entity''s include value.'
+        schema:
+          type: string
+          example: owners:non-deleted,followers:all
+      responses:
+        '200':
+          description: The Metric
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Metric'
+        '404':
+          description: Metric for instance {fqn} is not found
+    delete:
+      tags:
+      - Metrics
+      summary: Delete a Metric by fully qualified name
+      description: Delete a Metric by `fullyQualifiedName`.
+      operationId: deleteAPIEndpointByFQN_1
+      parameters:
+      - name: hardDelete
+        in: query
+        description: Hard delete the entity. (Default = `false`)
+        schema:
+          type: boolean
+          default: false
+      - name: fqn
+        in: path
+        description: Fully qualified name of the Metric
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Metric for instance {fqn} is not found
+    patch:
+      tags:
+      - Metrics
+      summary: Update a Metric using name
+      description: Update an existing Metric using JsonPatch.
+      externalDocs:
+        description: JsonPatch RFC
+        url: https://tools.ietf.org/html/rfc6902
+      operationId: patchMetric
+      parameters:
+      - name: fqn
+        in: path
+        description: Name of the Metric
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: JsonPatch with array of operations
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/JsonPatch'
+            example: '[{op:remove, path:/a},{op:add, path: /b, value: val}]'
+      responses:
+        default:
+          description: default response
+          content:
+            application/json: {}
+  /v1/metrics/{id}:
+    get:
+      tags:
+      - Metrics
+      summary: Get a metric by Id
+      description: Get a metric by `Id`.
+      operationId: getMetricByID
+      parameters:
+      - name: id
+        in: path
+        description: Id of the metric
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: fields
+        in: query
+        description: Fields requested in the returned resource
+        schema:
+          type: string
+          example: owners,reviewers,relatedMetrics,followers,tags,extension,domains,dataProducts
+      - name: include
+        in: query
+        description: Include all, deleted, or non-deleted entities.
+        schema:
+          type: string
+          default: non-deleted
+          enum:
+          - all
+          - deleted
+          - non-deleted
+      - name: includeRelations
+        in: query
+        description: 'Per-relation include control. Format: field:value,field2:value2. Example: owners:non-deleted,followers:all. Valid values: all, deleted, non-deleted. If not specified for a field, uses the entity''s include value.'
+        schema:
+          type: string
+          example: owners:non-deleted,followers:all
+      responses:
+        '200':
+          description: The metrics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Metric'
+        '404':
+          description: Metrics for instance {id} is not found
+    delete:
+      tags:
+      - Metrics
+      summary: Delete a Metric by id
+      description: Delete a Metric by `id`.
+      operationId: deleteMetric
+      parameters:
+      - name: hardDelete
+        in: query
+        description: Hard delete the entity. (Default = `false`)
+        schema:
+          type: boolean
+          default: false
+      - name: id
+        in: path
+        description: Id of the Metric
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Metric for instance {id} is not found
+    patch:
+      tags:
+      - Metrics
+      summary: Update a Metric
+      description: Update an existing Metric using JsonPatch.
+      externalDocs:
+        description: JsonPatch RFC
+        url: https://tools.ietf.org/html/rfc6902
+      operationId: patchMetric_1
+      parameters:
+      - name: id
+        in: path
+        description: Id of the Metric
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        description: JsonPatch with array of operations
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/JsonPatch'
+            example: '[{op:remove, path:/a},{op:add, path: /b, value: val}]'
+      responses:
+        default:
+          description: default response
+          content:
+            application/json: {}
+  /v1/metrics/async/{id}:
+    delete:
+      tags:
+      - Metrics
+      summary: Asynchronously delete a Metric by id
+      description: Asynchronously delete a Metric by `id`.
+      operationId: deleteMetricAsync
+      parameters:
+      - name: hardDelete
+        in: query
+        description: Hard delete the entity. (Default = `false`)
+        schema:
+          type: boolean
+          default: false
+      - name: id
+        in: path
+        description: Id of the Metric
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Metric for instance {id} is not found
+  /v1/metrics/{id}/followers/{userId}:
+    delete:
+      tags:
+      - Metrics
+      summary: Remove a follower
+      description: Remove the user identified `userId` as a follower of the Metric.
+      operationId: deleteFollower_11
+      parameters:
+      - name: id
+        in: path
+        description: Id of the Metric
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: userId
+        in: path
+        description: Id of the user being removed as follower
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeEvent'
+  /v1/metrics/name/{name}/export:
+    get:
+      tags:
+      - Metrics
+      summary: Export metrics in CSV format
+      operationId: exportMetrics
+      parameters:
+      - name: name
+        in: path
+        description: Metric fully qualified name, or * to export all metrics
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Exported CSV with metrics
+          content:
+            application/json:
+              schema:
+                type: string
+  /v1/metrics/name/{name}/exportAsync:
+    get:
+      tags:
+      - Metrics
+      summary: Export metrics in CSV format asynchronously
+      operationId: exportMetricsAsync
+      parameters:
+      - name: name
+        in: path
+        description: Metric fully qualified name, or * to export all metrics
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Export initiated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CSVExportResponse'
+  /v1/metrics/{id}/context:
+    get:
+      tags:
+      - Metrics
+      summary: Get the AI context for an entity by id
+      description: Retrieve the LLM-ready AI Context (Context Profile) for the entity — its attached business knowledge (glossary terms, Context Center articles, applied metrics), type-specific structural context, and depth-1 lineage — as an OKF-style markdown document (default) or the structured AIContext JSON (`?format=json`).
+      operationId: getEntityAiContextById_44
+      parameters:
+      - name: id
+        in: path
+        description: Entity id
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: format
+        in: query
+        description: 'Output format: markdown (default) or json'
+        schema:
+          type: string
+          default: markdown
+      - name: query
+        in: query
+        description: Optional question; truncated knowledge items are excerpted to the passage most relevant to it instead of the positional lead
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Entity AI context
+        '404':
+          description: Entity not found
+  /v1/metrics/name/{fqn}/context:
+    get:
+      tags:
+      - Metrics
+      summary: Get the AI context for an entity by fully qualified name
+      description: Retrieve the LLM-ready AI Context (Context Profile) for the entity by FQN — see getEntityAiContextById. Returns an OKF-style markdown document by default, or the structured AIContext JSON with `?format=json`.
+      operationId: getEntityAiContextByName_44
+      parameters:
+      - name: fqn
+        in: path
+        description: Entity fully qualified name
+        required: true
+        schema:
+          type: string
+      - name: format
+        in: query
+        description: 'Output format: markdown (default) or json'
+        schema:
+          type: string
+          default: markdown
+      - name: query
+        in: query
+        description: Optional question; truncated knowledge items are excerpted to the passage most relevant to it instead of the positional lead
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Entity AI context
+        '404':
+          description: Entity not found
+  /v1/metrics/documentation/csv:
+    get:
+      tags:
+      - Metrics
+      summary: Get CSV documentation for metric import/export
+      operationId: getMetricCsvDocumentation
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                type: string
+  /v1/metrics/customUnits:
+    get:
+      tags:
+      - Metrics
+      summary: Get list of custom units of measurement
+      description: Get a list of all custom units of measurement that have been used in existing metrics. This helps UI provide autocomplete suggestions.
+      operationId: getCustomUnitsOfMeasurement
+      responses:
+        '200':
+          description: List of custom units
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+  /v1/metrics/{id}/versions/{version}:
+    get:
+      tags:
+      - Metrics
+      summary: Get a version of the Metric
+      description: Get a version of the Metric by given `id`
+      operationId: getSpecificEndpointVersion_1
+      parameters:
+      - name: id
+        in: path
+        description: Id of the Metric
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: version
+        in: path
+        description: Metric version number in the form `major`.`minor`
+        required: true
+        schema:
+          type: string
+          example: 0.1 or 1.1
+      responses:
+        '200':
+          description: Metric Version
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Metric'
+        '404':
+          description: Metric for instance {id} and version {version} is not found
+  /v1/metrics/name/{name}/import:
+    put:
+      tags:
+      - Metrics
+      summary: Import metrics from CSV to create or update metrics
+      operationId: importMetrics
+      parameters:
+      - name: name
+        in: path
+        description: Metric import scope. Use * for collection import
+        required: true
+        schema:
+          type: string
+      - name: dryRun
+        in: query
+        description: Dry-run when true validates the CSV without importing it. (default=true)
+        schema:
+          type: boolean
+          default: true
+      requestBody:
+        content:
+          text/plain; charset=UTF-8:
+            schema:
+              type: string
+      responses:
+        '200':
+          description: Import result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CsvImportResult'
+  /v1/metrics/name/{name}/importAsync:
+    put:
+      tags:
+      - Metrics
+      summary: Import metrics from CSV asynchronously
+      operationId: importMetricsAsync
+      parameters:
+      - name: name
+        in: path
+        description: Metric import scope. Use * for collection import
+        required: true
+        schema:
+          type: string
+      - name: dryRun
+        in: query
+        description: Dry-run when true validates the CSV without importing it. (default=true)
+        schema:
+          type: boolean
+          default: true
+      requestBody:
+        content:
+          text/plain; charset=UTF-8:
+            schema:
+              type: string
+      responses:
+        '200':
+          description: Import initiated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CsvImportResult'
+  /v1/metrics/history:
+    get:
+      tags:
+      - Metrics
+      summary: List all entity versions within a time range
+      description: Get a paginated list of all entity versions within a given time range specified by `startTs` and `endTs` in milliseconds since epoch.
+      operationId: listAllEntityVersionsByTimestamp_43
+      parameters:
+      - name: startTs
+        in: query
+        description: Start timestamp in milliseconds since epoch
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: endTs
+        in: query
+        description: End timestamp in milliseconds since epoch
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: limit
+        in: query
+        description: Limit the number of entity returned (1 to 1000000, default = 10)
+        schema:
+          maximum: 500
+          minimum: 1
+          type: integer
+          format: int32
+          default: 10
+      - name: before
+        in: query
+        description: Returns list of entity versions before this cursor
+        schema:
+          type: string
+      - name: after
+        in: query
+        description: Returns list of entity versions after this cursor
+        schema:
+          type: string
+      responses:
+        '200':
+          description: List of all versions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResultList'
+  /v1/metrics/{id}/versions:
+    get:
+      tags:
+      - Metrics
+      summary: List Metric versions
+      description: Get a list of all the versions of a metric identified by `id`
+      operationId: listAllMetricVersion
+      parameters:
+      - name: id
+        in: path
+        description: Id of the metric
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: List of Metric versions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityHistory'
+  /v1/metrics/restore:
+    put:
+      tags:
+      - Metrics
+      summary: Restore a soft deleted Metric
+      description: Restore a soft deleted Metric.
+      operationId: restore_25
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RestoreEntity'
+      responses:
+        '200':
+          description: Successfully restored the Metric.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Metric'
+  /v1/metrics/{id}/vote:
+    put:
+      tags:
+      - Metrics
+      summary: Update Vote for a Metric
+      description: Update vote for a Metric
+      operationId: updateVoteForMetric
+      parameters:
+      - name: id
+        in: path
+        description: Id of the Entity
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VoteRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeEvent'
+        '404':
+          description: model for instance {id} is not found
+components:
+  schemas:
+    TagLabel:
+      required:
+      - labelType
+      - source
+      - state
+      - tagFQN
+      type: object
+      properties:
+        tagFQN:
+          type: string
+        name:
+          type: string
+        displayName:
+          type: string
+        description:
+          type: string
+        style:
+          $ref: '#/components/schemas/Style'
+        source:
+          type: string
+          enum:
+          - Classification
+          - Glossary
+        labelType:
+          type: string
+          enum:
+          - Manual
+          - Propagated
+          - Automated
+          - Derived
+          - Generated
+        state:
+          type: string
+          enum:
+          - Suggested
+          - Confirmed
+        href:
+          type: string
+          format: uri
+        reason:
+          type: string
+        appliedAt:
+          type: string
+          format: date-time
+        appliedBy:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/TagLabelMetadata'
+    EntityReference:
+      required:
+      - id
+      - type
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+        name:
+          type: string
+        fullyQualifiedName:
+          type: string
+        description:
+          type: string
+        displayName:
+          type: string
+        deleted:
+          type: boolean
+        inherited:
+          type: boolean
+        href:
+          type: string
+          format: uri
+    RestoreEntity:
+      required:
+      - id
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+    TagLabelRecognizerMetadata:
+      required:
+      - recognizerId
+      - recognizerName
+      - score
+      type: object
+      properties:
+        recognizerId:
+          type: string
+          format: uuid
+        recognizerName:
+          type: string
+        score:
+          type: number
+          format: double
+        target:
+          type: string
+          enum:
+          - content
+          - column_name
+        patterns:
+          type: array
+          items:
+            $ref: '#/components/schemas/PatternMatch'
+    EntityError:
+      type: object
+      properties:
+        message:
+          type: string
+        entity:
+          type: object
+    CoverImage:
+      type: object
+      properties:
+        url:
+          type: string
+        position:
+          type: string
+    Paging:
+      required:
+      - total
+      type: object
+      properties:
+        before:
+          type: string
+        after:
+          type: string
+        offset:
+          type: integer
+          format: int32
+        limit:
+          type: integer
+          format: int32
+        total:
+          type: integer
+          format: int32
+    MetricExpression:
+      type: object
+      properties:
+        language:
+          type: string
+          enum:
+          - SQL
+          - Java
+          - JavaScript
+          - Python
+          - External
+        code:
+          type: string
+    AccessDetails:
+      required:
+      - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: integer
+          format: int64
+        accessedBy:
+          $ref: '#/components/schemas/EntityReference'
+        accessedByAProcess:
+          type: string
+    ChangeEvent:
+      required:
+      - entityId
+      - entityType
+      - eventType
+      - id
+      - timestamp
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        eventType:
+          type: string
+          enum:
+          - entityCreated
+          - entityUpdated
+          - entityFieldsChanged
+          - entityNoChange
+          - entitySoftDeleted
+          - entityDeleted
+          - entityRestored
+          - threadCreated
+          - threadUpdated
+          - postCreated
+          - postUpdated
+          - taskCreated
+          - taskUpdated
+          - taskResolved
+          - taskClosed
+          - logicalTestCaseAdded
+          - suggestionCreated
+          - suggestionUpdated
+          - suggestionAccepted
+          - suggestionRejected
+          - suggestionDeleted
+          - userLogin
+          - userLogout
+          - entityLineageAdded
+          - entityLineageDeleted
+          - entityLineageUpdated
+        entityType:
+          type: string
+        entityId:
+          type: string
+          format: uuid
+        domains:
+          type: array
+          items:
+            type: string
+            format: uuid
+        entityFullyQualifiedName:
+          type: string
+        previousVersion:
+          type: number
+          format: double
+        currentVersion:
+          type: number
+          format: double
+        userName:
+          type: string
+        impersonatedBy:
+          type: string
+        timestamp:
+          type: integer
+          format: int64
+        changeDescription:
+          $ref: '#/components/schemas/ChangeDescription'
+        incrementalChangeDescription:
+          $ref: '#/components/schemas/ChangeDescription'
+        recursive:
+          type: boolean
+        entity:
+          type: object
+    MetricsList:
+      required:
+      - data
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Metric'
+        paging:
+          $ref: '#/components/schemas/Paging'
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityError'
+        warningsCount:
+          type: integer
+          format: int32
+        warnings:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityError'
+    ChangeSummaryMap:
+      type: object
+    LifeCycle:
+      type: object
+      properties:
+        created:
+          $ref: '#/components/schemas/AccessDetails'
+        updated:
+          $ref: '#/components/schemas/AccessDetails'
+        accessed:
+          $ref: '#/components/schemas/AccessDetails'
+    JsonPatch:
+      type: object
+    CreateMetric:
+      required:
+      - name
+      type: object
+      properties:
+        name:
+          maxLength: 256
+          minLength: 1
+          pattern: ^((?!::)[^>"\x00-\x1f])*$
+          type: string
+        displayName:
+          type: string
+        description:
+          type: string
+        metricExpression:
+          $ref: '#/components/schemas/MetricExpression'
+        metricType:
+          type: string
+          enum:
+          - COUNT
+          - SUM
+          - AVERAGE
+          - RATIO
+          - PERCENTAGE
+          - MIN
+          - MAX
+          - MEDIAN
+          - MODE
+          - STANDARD_DEVIATION
+          - VARIANCE
+          - SIMPLE
+          - CUMULATIVE
+          - DERIVED
+          - CONVERSION
+          - OTHER
+        unitOfMeasurement:
+          type: string
+          enum:
+          - COUNT
+          - DOLLARS
+          - PERCENTAGE
+          - TIMESTAMP
+          - SIZE
+          - REQUESTS
+          - EVENTS
+          - TRANSACTIONS
+          - OTHER
+        customUnitOfMeasurement:
+          type: string
+        granularity:
+          type: string
+          enum:
+          - SECOND
+          - MINUTE
+          - HOUR
+          - DAY
+          - WEEK
+          - MONTH
+          - QUARTER
+          - YEAR
+        dimensions:
+          type: array
+          items:
+            $ref: '#/components/schemas/MetricDimension'
+        measures:
+          type: array
+          items:
+            $ref: '#/components/schemas/MetricMeasure'
+        filters:
+          type: array
+          items:
+            $ref: '#/components/schemas/MetricFilter'
+        relatedMetrics:
+          type: array
+          items:
+            type: string
+        assets:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        owners:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        reviewers:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/TagLabel'
+        domains:
+          type: array
+          items:
+            type: string
+        dataProducts:
+          type: array
+          items:
+            type: string
+        extension:
+          type: object
+        provider:
+          type: string
+          enum:
+          - system
+          - user
+          - automation
+        lifeCycle:
+          $ref: '#/components/schemas/LifeCycle'
+    ChangeDescription:
+      type: object
+      properties:
+        fieldsAdded:
+          type: array
+          items:
+            $ref: '#/components/schemas/FieldChange'
+        fieldsUpdated:
+          type: array
+          items:
+            $ref: '#/components/schemas/FieldChange'
+        fieldsDeleted:
+          type: array
+          items:
+            $ref: '#/components/schemas/FieldChange'
+        previousVersion:
+          type: number
+          format: double
+        changeSummary:
+          $ref: '#/components/schemas/ChangeSummaryMap'
+    ResultList:
+      required:
+      - data
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+        paging:
+          $ref: '#/components/schemas/Paging'
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityError'
+        warningsCount:
+          type: integer
+          format: int32
+        warnings:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityError'
+    MetricFilter:
+      required:
+      - where
+      type: object
+      properties:
+        where:
+          type: string
+    UsageStats:
+      required:
+      - count
+      type: object
+      properties:
+        count:
+          minimum: 0
+          type: integer
+          format: int32
+        percentileRank:
+          type: number
+          format: double
+    FieldChange:
+      type: object
+      properties:
+        name:
+          type: string
+        oldValue:
+          type: object
+        newValue:
+          type: object
+    VoteRequest:
+      type: object
+      properties:
+        updatedVoteType:
+          type: string
+          enum:
+          - votedUp
+          - votedDown
+          - unVoted
+    UsageDetails:
+      required:
+      - dailyStats
+      - date
+      type: object
+      properties:
+        dailyStats:
+          $ref: '#/components/schemas/UsageStats'
+        weeklyStats:
+          $ref: '#/components/schemas/UsageStats'
+        monthlyStats:
+          $ref: '#/components/schemas/UsageStats'
+        date:
+          type: string
+    MetricMeasure:
+      required:
+      - name
+      type: object
+      properties:
+        name:
+          type: string
+        fullyQualifiedName:
+          maxLength: 3072
+          minLength: 1
+          type: string
+        aggregation:
+          type: string
+        description:
+          type: string
+        expression:
+          type: string
+    PatternMatch:
+      required:
+      - name
+      - score
+      type: object
+      properties:
+        name:
+          type: string
+        regex:
+          type: string
+        score:
+          type: number
+          format: double
+    Style:
+      type: object
+      properties:
+        color:
+          type: string
+        iconURL:
+          type: string
+        coverImage:
+          $ref: '#/components/schemas/CoverImage'
+    Votes:
+      type: object
+      properties:
+        upVotes:
+          type: integer
+          format: int32
+        downVotes:
+          type: integer
+          format: int32
+        upVoters:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        downVoters:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+    CsvImportResult:
+      type: object
+      properties:
+        dryRun:
+          type: boolean
+        status:
+          type: string
+          enum:
+          - success
+          - failure
+          - aborted
+          - partialSuccess
+          - running
+        abortReason:
+          type: string
+        numberOfRowsProcessed:
+          minimum: 0
+          type: integer
+          format: int32
+        numberOfRowsPassed:
+          minimum: 0
+          type: integer
+          format: int32
+        numberOfRowsFailed:
+          minimum: 0
+          type: integer
+          format: int32
+        importResultsCsv:
+          type: string
+    AssetCertification:
+      required:
+      - appliedDate
+      - expiryDate
+      - tagLabel
+      type: object
+      properties:
+        tagLabel:
+          $ref: '#/components/schemas/TagLabel'
+        appliedDate:
+          type: integer
+          format: int64
+        expiryDate:
+          type: integer
+          format: int64
+    CSVExportResponse:
+      type: object
+      properties:
+        jobId:
+          type: string
+        message:
+          type: string
+    MetricDimension:
+      required:
+      - name
+      type: object
+      properties:
+        name:
+          type: string
+        fullyQualifiedName:
+          maxLength: 3072
+          minLength: 1
+          type: string
+        type:
+          type: string
+          enum:
+          - CATEGORICAL
+          - TIME
+        description:
+          type: string
+        expression:
+          type: string
+    Metric:
+      required:
+      - id
+      - name
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          maxLength: 256
+          minLength: 1
+          pattern: ^((?!::)[^>"\x00-\x1f])*$
+          type: string
+        fullyQualifiedName:
+          maxLength: 3072
+          minLength: 1
+          type: string
+        displayName:
+          type: string
+        description:
+          type: string
+        metricExpression:
+          $ref: '#/components/schemas/MetricExpression'
+        metricType:
+          type: string
+          enum:
+          - COUNT
+          - SUM
+          - AVERAGE
+          - RATIO
+          - PERCENTAGE
+          - MIN
+          - MAX
+          - MEDIAN
+          - MODE
+          - STANDARD_DEVIATION
+          - VARIANCE
+          - SIMPLE
+          - CUMULATIVE
+          - DERIVED
+          - CONVERSION
+          - OTHER
+        unitOfMeasurement:
+          type: string
+          enum:
+          - COUNT
+          - DOLLARS
+          - PERCENTAGE
+          - TIMESTAMP
+          - SIZE
+          - REQUESTS
+          - EVENTS
+          - TRANSACTIONS
+          - OTHER
+        customUnitOfMeasurement:
+          type: string
+        granularity:
+          type: string
+          enum:
+          - SECOND
+          - MINUTE
+          - HOUR
+          - DAY
+          - WEEK
+          - MONTH
+          - QUARTER
+          - YEAR
+        dimensions:
+          type: array
+          items:
+            $ref: '#/components/schemas/MetricDimension'
+        measures:
+          type: array
+          items:
+            $ref: '#/components/schemas/MetricMeasure'
+        filters:
+          type: array
+          items:
+            $ref: '#/components/schemas/MetricFilter'
+        relatedMetrics:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        assets:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        version:
+          type: number
+          format: double
+        updatedAt:
+          type: integer
+          format: int64
+        updatedBy:
+          type: string
+        impersonatedBy:
+          type: string
+        href:
+          type: string
+          format: uri
+        owners:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        reviewers:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        followers:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/TagLabel'
+        changeDescription:
+          $ref: '#/components/schemas/ChangeDescription'
+        incrementalChangeDescription:
+          $ref: '#/components/schemas/ChangeDescription'
+        deleted:
+          type: boolean
+        domains:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        dataProducts:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        dataContract:
+          $ref: '#/components/schemas/EntityReference'
+        votes:
+          $ref: '#/components/schemas/Votes'
+        extension:
+          type: object
+        certification:
+          $ref: '#/components/schemas/AssetCertification'
+        entityStatus:
+          type: string
+          enum:
+          - Draft
+          - In Review
+          - Approved
+          - Archived
+          - Deprecated
+          - Rejected
+          - Unprocessed
+        provider:
+          type: string
+          enum:
+          - system
+          - user
+          - automation
+        derivedFrom:
+          $ref: '#/components/schemas/EntityReference'
+        lifeCycle:
+          $ref: '#/components/schemas/LifeCycle'
+        usageSummary:
+          $ref: '#/components/schemas/UsageDetails'
+        experts:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        sourceHash:
+          type: string
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        service:
+          $ref: '#/components/schemas/EntityReference'
+        style:
+          $ref: '#/components/schemas/Style'
+    EntityHistory:
+      required:
+      - entityType
+      - versions
+      type: object
+      properties:
+        entityType:
+          type: string
+        versions:
+          type: array
+          items:
+            type: object
+    TagLabelMetadata:
+      type: object
+      properties:
+        recognizer:
+          $ref: '#/components/schemas/TagLabelRecognizerMetadata'
+        expiryDate:
+          type: integer
+          format: int64
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

@@ -1,0 +1,1547 @@
+openapi: 3.2.0
+info:
+  title: OpenMetadata Topics API
+  description: Common types and API definition for OpenMetadata
+  contact:
+    name: OpenMetadata
+    url: https://open-metadata.org
+    email: openmetadata-dev@googlegroups.com
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+  version: 2.0.5
+servers:
+- url: /api
+  description: Current Host
+- url: http://localhost:8585/api
+  description: Endpoint URL
+security:
+- BearerAuth: []
+tags:
+- name: Topics
+  description: A `Topic` is a feed or an event stream in a `Messaging Service` into which publishers publish messages and consumed by consumers.
+paths:
+  /v1/topics/{id}/followers:
+    put:
+      tags:
+      - Topics
+      summary: Add a follower
+      description: Add a user identified by `userId` as followed of this topic
+      operationId: addFollower_14
+      parameters:
+      - name: id
+        in: path
+        description: Id of the topic
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        description: Id of the user to be added as follower
+        content:
+          application/json:
+            schema:
+              type: string
+              format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeEvent'
+        '404':
+          description: Topic for instance {id} is not found
+  /v1/topics/{id}/sampleData:
+    get:
+      tags:
+      - Topics
+      summary: Get sample data
+      description: Get sample data from the topic.
+      operationId: getSampleData_4
+      parameters:
+      - name: id
+        in: path
+        description: Id of the topic
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Successfully obtained the Topic
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Topic'
+    put:
+      tags:
+      - Topics
+      summary: Add sample data
+      description: Add sample data to the topic.
+      operationId: addSampleData_4
+      parameters:
+      - name: id
+        in: path
+        description: Id of the topic
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TopicSampleData'
+      responses:
+        '200':
+          description: The topic
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Topic'
+    delete:
+      tags:
+      - Topics
+      summary: Delete sample data
+      description: Delete sample data from the topic.
+      operationId: deleteSampleData_3
+      parameters:
+      - name: id
+        in: path
+        description: Id of the topic
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Successfully deleted sample data from the Topic
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Topic'
+  /v1/topics/bulk:
+    put:
+      tags:
+      - Topics
+      summary: Bulk create or update topics
+      description: Create or update multiple topics in a single operation. Returns a BulkOperationResult with success/failure details for each topic.
+      operationId: bulkCreateOrUpdateTopics
+      parameters:
+      - name: overrideMetadata
+        in: query
+        description: When true, allows the bulk update to overwrite user-curated fields (description, displayName, owners, tags) that bot-driven updates normally preserve, and disables the sourceHash fast-path so unchanged entities are re-evaluated. Defaults to false.
+        schema:
+          type: boolean
+          default: false
+      - name: async
+        in: query
+        schema:
+          type: boolean
+          default: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/CreateTopic'
+      responses:
+        '200':
+          description: Bulk operation results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulkOperationResult'
+        '202':
+          description: Bulk operation accepted for async processing
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulkOperationResult'
+        '400':
+          description: Bad request
+  /v1/topics:
+    get:
+      tags:
+      - Topics
+      summary: List topics
+      description: Get a list of topics, optionally filtered by `service` it belongs to. Use `fields` parameter to get only necessary fields. Use cursor-based pagination to limit the number entries in the list using `limit` and `before` or `after` query params.
+      operationId: listTopics
+      parameters:
+      - name: fields
+        in: query
+        description: Fields requested in the returned resource
+        schema:
+          type: string
+          example: owners,followers,tags,extension,domains,dataProducts,sourceHash
+      - name: service
+        in: query
+        description: Filter topics by service name
+        schema:
+          type: string
+          example: kafkaWestCoast
+      - name: limit
+        in: query
+        description: Limit the number topics returned. (1 to 1000000, default = 10)
+        schema:
+          maximum: 1000000
+          minimum: 0
+          type: integer
+          format: int32
+          default: 10
+      - name: before
+        in: query
+        description: Returns list of topics before this cursor
+        schema:
+          type: string
+      - name: after
+        in: query
+        description: Returns list of topics after this cursor
+        schema:
+          type: string
+      - name: include
+        in: query
+        description: Include all, deleted, or non-deleted entities.
+        schema:
+          type: string
+          default: non-deleted
+          enum:
+          - all
+          - deleted
+          - non-deleted
+      responses:
+        '200':
+          description: List of topics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TopicList'
+    put:
+      tags:
+      - Topics
+      summary: Update topic
+      description: Create a topic, it it does not exist or update an existing topic.
+      operationId: createOrUpdateTopic
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTopic'
+      responses:
+        '200':
+          description: 'The updated topic '
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Topic'
+    post:
+      tags:
+      - Topics
+      summary: Create a topic
+      description: Create a topic under an existing `service`.
+      operationId: createTopic
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTopic'
+      responses:
+        '200':
+          description: The topic
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Topic'
+        '400':
+          description: Bad request
+  /v1/topics/name/{fqn}:
+    get:
+      tags:
+      - Topics
+      summary: Get a topic by fully qualified name
+      description: Get a topic by fully qualified name.
+      operationId: getTopicByFQN
+      parameters:
+      - name: fqn
+        in: path
+        description: Fully qualified name of the topic
+        required: true
+        schema:
+          type: string
+      - name: fields
+        in: query
+        description: Fields requested in the returned resource
+        schema:
+          type: string
+          example: owners,followers,tags,extension,domains,dataProducts,sourceHash
+      - name: include
+        in: query
+        description: Include all, deleted, or non-deleted entities.
+        schema:
+          type: string
+          default: non-deleted
+          enum:
+          - all
+          - deleted
+          - non-deleted
+      - name: includeRelations
+        in: query
+        description: 'Per-relation include control. Format: field:value,field2:value2. Example: owners:non-deleted,followers:all. Valid values: all, deleted, non-deleted. If not specified for a field, uses the entity''s include value.'
+        schema:
+          type: string
+          example: owners:non-deleted,followers:all
+      responses:
+        '200':
+          description: The topic
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Topic'
+        '404':
+          description: Topic for instance {fqn} is not found
+    delete:
+      tags:
+      - Topics
+      summary: Delete a topic by fully qualified name
+      description: Delete a topic by `fullyQualifiedName`.
+      operationId: deleteTopicByFQN
+      parameters:
+      - name: hardDelete
+        in: query
+        description: Hard delete the entity. (Default = `false`)
+        schema:
+          type: boolean
+          default: false
+      - name: fqn
+        in: path
+        description: Fully qualified name of the topic
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Topic for instance {fqn} is not found
+    patch:
+      tags:
+      - Topics
+      summary: Update a topic using name
+      description: Update an existing topic using JsonPatch.
+      externalDocs:
+        description: JsonPatch RFC
+        url: https://tools.ietf.org/html/rfc6902
+      operationId: patchTopic
+      parameters:
+      - name: fqn
+        in: path
+        description: Name of the topic
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: JsonPatch with array of operations
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/JsonPatch'
+            example: '[{op:remove, path:/a},{op:add, path: /b, value: val}]'
+      responses:
+        default:
+          description: default response
+          content:
+            application/json: {}
+  /v1/topics/{id}:
+    get:
+      tags:
+      - Topics
+      summary: Get a topic by id
+      description: Get a topic by `id`.
+      operationId: get_7
+      parameters:
+      - name: id
+        in: path
+        description: Id of the topic
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: fields
+        in: query
+        description: Fields requested in the returned resource
+        schema:
+          type: string
+          example: owners,followers,tags,extension,domains,dataProducts,sourceHash
+      - name: include
+        in: query
+        description: Include all, deleted, or non-deleted entities.
+        schema:
+          type: string
+          default: non-deleted
+          enum:
+          - all
+          - deleted
+          - non-deleted
+      - name: includeRelations
+        in: query
+        description: 'Per-relation include control. Format: field:value,field2:value2. Example: owners:non-deleted,followers:all. Valid values: all, deleted, non-deleted. If not specified for a field, uses the entity''s include value.'
+        schema:
+          type: string
+          example: owners:non-deleted,followers:all
+      responses:
+        '200':
+          description: The topic
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Topic'
+        '404':
+          description: Topic for instance {id} is not found
+    delete:
+      tags:
+      - Topics
+      summary: Delete a topic by id
+      description: Delete a topic by `id`.
+      operationId: deleteTopic
+      parameters:
+      - name: hardDelete
+        in: query
+        description: Hard delete the entity. (Default = `false`)
+        schema:
+          type: boolean
+          default: false
+      - name: id
+        in: path
+        description: Id of the topic
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Topic for instance {id} is not found
+    patch:
+      tags:
+      - Topics
+      summary: Update a topic
+      description: Update an existing topic using JsonPatch.
+      externalDocs:
+        description: JsonPatch RFC
+        url: https://tools.ietf.org/html/rfc6902
+      operationId: patchTopic_1
+      parameters:
+      - name: id
+        in: path
+        description: Id of the topic
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        description: JsonPatch with array of operations
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/JsonPatch'
+            example: '[{op:remove, path:/a},{op:add, path: /b, value: val}]'
+      responses:
+        default:
+          description: default response
+          content:
+            application/json: {}
+  /v1/topics/async/{id}:
+    delete:
+      tags:
+      - Topics
+      summary: Asynchronously delete a topic by id
+      description: Asynchronously delete a topic by `id`.
+      operationId: deleteTopicAsync
+      parameters:
+      - name: hardDelete
+        in: query
+        description: Hard delete the entity. (Default = `false`)
+        schema:
+          type: boolean
+          default: false
+      - name: id
+        in: path
+        description: Id of the topic
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Topic for instance {id} is not found
+  /v1/topics/{id}/followers/{userId}:
+    delete:
+      tags:
+      - Topics
+      summary: Remove a follower
+      description: Remove the user identified `userId` as a follower of the topic.
+      operationId: deleteFollower_30
+      parameters:
+      - name: id
+        in: path
+        description: Id of the topic
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: userId
+        in: path
+        description: Id of the user being removed as follower
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeEvent'
+  /v1/topics/deleteStale:
+    delete:
+      tags:
+      - Topics
+      summary: Delete stale topics within a scope
+      description: Delete entities within the given scope (service, database, or databaseSchema) that the ingestion connector did not report in the current run. The connector sends the set of FQNs it saw; entities in scope not in that set are considered stale. By default the deletion is soft; pass hardDelete=true to hard-delete instead. Returns a BulkOperationResult of deleted (or, for dryRun, would-be-deleted) entities.
+      operationId: bulkDeleteStaleTopics
+      requestBody:
+        description: Scope to reconcile and the FQNs the connector saw this run. Carried as a request body on DELETE; a topology that strips it is rejected with 400 rather than being read as an empty seen-set.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkDeleteStaleRequest'
+        required: true
+      responses:
+        '200':
+          description: Stale deletion results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulkOperationResult'
+        '400':
+          description: Bad request
+  /v1/topics/{id}/context:
+    get:
+      tags:
+      - Topics
+      summary: Get the AI context for an entity by id
+      description: Retrieve the LLM-ready AI Context (Context Profile) for the entity — its attached business knowledge (glossary terms, Context Center articles, applied metrics), type-specific structural context, and depth-1 lineage — as an OKF-style markdown document (default) or the structured AIContext JSON (`?format=json`).
+      operationId: getEntityAiContextById_72
+      parameters:
+      - name: id
+        in: path
+        description: Entity id
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: format
+        in: query
+        description: 'Output format: markdown (default) or json'
+        schema:
+          type: string
+          default: markdown
+      - name: query
+        in: query
+        description: Optional question; truncated knowledge items are excerpted to the passage most relevant to it instead of the positional lead
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Entity AI context
+        '404':
+          description: Entity not found
+  /v1/topics/name/{fqn}/context:
+    get:
+      tags:
+      - Topics
+      summary: Get the AI context for an entity by fully qualified name
+      description: Retrieve the LLM-ready AI Context (Context Profile) for the entity by FQN — see getEntityAiContextById. Returns an OKF-style markdown document by default, or the structured AIContext JSON with `?format=json`.
+      operationId: getEntityAiContextByName_72
+      parameters:
+      - name: fqn
+        in: path
+        description: Entity fully qualified name
+        required: true
+        schema:
+          type: string
+      - name: format
+        in: query
+        description: 'Output format: markdown (default) or json'
+        schema:
+          type: string
+          default: markdown
+      - name: query
+        in: query
+        description: Optional question; truncated knowledge items are excerpted to the passage most relevant to it instead of the positional lead
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Entity AI context
+        '404':
+          description: Entity not found
+  /v1/topics/{id}/versions/{version}:
+    get:
+      tags:
+      - Topics
+      summary: Get a version of the topic
+      description: Get a version of the topic by given `id`
+      operationId: getSpecificTopicVersion
+      parameters:
+      - name: id
+        in: path
+        description: Id of the topic
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: version
+        in: path
+        description: Topic version number in the form `major`.`minor`
+        required: true
+        schema:
+          type: string
+          example: 0.1 or 1.1
+      responses:
+        '200':
+          description: topic
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Topic'
+        '404':
+          description: Topic for instance {id} and version {version} is not found
+  /v1/topics/history:
+    get:
+      tags:
+      - Topics
+      summary: List all entity versions within a time range
+      description: Get a paginated list of all entity versions within a given time range specified by `startTs` and `endTs` in milliseconds since epoch.
+      operationId: listAllEntityVersionsByTimestamp_72
+      parameters:
+      - name: startTs
+        in: query
+        description: Start timestamp in milliseconds since epoch
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: endTs
+        in: query
+        description: End timestamp in milliseconds since epoch
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: limit
+        in: query
+        description: Limit the number of entity returned (1 to 1000000, default = 10)
+        schema:
+          maximum: 500
+          minimum: 1
+          type: integer
+          format: int32
+          default: 10
+      - name: before
+        in: query
+        description: Returns list of entity versions before this cursor
+        schema:
+          type: string
+      - name: after
+        in: query
+        description: Returns list of entity versions after this cursor
+        schema:
+          type: string
+      responses:
+        '200':
+          description: List of all versions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResultList'
+  /v1/topics/{id}/versions:
+    get:
+      tags:
+      - Topics
+      summary: List topic versions
+      description: Get a list of all the versions of a topic identified by `id`
+      operationId: listAllTopicVersion
+      parameters:
+      - name: id
+        in: path
+        description: Id of the topic
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: List of topic versions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityHistory'
+  /v1/topics/restore:
+    put:
+      tags:
+      - Topics
+      summary: Restore a soft deleted topic
+      description: Restore a soft deleted topic.
+      operationId: restore_49
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RestoreEntity'
+      responses:
+        '200':
+          description: 'Successfully restored the Topic. '
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Topic'
+  /v1/topics/{id}/vote:
+    put:
+      tags:
+      - Topics
+      summary: Update Vote for a Entity
+      description: Update vote for a Entity
+      operationId: updateVoteForEntity_17
+      parameters:
+      - name: id
+        in: path
+        description: Id of the Entity
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VoteRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeEvent'
+        '404':
+          description: model for instance {id} is not found
+components:
+  schemas:
+    TagLabel:
+      required:
+      - labelType
+      - source
+      - state
+      - tagFQN
+      type: object
+      properties:
+        tagFQN:
+          type: string
+        name:
+          type: string
+        displayName:
+          type: string
+        description:
+          type: string
+        style:
+          $ref: '#/components/schemas/Style'
+        source:
+          type: string
+          enum:
+          - Classification
+          - Glossary
+        labelType:
+          type: string
+          enum:
+          - Manual
+          - Propagated
+          - Automated
+          - Derived
+          - Generated
+        state:
+          type: string
+          enum:
+          - Suggested
+          - Confirmed
+        href:
+          type: string
+          format: uri
+        reason:
+          type: string
+        appliedAt:
+          type: string
+          format: date-time
+        appliedBy:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/TagLabelMetadata'
+    EntityReference:
+      required:
+      - id
+      - type
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+        name:
+          type: string
+        fullyQualifiedName:
+          type: string
+        description:
+          type: string
+        displayName:
+          type: string
+        deleted:
+          type: boolean
+        inherited:
+          type: boolean
+        href:
+          type: string
+          format: uri
+    RestoreEntity:
+      required:
+      - id
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+    TagLabelRecognizerMetadata:
+      required:
+      - recognizerId
+      - recognizerName
+      - score
+      type: object
+      properties:
+        recognizerId:
+          type: string
+          format: uuid
+        recognizerName:
+          type: string
+        score:
+          type: number
+          format: double
+        target:
+          type: string
+          enum:
+          - content
+          - column_name
+        patterns:
+          type: array
+          items:
+            $ref: '#/components/schemas/PatternMatch'
+    EntityError:
+      type: object
+      properties:
+        message:
+          type: string
+        entity:
+          type: object
+    BulkDeleteStaleRequest:
+      required:
+      - scopeEntityType
+      - scopeFqn
+      - seenFqns
+      type: object
+      properties:
+        scopeFqn:
+          type: string
+        scopeEntityType:
+          type: string
+        seenFqns:
+          type: array
+          items:
+            type: string
+        dryRun:
+          type: boolean
+        hardDelete:
+          type: boolean
+        recursive:
+          type: boolean
+    CoverImage:
+      type: object
+      properties:
+        url:
+          type: string
+        position:
+          type: string
+    AccessDetails:
+      required:
+      - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: integer
+          format: int64
+        accessedBy:
+          $ref: '#/components/schemas/EntityReference'
+        accessedByAProcess:
+          type: string
+    Paging:
+      required:
+      - total
+      type: object
+      properties:
+        before:
+          type: string
+        after:
+          type: string
+        offset:
+          type: integer
+          format: int32
+        limit:
+          type: integer
+          format: int32
+        total:
+          type: integer
+          format: int32
+    TopicList:
+      required:
+      - data
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Topic'
+        paging:
+          $ref: '#/components/schemas/Paging'
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityError'
+        warningsCount:
+          type: integer
+          format: int32
+        warnings:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityError'
+    BulkOperationResult:
+      type: object
+      properties:
+        dryRun:
+          type: boolean
+        status:
+          type: string
+          enum:
+          - success
+          - failure
+          - aborted
+          - partialSuccess
+          - running
+        abortReason:
+          type: string
+        numberOfRowsProcessed:
+          minimum: 0
+          type: integer
+          format: int32
+        numberOfRowsPassed:
+          minimum: 0
+          type: integer
+          format: int32
+        numberOfRowsFailed:
+          minimum: 0
+          type: integer
+          format: int32
+        successRequest:
+          type: array
+          items:
+            $ref: '#/components/schemas/BulkResponse'
+        failedRequest:
+          type: array
+          items:
+            $ref: '#/components/schemas/BulkResponse'
+    ChangeEvent:
+      required:
+      - entityId
+      - entityType
+      - eventType
+      - id
+      - timestamp
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        eventType:
+          type: string
+          enum:
+          - entityCreated
+          - entityUpdated
+          - entityFieldsChanged
+          - entityNoChange
+          - entitySoftDeleted
+          - entityDeleted
+          - entityRestored
+          - threadCreated
+          - threadUpdated
+          - postCreated
+          - postUpdated
+          - taskCreated
+          - taskUpdated
+          - taskResolved
+          - taskClosed
+          - logicalTestCaseAdded
+          - suggestionCreated
+          - suggestionUpdated
+          - suggestionAccepted
+          - suggestionRejected
+          - suggestionDeleted
+          - userLogin
+          - userLogout
+          - entityLineageAdded
+          - entityLineageDeleted
+          - entityLineageUpdated
+        entityType:
+          type: string
+        entityId:
+          type: string
+          format: uuid
+        domains:
+          type: array
+          items:
+            type: string
+            format: uuid
+        entityFullyQualifiedName:
+          type: string
+        previousVersion:
+          type: number
+          format: double
+        currentVersion:
+          type: number
+          format: double
+        userName:
+          type: string
+        impersonatedBy:
+          type: string
+        timestamp:
+          type: integer
+          format: int64
+        changeDescription:
+          $ref: '#/components/schemas/ChangeDescription'
+        incrementalChangeDescription:
+          $ref: '#/components/schemas/ChangeDescription'
+        recursive:
+          type: boolean
+        entity:
+          type: object
+    ChangeSummaryMap:
+      type: object
+    Field:
+      required:
+      - dataType
+      - name
+      type: object
+      properties:
+        name:
+          maxLength: 128
+          minLength: 1
+          pattern: ^((?!::)[^>"\x00-\x1f])*$
+          type: string
+        displayName:
+          type: string
+        dataType:
+          type: string
+          enum:
+          - RECORD
+          - 'NULL'
+          - BOOLEAN
+          - INT
+          - LONG
+          - BYTES
+          - FLOAT
+          - DOUBLE
+          - TIMESTAMP
+          - TIMESTAMPZ
+          - TIME
+          - DATE
+          - STRING
+          - ARRAY
+          - MAP
+          - ENUM
+          - UNION
+          - FIXED
+          - ERROR
+          - UNKNOWN
+        dataTypeDisplay:
+          type: string
+        description:
+          type: string
+        fullyQualifiedName:
+          maxLength: 3072
+          minLength: 1
+          type: string
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/TagLabel'
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/Field'
+    LifeCycle:
+      type: object
+      properties:
+        created:
+          $ref: '#/components/schemas/AccessDetails'
+        updated:
+          $ref: '#/components/schemas/AccessDetails'
+        accessed:
+          $ref: '#/components/schemas/AccessDetails'
+    JsonPatch:
+      type: object
+    Topic:
+      required:
+      - id
+      - name
+      - partitions
+      - service
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          maxLength: 256
+          minLength: 1
+          pattern: ^((?!::)[^>"\x00-\x1f])*$
+          type: string
+        fullyQualifiedName:
+          maxLength: 3072
+          minLength: 1
+          type: string
+        displayName:
+          type: string
+        description:
+          type: string
+        version:
+          type: number
+          format: double
+        updatedAt:
+          type: integer
+          format: int64
+        updatedBy:
+          type: string
+        impersonatedBy:
+          type: string
+        service:
+          $ref: '#/components/schemas/EntityReference'
+        serviceType:
+          type: string
+          enum:
+          - Kafka
+          - Redpanda
+          - Kinesis
+          - PubSub
+          - CustomMessaging
+        messageSchema:
+          $ref: '#/components/schemas/MessageSchema'
+        partitions:
+          minimum: 1
+          type: integer
+          format: int32
+        cleanupPolicies:
+          type: array
+          items:
+            type: string
+            enum:
+            - delete
+            - compact
+        retentionTime:
+          type: number
+          format: double
+        replicationFactor:
+          type: integer
+          format: int32
+        maximumMessageSize:
+          type: integer
+          format: int32
+        minimumInSyncReplicas:
+          type: integer
+          format: int32
+        retentionSize:
+          type: number
+          format: double
+        topicConfig:
+          $ref: '#/components/schemas/TopicConfig'
+        sampleData:
+          $ref: '#/components/schemas/TopicSampleData'
+        owners:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        followers:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/TagLabel'
+        href:
+          type: string
+          format: uri
+        changeDescription:
+          $ref: '#/components/schemas/ChangeDescription'
+        incrementalChangeDescription:
+          $ref: '#/components/schemas/ChangeDescription'
+        deleted:
+          type: boolean
+        extension:
+          type: object
+        sourceUrl:
+          type: string
+        domains:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        dataProducts:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        dataContract:
+          $ref: '#/components/schemas/EntityReference'
+        votes:
+          $ref: '#/components/schemas/Votes'
+        lifeCycle:
+          $ref: '#/components/schemas/LifeCycle'
+        certification:
+          $ref: '#/components/schemas/AssetCertification'
+        sourceHash:
+          maxLength: 32
+          minLength: 1
+          type: string
+        entityStatus:
+          type: string
+          enum:
+          - Draft
+          - In Review
+          - Approved
+          - Archived
+          - Deprecated
+          - Rejected
+          - Unprocessed
+        reviewers:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        usageSummary:
+          $ref: '#/components/schemas/UsageDetails'
+        experts:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        provider:
+          type: string
+          enum:
+          - system
+          - user
+          - automation
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        style:
+          $ref: '#/components/schemas/Style'
+    ChangeDescription:
+      type: object
+      properties:
+        fieldsAdded:
+          type: array
+          items:
+            $ref: '#/components/schemas/FieldChange'
+        fieldsUpdated:
+          type: array
+          items:
+            $ref: '#/components/schemas/FieldChange'
+        fieldsDeleted:
+          type: array
+          items:
+            $ref: '#/components/schemas/FieldChange'
+        previousVersion:
+          type: number
+          format: double
+        changeSummary:
+          $ref: '#/components/schemas/ChangeSummaryMap'
+    ResultList:
+      required:
+      - data
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+        paging:
+          $ref: '#/components/schemas/Paging'
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityError'
+        warningsCount:
+          type: integer
+          format: int32
+        warnings:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityError'
+    BulkResponse:
+      type: object
+      properties:
+        request:
+          type: object
+        message:
+          type: string
+        status:
+          type: integer
+          format: int32
+        hasSideEffects:
+          type: boolean
+    TopicSampleData:
+      type: object
+      properties:
+        messages:
+          type: array
+          items:
+            type: string
+    MessageSchema:
+      type: object
+      properties:
+        schemaText:
+          type: string
+        schemaType:
+          type: string
+          enum:
+          - Avro
+          - Protobuf
+          - JSON
+          - Other
+          - None
+        schemaFields:
+          type: array
+          items:
+            $ref: '#/components/schemas/Field'
+    UsageStats:
+      required:
+      - count
+      type: object
+      properties:
+        count:
+          minimum: 0
+          type: integer
+          format: int32
+        percentileRank:
+          type: number
+          format: double
+    FieldChange:
+      type: object
+      properties:
+        name:
+          type: string
+        oldValue:
+          type: object
+        newValue:
+          type: object
+    VoteRequest:
+      type: object
+      properties:
+        updatedVoteType:
+          type: string
+          enum:
+          - votedUp
+          - votedDown
+          - unVoted
+    UsageDetails:
+      required:
+      - dailyStats
+      - date
+      type: object
+      properties:
+        dailyStats:
+          $ref: '#/components/schemas/UsageStats'
+        weeklyStats:
+          $ref: '#/components/schemas/UsageStats'
+        monthlyStats:
+          $ref: '#/components/schemas/UsageStats'
+        date:
+          type: string
+    CreateTopic:
+      required:
+      - name
+      - partitions
+      - service
+      type: object
+      properties:
+        name:
+          maxLength: 256
+          minLength: 1
+          pattern: ^((?!::)[^>"\x00-\x1f])*$
+          type: string
+        displayName:
+          type: string
+        description:
+          type: string
+        service:
+          maxLength: 3072
+          minLength: 1
+          type: string
+        messageSchema:
+          $ref: '#/components/schemas/MessageSchema'
+        partitions:
+          minimum: 1
+          type: integer
+          format: int32
+        cleanupPolicies:
+          type: array
+          items:
+            type: string
+            enum:
+            - delete
+            - compact
+        replicationFactor:
+          type: integer
+          format: int32
+        retentionTime:
+          type: number
+          format: double
+        maximumMessageSize:
+          type: integer
+          format: int32
+        minimumInSyncReplicas:
+          type: integer
+          format: int32
+        retentionSize:
+          type: number
+          format: double
+        topicConfig:
+          $ref: '#/components/schemas/TopicConfig'
+        owners:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/TagLabel'
+        extension:
+          type: object
+        sourceUrl:
+          type: string
+        domains:
+          type: array
+          items:
+            type: string
+        dataProducts:
+          type: array
+          items:
+            type: string
+        lifeCycle:
+          $ref: '#/components/schemas/LifeCycle'
+        sourceHash:
+          maxLength: 32
+          minLength: 1
+          type: string
+        reviewers:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+    PatternMatch:
+      required:
+      - name
+      - score
+      type: object
+      properties:
+        name:
+          type: string
+        regex:
+          type: string
+        score:
+          type: number
+          format: double
+    Style:
+      type: object
+      properties:
+        color:
+          type: string
+        iconURL:
+          type: string
+        coverImage:
+          $ref: '#/components/schemas/CoverImage'
+    TopicConfig:
+      type: object
+    Votes:
+      type: object
+      properties:
+        upVotes:
+          type: integer
+          format: int32
+        downVotes:
+          type: integer
+          format: int32
+        upVoters:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        downVoters:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+    AssetCertification:
+      required:
+      - appliedDate
+      - expiryDate
+      - tagLabel
+      type: object
+      properties:
+        tagLabel:
+          $ref: '#/components/schemas/TagLabel'
+        appliedDate:
+          type: integer
+          format: int64
+        expiryDate:
+          type: integer
+          format: int64
+    EntityHistory:
+      required:
+      - entityType
+      - versions
+      type: object
+      properties:
+        entityType:
+          type: string
+        versions:
+          type: array
+          items:
+            type: object
+    TagLabelMetadata:
+      type: object
+      properties:
+        recognizer:
+          $ref: '#/components/schemas/TagLabelRecognizerMetadata'
+        expiryDate:
+          type: integer
+          format: int64
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

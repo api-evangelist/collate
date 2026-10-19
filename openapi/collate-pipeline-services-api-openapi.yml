@@ -1,0 +1,1337 @@
+openapi: 3.2.0
+info:
+  title: OpenMetadata Pipeline Services API
+  description: Common types and API definition for OpenMetadata
+  contact:
+    name: OpenMetadata
+    url: https://open-metadata.org
+    email: openmetadata-dev@googlegroups.com
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+  version: 2.0.5
+servers:
+- url: /api
+  description: Current Host
+- url: http://localhost:8585/api
+  description: Endpoint URL
+security:
+- BearerAuth: []
+tags:
+- name: Pipeline Services
+paths:
+  /v1/services/pipelineServices/{id}/followers:
+    put:
+      tags:
+      - Pipeline Services
+      summary: Add a follower
+      description: Add a user identified by `userId` as followed of this pipeline service
+      operationId: addFollowerToDatabaseService_2
+      parameters:
+      - name: id
+        in: path
+        description: Id of the Pipeline Service
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        description: Id of the user to be added as follower
+        content:
+          application/json:
+            schema:
+              type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeEvent'
+        '404':
+          description: Pipeline Service for instance {id} is not found
+  /v1/services/pipelineServices/{id}/testConnectionResult:
+    put:
+      tags:
+      - Pipeline Services
+      summary: Add test connection result
+      description: Add test connection result to the service.
+      operationId: addTestConnectionResult_9
+      parameters:
+      - name: id
+        in: path
+        description: Id of the service
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TestConnectionResult'
+      responses:
+        '200':
+          description: Successfully updated the service
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineService'
+  /v1/services/pipelineServices:
+    get:
+      tags:
+      - Pipeline Services
+      summary: List pipeline services
+      description: Get a list of pipeline services. Use cursor-based pagination to limit the number entries in the list using `limit` and `before` or `after` query params.
+      operationId: listPipelineService
+      parameters:
+      - name: fields
+        in: query
+        description: Fields requested in the returned resource
+        schema:
+          type: string
+          example: pipelines,owners,domains,followers
+      - name: domain
+        in: query
+        description: Filter services by domain
+        schema:
+          type: string
+          example: Marketing
+      - name: limit
+        in: query
+        description: Limit number services returned. (1 to 1000000, default 10)
+        schema:
+          maximum: 1000000
+          minimum: 0
+          type: integer
+          format: int32
+          default: 10
+      - name: before
+        in: query
+        description: Returns list of services before this cursor
+        schema:
+          type: string
+      - name: after
+        in: query
+        description: Returns list of services after this cursor
+        schema:
+          type: string
+      - name: include
+        in: query
+        description: Include all, deleted, or non-deleted entities.
+        schema:
+          type: string
+          default: non-deleted
+          enum:
+          - all
+          - deleted
+          - non-deleted
+      responses:
+        '200':
+          description: List of pipeline services
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineServiceList'
+    put:
+      tags:
+      - Pipeline Services
+      summary: Update pipeline service
+      description: Create a new pipeline service or update an existing pipeline service identified by `id`.
+      operationId: createOrUpdatePipelineService
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePipelineService'
+      responses:
+        '200':
+          description: Pipeline service instance
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineService'
+        '400':
+          description: Bad request
+    post:
+      tags:
+      - Pipeline Services
+      summary: Create a pipeline service
+      description: Create a new pipeline service.
+      operationId: createPipelineService
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePipelineService'
+      responses:
+        '200':
+          description: Pipeline service instance
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineService'
+        '400':
+          description: Bad request
+  /v1/services/pipelineServices/name/{fqn}:
+    get:
+      tags:
+      - Pipeline Services
+      summary: Get pipeline service by fully qualified name
+      description: Get a pipeline service by the service `fullyQualifiedName`.
+      operationId: getPipelineServiceByFQN
+      parameters:
+      - name: fqn
+        in: path
+        description: Fully qualified name of the pipeline service
+        required: true
+        schema:
+          type: string
+      - name: fields
+        in: query
+        description: Fields requested in the returned resource
+        schema:
+          type: string
+          example: pipelines,owners,domains,followers
+      - name: include
+        in: query
+        description: Include all, deleted, or non-deleted entities.
+        schema:
+          type: string
+          default: non-deleted
+          enum:
+          - all
+          - deleted
+          - non-deleted
+      - name: includeRelations
+        in: query
+        description: 'Per-relation include control. Format: field:value,field2:value2. Example: owners:non-deleted,followers:all. Valid values: all, deleted, non-deleted. If not specified for a field, uses the entity''s include value.'
+        schema:
+          type: string
+          example: owners:non-deleted,followers:all
+      responses:
+        '200':
+          description: Pipeline service instance
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineService'
+        '404':
+          description: Pipeline service for instance {fqn} is not found
+    delete:
+      tags:
+      - Pipeline Services
+      summary: Delete a pipeline service by fully qualified name
+      description: Delete a pipeline services by `fullyQualifiedName`. If pipelines (and tasks) belong to the service, it can't be deleted.
+      operationId: deletePipelineServiceByName
+      parameters:
+      - name: recursive
+        in: query
+        description: Recursively delete this entity and it's children. (Default `false`)
+        schema:
+          type: boolean
+          default: false
+      - name: hardDelete
+        in: query
+        description: Hard delete the entity. (Default = `false`)
+        schema:
+          type: boolean
+          default: false
+      - name: fqn
+        in: path
+        description: Fully qualified name of the pipeline service
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Pipeline service for instance {fqn} is not found
+    patch:
+      tags:
+      - Pipeline Services
+      summary: Update a pipeline service using name
+      description: Update an existing pipeline service using JsonPatch.
+      externalDocs:
+        description: JsonPatch RFC
+        url: https://tools.ietf.org/html/rfc6902
+      operationId: patchPipelineService
+      parameters:
+      - name: fqn
+        in: path
+        description: Name of the pipeline service
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: JsonPatch with array of operations
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/JsonPatch'
+            example: '[{op:remove, path:/a},{op:add, path: /b, value: val}]'
+      responses:
+        default:
+          description: default response
+          content:
+            application/json: {}
+  /v1/services/pipelineServices/{id}:
+    get:
+      tags:
+      - Pipeline Services
+      summary: Get a pipeline service by Id
+      description: Get a pipeline service by `Id`.
+      operationId: getPipelineServiceByID
+      parameters:
+      - name: id
+        in: path
+        description: Id of the pipeline service
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: fields
+        in: query
+        description: Fields requested in the returned resource
+        schema:
+          type: string
+          example: pipelines,owners,domains,followers
+      - name: include
+        in: query
+        description: Include all, deleted, or non-deleted entities.
+        schema:
+          type: string
+          default: non-deleted
+          enum:
+          - all
+          - deleted
+          - non-deleted
+      - name: includeRelations
+        in: query
+        description: 'Per-relation include control. Format: field:value,field2:value2. Example: owners:non-deleted,followers:all. Valid values: all, deleted, non-deleted. If not specified for a field, uses the entity''s include value.'
+        schema:
+          type: string
+          example: owners:non-deleted,followers:all
+      responses:
+        '200':
+          description: Pipeline service instance
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineService'
+        '404':
+          description: Pipeline service for instance {id} is not found
+    delete:
+      tags:
+      - Pipeline Services
+      summary: Delete a pipeline service by Id
+      description: Delete a pipeline services. If pipelines (and tasks) belong to the service, it can't be deleted.
+      operationId: deletePipelineService
+      parameters:
+      - name: recursive
+        in: query
+        description: Recursively delete this entity and it's children. (Default `false`)
+        schema:
+          type: boolean
+          default: false
+      - name: hardDelete
+        in: query
+        description: Hard delete the entity. (Default = `false`)
+        schema:
+          type: boolean
+          default: false
+      - name: id
+        in: path
+        description: Id of the pipeline service
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Pipeline service for instance {id} is not found
+    patch:
+      tags:
+      - Pipeline Services
+      summary: Update a pipeline service
+      description: Update an existing pipeline service using JsonPatch.
+      externalDocs:
+        description: JsonPatch RFC
+        url: https://tools.ietf.org/html/rfc6902
+      operationId: patchPipelineService_1
+      parameters:
+      - name: id
+        in: path
+        description: Id of the pipeline service
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        description: JsonPatch with array of operations
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/JsonPatch'
+            example: '[{op:remove, path:/a},{op:add, path: /b, value: val}]'
+      responses:
+        default:
+          description: default response
+          content:
+            application/json: {}
+  /v1/services/pipelineServices/async/{id}:
+    delete:
+      tags:
+      - Pipeline Services
+      summary: Asynchronously delete a pipeline service by Id
+      description: Asynchronously delete a pipeline services. If pipelines (and tasks) belong to the service, it can't be deleted.
+      operationId: deletePipelineServiceAsync
+      parameters:
+      - name: recursive
+        in: query
+        description: Recursively delete this entity and it's children. (Default `false`)
+        schema:
+          type: boolean
+          default: false
+      - name: hardDelete
+        in: query
+        description: Hard delete the entity. (Default = `false`)
+        schema:
+          type: boolean
+          default: false
+      - name: id
+        in: path
+        description: Id of the pipeline service
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Pipeline service for instance {id} is not found
+  /v1/services/pipelineServices/{id}/followers/{userId}:
+    delete:
+      tags:
+      - Pipeline Services
+      summary: Remove a follower
+      description: Remove the user identified `userId` as a follower of the entity.
+      operationId: deleteFollower_25
+      parameters:
+      - name: id
+        in: path
+        description: Id of the Entity
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: userId
+        in: path
+        description: Id of the user being removed as follower
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeEvent'
+  /v1/services/pipelineServices/{id}/context:
+    get:
+      tags:
+      - Pipeline Services
+      summary: Get the AI context for an entity by id
+      description: Retrieve the LLM-ready AI Context (Context Profile) for the entity — its attached business knowledge (glossary terms, Context Center articles, applied metrics), type-specific structural context, and depth-1 lineage — as an OKF-style markdown document (default) or the structured AIContext JSON (`?format=json`).
+      operationId: getEntityAiContextById_61
+      parameters:
+      - name: id
+        in: path
+        description: Entity id
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: format
+        in: query
+        description: 'Output format: markdown (default) or json'
+        schema:
+          type: string
+          default: markdown
+      - name: query
+        in: query
+        description: Optional question; truncated knowledge items are excerpted to the passage most relevant to it instead of the positional lead
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Entity AI context
+        '404':
+          description: Entity not found
+  /v1/services/pipelineServices/name/{fqn}/context:
+    get:
+      tags:
+      - Pipeline Services
+      summary: Get the AI context for an entity by fully qualified name
+      description: Retrieve the LLM-ready AI Context (Context Profile) for the entity by FQN — see getEntityAiContextById. Returns an OKF-style markdown document by default, or the structured AIContext JSON with `?format=json`.
+      operationId: getEntityAiContextByName_61
+      parameters:
+      - name: fqn
+        in: path
+        description: Entity fully qualified name
+        required: true
+        schema:
+          type: string
+      - name: format
+        in: query
+        description: 'Output format: markdown (default) or json'
+        schema:
+          type: string
+          default: markdown
+      - name: query
+        in: query
+        description: Optional question; truncated knowledge items are excerpted to the passage most relevant to it instead of the positional lead
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Entity AI context
+        '404':
+          description: Entity not found
+  /v1/services/pipelineServices/{id}/versions/{version}:
+    get:
+      tags:
+      - Pipeline Services
+      summary: Get a version of the pipeline service
+      description: Get a version of the pipeline service by given `Id`
+      operationId: getSpecificPipelineService
+      parameters:
+      - name: id
+        in: path
+        description: Id of the pipeline service
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: version
+        in: path
+        description: pipeline service version number in the form `major`.`minor`
+        required: true
+        schema:
+          type: string
+          example: 0.1 or 1.1
+      responses:
+        '200':
+          description: pipeline service
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineService'
+        '404':
+          description: Pipeline service for instance {id} and version {version} is not found
+  /v1/services/pipelineServices/history:
+    get:
+      tags:
+      - Pipeline Services
+      summary: List all entity versions within a time range
+      description: Get a paginated list of all entity versions within a given time range specified by `startTs` and `endTs` in milliseconds since epoch.
+      operationId: listAllEntityVersionsByTimestamp_60
+      parameters:
+      - name: startTs
+        in: query
+        description: Start timestamp in milliseconds since epoch
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: endTs
+        in: query
+        description: End timestamp in milliseconds since epoch
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: limit
+        in: query
+        description: Limit the number of entity returned (1 to 1000000, default = 10)
+        schema:
+          maximum: 500
+          minimum: 1
+          type: integer
+          format: int32
+          default: 10
+      - name: before
+        in: query
+        description: Returns list of entity versions before this cursor
+        schema:
+          type: string
+      - name: after
+        in: query
+        description: Returns list of entity versions after this cursor
+        schema:
+          type: string
+      responses:
+        '200':
+          description: List of all versions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResultList'
+  /v1/services/pipelineServices/{id}/versions:
+    get:
+      tags:
+      - Pipeline Services
+      summary: List pipeline service versions
+      description: Get a list of all the versions of a pipeline service identified by `Id`
+      operationId: listAllPipelineServiceVersion
+      parameters:
+      - name: id
+        in: path
+        description: Id of the pipeline service
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: List of pipeline service versions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityHistory'
+  /v1/services/pipelineServices/restore:
+    put:
+      tags:
+      - Pipeline Services
+      summary: Restore a soft deleted pipeline service
+      description: Restore a soft deleted pipeline service.
+      operationId: restore_41
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RestoreEntity'
+      responses:
+        '200':
+          description: 'Successfully restored the PipelineService '
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineService'
+components:
+  schemas:
+    TagLabel:
+      required:
+      - labelType
+      - source
+      - state
+      - tagFQN
+      type: object
+      properties:
+        tagFQN:
+          type: string
+        name:
+          type: string
+        displayName:
+          type: string
+        description:
+          type: string
+        style:
+          $ref: '#/components/schemas/Style'
+        source:
+          type: string
+          enum:
+          - Classification
+          - Glossary
+        labelType:
+          type: string
+          enum:
+          - Manual
+          - Propagated
+          - Automated
+          - Derived
+          - Generated
+        state:
+          type: string
+          enum:
+          - Suggested
+          - Confirmed
+        href:
+          type: string
+          format: uri
+        reason:
+          type: string
+        appliedAt:
+          type: string
+          format: date-time
+        appliedBy:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/TagLabelMetadata'
+    EntityReference:
+      required:
+      - id
+      - type
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+        name:
+          type: string
+        fullyQualifiedName:
+          type: string
+        description:
+          type: string
+        displayName:
+          type: string
+        deleted:
+          type: boolean
+        inherited:
+          type: boolean
+        href:
+          type: string
+          format: uri
+    RestoreEntity:
+      required:
+      - id
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+    TagLabelRecognizerMetadata:
+      required:
+      - recognizerId
+      - recognizerName
+      - score
+      type: object
+      properties:
+        recognizerId:
+          type: string
+          format: uuid
+        recognizerName:
+          type: string
+        score:
+          type: number
+          format: double
+        target:
+          type: string
+          enum:
+          - content
+          - column_name
+        patterns:
+          type: array
+          items:
+            $ref: '#/components/schemas/PatternMatch'
+    EntityError:
+      type: object
+      properties:
+        message:
+          type: string
+        entity:
+          type: object
+    CoverImage:
+      type: object
+      properties:
+        url:
+          type: string
+        position:
+          type: string
+    Paging:
+      required:
+      - total
+      type: object
+      properties:
+        before:
+          type: string
+        after:
+          type: string
+        offset:
+          type: integer
+          format: int32
+        limit:
+          type: integer
+          format: int32
+        total:
+          type: integer
+          format: int32
+    AccessDetails:
+      required:
+      - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: integer
+          format: int64
+        accessedBy:
+          $ref: '#/components/schemas/EntityReference'
+        accessedByAProcess:
+          type: string
+    PipelineService:
+      required:
+      - id
+      - name
+      - serviceType
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          maxLength: 256
+          minLength: 1
+          pattern: ^((?!::)[^>"\x00-\x1f])*$
+          type: string
+        fullyQualifiedName:
+          maxLength: 3072
+          minLength: 1
+          type: string
+        serviceType:
+          type: string
+          enum:
+          - Airflow
+          - GluePipeline
+          - KinesisFirehose
+          - Airbyte
+          - Fivetran
+          - Flink
+          - Dagster
+          - Nifi
+          - DomoPipeline
+          - CustomPipeline
+          - DatabricksPipeline
+          - Spline
+          - Spark
+          - OpenLineage
+          - Prefect
+          - KafkaConnect
+          - DBTCloud
+          - Matillion
+          - Stitch
+          - DataFactory
+          - Wherescape
+          - SSIS
+          - Snowplow
+          - Mulesoft
+          - MicrosoftFabricPipeline
+          - SapBw4HanaPipeline
+        description:
+          type: string
+        displayName:
+          type: string
+        version:
+          type: number
+          format: double
+        updatedAt:
+          type: integer
+          format: int64
+        updatedBy:
+          type: string
+        impersonatedBy:
+          type: string
+        testConnectionResult:
+          $ref: '#/components/schemas/TestConnectionResult'
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/TagLabel'
+        style:
+          $ref: '#/components/schemas/Style'
+        pipelines:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        connection:
+          $ref: '#/components/schemas/PipelineConnection'
+        owners:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        href:
+          type: string
+          format: uri
+        changeDescription:
+          $ref: '#/components/schemas/ChangeDescription'
+        incrementalChangeDescription:
+          $ref: '#/components/schemas/ChangeDescription'
+        deleted:
+          type: boolean
+        entityStatus:
+          type: string
+          enum:
+          - Draft
+          - In Review
+          - Approved
+          - Archived
+          - Deprecated
+          - Rejected
+          - Unprocessed
+        dataProducts:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        dataContract:
+          $ref: '#/components/schemas/EntityReference'
+        followers:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        domains:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        ingestionRunner:
+          $ref: '#/components/schemas/EntityReference'
+        reviewers:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        votes:
+          $ref: '#/components/schemas/Votes'
+        lifeCycle:
+          $ref: '#/components/schemas/LifeCycle'
+        usageSummary:
+          $ref: '#/components/schemas/UsageDetails'
+        experts:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        certification:
+          $ref: '#/components/schemas/AssetCertification'
+        sourceHash:
+          type: string
+        provider:
+          type: string
+          enum:
+          - system
+          - user
+          - automation
+        extension:
+          type: object
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        service:
+          $ref: '#/components/schemas/EntityReference'
+    ChangeEvent:
+      required:
+      - entityId
+      - entityType
+      - eventType
+      - id
+      - timestamp
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        eventType:
+          type: string
+          enum:
+          - entityCreated
+          - entityUpdated
+          - entityFieldsChanged
+          - entityNoChange
+          - entitySoftDeleted
+          - entityDeleted
+          - entityRestored
+          - threadCreated
+          - threadUpdated
+          - postCreated
+          - postUpdated
+          - taskCreated
+          - taskUpdated
+          - taskResolved
+          - taskClosed
+          - logicalTestCaseAdded
+          - suggestionCreated
+          - suggestionUpdated
+          - suggestionAccepted
+          - suggestionRejected
+          - suggestionDeleted
+          - userLogin
+          - userLogout
+          - entityLineageAdded
+          - entityLineageDeleted
+          - entityLineageUpdated
+        entityType:
+          type: string
+        entityId:
+          type: string
+          format: uuid
+        domains:
+          type: array
+          items:
+            type: string
+            format: uuid
+        entityFullyQualifiedName:
+          type: string
+        previousVersion:
+          type: number
+          format: double
+        currentVersion:
+          type: number
+          format: double
+        userName:
+          type: string
+        impersonatedBy:
+          type: string
+        timestamp:
+          type: integer
+          format: int64
+        changeDescription:
+          $ref: '#/components/schemas/ChangeDescription'
+        incrementalChangeDescription:
+          $ref: '#/components/schemas/ChangeDescription'
+        recursive:
+          type: boolean
+        entity:
+          type: object
+    ChangeSummaryMap:
+      type: object
+    LifeCycle:
+      type: object
+      properties:
+        created:
+          $ref: '#/components/schemas/AccessDetails'
+        updated:
+          $ref: '#/components/schemas/AccessDetails'
+        accessed:
+          $ref: '#/components/schemas/AccessDetails'
+    JsonPatch:
+      type: object
+    ChangeDescription:
+      type: object
+      properties:
+        fieldsAdded:
+          type: array
+          items:
+            $ref: '#/components/schemas/FieldChange'
+        fieldsUpdated:
+          type: array
+          items:
+            $ref: '#/components/schemas/FieldChange'
+        fieldsDeleted:
+          type: array
+          items:
+            $ref: '#/components/schemas/FieldChange'
+        previousVersion:
+          type: number
+          format: double
+        changeSummary:
+          $ref: '#/components/schemas/ChangeSummaryMap'
+    ResultList:
+      required:
+      - data
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+        paging:
+          $ref: '#/components/schemas/Paging'
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityError'
+        warningsCount:
+          type: integer
+          format: int32
+        warnings:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityError'
+    Diagnosis:
+      type: object
+      properties:
+        title:
+          type: string
+        remediation:
+          type: string
+        docUrl:
+          type: string
+    PipelineServiceList:
+      required:
+      - data
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/PipelineService'
+        paging:
+          $ref: '#/components/schemas/Paging'
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityError'
+        warningsCount:
+          type: integer
+          format: int32
+        warnings:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityError'
+    TestConnectionStepResult:
+      required:
+      - mandatory
+      - name
+      - passed
+      type: object
+      properties:
+        name:
+          type: string
+        mandatory:
+          type: boolean
+        passed:
+          type: boolean
+        message:
+          type: string
+        errorLog:
+          type: string
+        status:
+          type: string
+          enum:
+          - Queued
+          - Running
+          - Passed
+          - Failed
+          - Skipped
+          - Warning
+        skipReason:
+          type: string
+          enum:
+          - NotImplemented
+          - ConnectionNotEstablished
+        diagnosis:
+          $ref: '#/components/schemas/Diagnosis'
+        durationMs:
+          type: integer
+          format: int32
+        executedCommand:
+          type: string
+        resultSummary:
+          type: string
+    UsageStats:
+      required:
+      - count
+      type: object
+      properties:
+        count:
+          minimum: 0
+          type: integer
+          format: int32
+        percentileRank:
+          type: number
+          format: double
+    FieldChange:
+      type: object
+      properties:
+        name:
+          type: string
+        oldValue:
+          type: object
+        newValue:
+          type: object
+    UsageDetails:
+      required:
+      - dailyStats
+      - date
+      type: object
+      properties:
+        dailyStats:
+          $ref: '#/components/schemas/UsageStats'
+        weeklyStats:
+          $ref: '#/components/schemas/UsageStats'
+        monthlyStats:
+          $ref: '#/components/schemas/UsageStats'
+        date:
+          type: string
+    PipelineConnection:
+      type: object
+      properties:
+        config:
+          type: object
+    PatternMatch:
+      required:
+      - name
+      - score
+      type: object
+      properties:
+        name:
+          type: string
+        regex:
+          type: string
+        score:
+          type: number
+          format: double
+    Style:
+      type: object
+      properties:
+        color:
+          type: string
+        iconURL:
+          type: string
+        coverImage:
+          $ref: '#/components/schemas/CoverImage'
+    Votes:
+      type: object
+      properties:
+        upVotes:
+          type: integer
+          format: int32
+        downVotes:
+          type: integer
+          format: int32
+        upVoters:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        downVoters:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+    AssetCertification:
+      required:
+      - appliedDate
+      - expiryDate
+      - tagLabel
+      type: object
+      properties:
+        tagLabel:
+          $ref: '#/components/schemas/TagLabel'
+        appliedDate:
+          type: integer
+          format: int64
+        expiryDate:
+          type: integer
+          format: int64
+    CreatePipelineService:
+      required:
+      - name
+      - serviceType
+      type: object
+      properties:
+        name:
+          maxLength: 256
+          minLength: 1
+          pattern: ^((?!::)[^>"\x00-\x1f])*$
+          type: string
+        displayName:
+          type: string
+        description:
+          type: string
+        serviceType:
+          type: string
+          enum:
+          - Airflow
+          - GluePipeline
+          - KinesisFirehose
+          - Airbyte
+          - Fivetran
+          - Flink
+          - Dagster
+          - Nifi
+          - DomoPipeline
+          - CustomPipeline
+          - DatabricksPipeline
+          - Spline
+          - Spark
+          - OpenLineage
+          - Prefect
+          - KafkaConnect
+          - DBTCloud
+          - Matillion
+          - Stitch
+          - DataFactory
+          - Wherescape
+          - SSIS
+          - Snowplow
+          - Mulesoft
+          - MicrosoftFabricPipeline
+          - SapBw4HanaPipeline
+        connection:
+          $ref: '#/components/schemas/PipelineConnection'
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/TagLabel'
+        style:
+          $ref: '#/components/schemas/Style'
+        owners:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        scheduleInterval:
+          type: string
+        dataProducts:
+          type: array
+          items:
+            type: string
+        domains:
+          type: array
+          items:
+            type: string
+        lifeCycle:
+          $ref: '#/components/schemas/LifeCycle'
+        ingestionRunner:
+          $ref: '#/components/schemas/EntityReference'
+        reviewers:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        extension:
+          type: object
+    TestConnectionResult:
+      required:
+      - steps
+      type: object
+      properties:
+        lastUpdatedAt:
+          type: integer
+          format: int64
+        status:
+          type: string
+          enum:
+          - Successful
+          - Failed
+          - Running
+        steps:
+          type: array
+          items:
+            $ref: '#/components/schemas/TestConnectionStepResult'
+    EntityHistory:
+      required:
+      - entityType
+      - versions
+      type: object
+      properties:
+        entityType:
+          type: string
+        versions:
+          type: array
+          items:
+            type: object
+    TagLabelMetadata:
+      type: object
+      properties:
+        recognizer:
+          $ref: '#/components/schemas/TagLabelRecognizerMetadata'
+        expiryDate:
+          type: integer
+          format: int64
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

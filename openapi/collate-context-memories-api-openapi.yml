@@ -1,0 +1,1236 @@
+openapi: 3.2.0
+info:
+  title: OpenMetadata Context Memories API
+  description: Common types and API definition for OpenMetadata
+  contact:
+    name: OpenMetadata
+    url: https://open-metadata.org
+    email: openmetadata-dev@googlegroups.com
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+  version: 2.0.5
+servers:
+- url: /api
+  description: Current Host
+- url: http://localhost:8585/api
+  description: Endpoint URL
+security:
+- BearerAuth: []
+tags:
+- name: Context Memories
+  description: APIs for managing reusable Context Center memories.
+paths:
+  /v1/contextCenter/memories:
+    get:
+      tags:
+      - Context Memories
+      summary: List context memories
+      description: Get a paginated list of context memories.
+      operationId: listContextMemories
+      parameters:
+      - name: fields
+        in: query
+        description: Fields requested in the returned resource
+        schema:
+          type: string
+          example: owners,tags,domains,primaryEntity,relatedEntities
+      - name: limit
+        in: query
+        description: Limit the number of results returned. (1 to 1000000, default = 10)
+        schema:
+          maximum: 1000000
+          minimum: 0
+          type: integer
+          format: int32
+          default: 10
+      - name: before
+        in: query
+        description: Returns list of context memories before this cursor
+        schema:
+          type: string
+      - name: after
+        in: query
+        description: Returns list of context memories after this cursor
+        schema:
+          type: string
+      - name: include
+        in: query
+        description: Include all, deleted, or non-deleted entities
+        schema:
+          type: string
+          default: non-deleted
+          enum:
+          - all
+          - deleted
+          - non-deleted
+      - name: q
+        in: query
+        description: Search title, question, answer, and summary
+        schema:
+          type: string
+      - name: assets
+        in: query
+        description: Comma-separated asset UUIDs. Matches the memory primaryEntity or relatedEntities.
+        schema:
+          type: string
+      - name: author
+        in: query
+        description: Memory author as user name or user UUID
+        schema:
+          type: string
+      - name: pinned
+        in: query
+        description: Filter by pinned state
+        schema:
+          type: boolean
+      - name: sortBy
+        in: query
+        description: 'Sort field: updatedAt, usageCount, updatedBy'
+        schema:
+          type: string
+      - name: sortOrder
+        in: query
+        description: 'Sort order: asc or desc'
+        schema:
+          type: string
+      - name: offset
+        in: query
+        description: Offset for search-backed pagination
+        schema:
+          minimum: 0
+          type: integer
+          format: int32
+      - name: primaryEntityId
+        in: query
+        description: Only return knowledge pills whose primaryEntity (the data asset the pill applies to) has this id
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: List of context memories
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContextMemoryList'
+    put:
+      tags:
+      - Context Memories
+      summary: Create or update a memory
+      description: Create a new context memory, or update an existing one if it already exists.
+      operationId: createOrUpdateContextMemory
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateContextMemory'
+      responses:
+        '200':
+          description: The updated memory
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContextMemory'
+    post:
+      tags:
+      - Context Memories
+      summary: Create a memory
+      description: Create a new context memory.
+      operationId: createContextMemory
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateContextMemory'
+      responses:
+        '200':
+          description: The created memory
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContextMemory'
+  /v1/contextCenter/memories/{id}:
+    get:
+      tags:
+      - Context Memories
+      summary: Get a memory by id
+      description: Get a context memory by `id`.
+      operationId: getContextMemory
+      parameters:
+      - name: id
+        in: path
+        description: Id of the context memory
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: fields
+        in: query
+        description: Fields requested in the returned resource
+        schema:
+          type: string
+      - name: include
+        in: query
+        description: Include all, deleted, or non-deleted entities
+        schema:
+          type: string
+          default: non-deleted
+          enum:
+          - all
+          - deleted
+          - non-deleted
+      responses:
+        '200':
+          description: The context memory
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContextMemory'
+        '404':
+          description: Memory not found
+    delete:
+      tags:
+      - Context Memories
+      summary: Delete a memory by id
+      description: Delete a context memory by `id`.
+      operationId: deleteContextMemory
+      parameters:
+      - name: recursive
+        in: query
+        description: Recursively delete this entity and its children. (Default = false)
+        schema:
+          type: boolean
+          default: false
+      - name: hardDelete
+        in: query
+        description: Hard delete the entity. (Default = false)
+        schema:
+          type: boolean
+          default: false
+      - name: id
+        in: path
+        description: Id of the context memory
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Memory not found
+    patch:
+      tags:
+      - Context Memories
+      summary: Update a memory
+      description: Apply a JSONPatch to a context memory.
+      externalDocs:
+        description: JsonPatch RFC
+        url: https://tools.ietf.org/html/rfc6902
+      operationId: patchContextMemory
+      parameters:
+      - name: id
+        in: path
+        description: Id of the context memory
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        description: JsonPatch with array of operations
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/JsonPatch'
+            example: '[{op:replace, path:/displayName, value: ''New name''}]'
+      responses:
+        default:
+          description: default response
+          content:
+            application/json: {}
+  /v1/contextCenter/memories/name/{fqn}:
+    get:
+      tags:
+      - Context Memories
+      summary: Get a memory by fully qualified name
+      description: Get a context memory by fully qualified name.
+      operationId: getContextMemoryByFqn
+      parameters:
+      - name: fqn
+        in: path
+        description: Fully qualified name of the context memory
+        required: true
+        schema:
+          type: string
+      - name: fields
+        in: query
+        description: Fields requested in the returned resource
+        schema:
+          type: string
+      - name: include
+        in: query
+        description: Include deleted memories
+        schema:
+          type: string
+          default: non-deleted
+          enum:
+          - all
+          - deleted
+          - non-deleted
+      responses:
+        '200':
+          description: The context memory
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContextMemory'
+        '404':
+          description: Memory not found
+    delete:
+      tags:
+      - Context Memories
+      summary: Delete a memory by fully qualified name
+      description: Delete a context memory by `fullyQualifiedName`.
+      operationId: deleteContextMemoryByFqn
+      parameters:
+      - name: recursive
+        in: query
+        description: Recursively delete this entity and its children. (Default = false)
+        schema:
+          type: boolean
+          default: false
+      - name: hardDelete
+        in: query
+        description: Hard delete the entity. (Default = false)
+        schema:
+          type: boolean
+          default: false
+      - name: fqn
+        in: path
+        description: Fully qualified name of the context memory
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Memory not found
+  /v1/contextCenter/memories/{id}/context:
+    get:
+      tags:
+      - Context Memories
+      summary: Get the AI context for an entity by id
+      description: Retrieve the LLM-ready AI Context (Context Profile) for the entity — its attached business knowledge (glossary terms, Context Center articles, applied metrics), type-specific structural context, and depth-1 lineage — as an OKF-style markdown document (default) or the structured AIContext JSON (`?format=json`).
+      operationId: getEntityAiContextById_14
+      parameters:
+      - name: id
+        in: path
+        description: Entity id
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: format
+        in: query
+        description: 'Output format: markdown (default) or json'
+        schema:
+          type: string
+          default: markdown
+      - name: query
+        in: query
+        description: Optional question; truncated knowledge items are excerpted to the passage most relevant to it instead of the positional lead
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Entity AI context
+        '404':
+          description: Entity not found
+  /v1/contextCenter/memories/name/{fqn}/context:
+    get:
+      tags:
+      - Context Memories
+      summary: Get the AI context for an entity by fully qualified name
+      description: Retrieve the LLM-ready AI Context (Context Profile) for the entity by FQN — see getEntityAiContextById. Returns an OKF-style markdown document by default, or the structured AIContext JSON with `?format=json`.
+      operationId: getEntityAiContextByName_14
+      parameters:
+      - name: fqn
+        in: path
+        description: Entity fully qualified name
+        required: true
+        schema:
+          type: string
+      - name: format
+        in: query
+        description: 'Output format: markdown (default) or json'
+        schema:
+          type: string
+          default: markdown
+      - name: query
+        in: query
+        description: Optional question; truncated knowledge items are excerpted to the passage most relevant to it instead of the positional lead
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Entity AI context
+        '404':
+          description: Entity not found
+  /v1/contextCenter/memories/{id}/versions/{version}:
+    get:
+      tags:
+      - Context Memories
+      summary: Get a version of a context memory
+      description: Get a version of a context memory by given `id`.
+      operationId: getSpecificContextMemoryVersion
+      parameters:
+      - name: id
+        in: path
+        description: Id of the context memory
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: version
+        in: path
+        description: Context memory version
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Context memory version details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContextMemory'
+  /v1/contextCenter/memories/history:
+    get:
+      tags:
+      - Context Memories
+      summary: List all entity versions within a time range
+      description: Get a paginated list of all entity versions within a given time range specified by `startTs` and `endTs` in milliseconds since epoch.
+      operationId: listAllEntityVersionsByTimestamp_14
+      parameters:
+      - name: startTs
+        in: query
+        description: Start timestamp in milliseconds since epoch
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: endTs
+        in: query
+        description: End timestamp in milliseconds since epoch
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: limit
+        in: query
+        description: Limit the number of entity returned (1 to 1000000, default = 10)
+        schema:
+          maximum: 500
+          minimum: 1
+          type: integer
+          format: int32
+          default: 10
+      - name: before
+        in: query
+        description: Returns list of entity versions before this cursor
+        schema:
+          type: string
+      - name: after
+        in: query
+        description: Returns list of entity versions after this cursor
+        schema:
+          type: string
+      responses:
+        '200':
+          description: List of all versions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResultList'
+  /v1/contextCenter/memories/{id}/versions:
+    get:
+      tags:
+      - Context Memories
+      summary: List context memory versions
+      description: Get a list of all the versions of a context memory identified by `id`.
+      operationId: listAllContextMemoryVersions
+      parameters:
+      - name: id
+        in: path
+        description: Id of the context memory
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: List of versions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityHistory'
+  /v1/contextCenter/memories/{id}/pin:
+    put:
+      tags:
+      - Context Memories
+      summary: Pin a memory
+      description: Globally pin a context memory.
+      operationId: pinContextMemory
+      parameters:
+      - name: id
+        in: path
+        description: Id of the context memory
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: The pinned memory
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContextMemory'
+    delete:
+      tags:
+      - Context Memories
+      summary: Unpin a memory
+      description: Remove the global pin from a context memory.
+      operationId: unpinContextMemory
+      parameters:
+      - name: id
+        in: path
+        description: Id of the context memory
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: The unpinned memory
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContextMemory'
+  /v1/contextCenter/memories/restore:
+    put:
+      tags:
+      - Context Memories
+      summary: Restore a soft-deleted memory
+      description: Restore a previously soft-deleted context memory.
+      operationId: restoreContextMemory
+      requestBody:
+        description: Id of the context memory to restore
+        content:
+          application/json:
+            schema:
+              type: string
+              format: uuid
+      responses:
+        '200':
+          description: The restored memory
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContextMemory'
+components:
+  schemas:
+    TagLabel:
+      required:
+      - labelType
+      - source
+      - state
+      - tagFQN
+      type: object
+      properties:
+        tagFQN:
+          type: string
+        name:
+          type: string
+        displayName:
+          type: string
+        description:
+          type: string
+        style:
+          $ref: '#/components/schemas/Style'
+        source:
+          type: string
+          enum:
+          - Classification
+          - Glossary
+        labelType:
+          type: string
+          enum:
+          - Manual
+          - Propagated
+          - Automated
+          - Derived
+          - Generated
+        state:
+          type: string
+          enum:
+          - Suggested
+          - Confirmed
+        href:
+          type: string
+          format: uri
+        reason:
+          type: string
+        appliedAt:
+          type: string
+          format: date-time
+        appliedBy:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/TagLabelMetadata'
+    EntityReference:
+      required:
+      - id
+      - type
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+        name:
+          type: string
+        fullyQualifiedName:
+          type: string
+        description:
+          type: string
+        displayName:
+          type: string
+        deleted:
+          type: boolean
+        inherited:
+          type: boolean
+        href:
+          type: string
+          format: uri
+    TagLabelRecognizerMetadata:
+      required:
+      - recognizerId
+      - recognizerName
+      - score
+      type: object
+      properties:
+        recognizerId:
+          type: string
+          format: uuid
+        recognizerName:
+          type: string
+        score:
+          type: number
+          format: double
+        target:
+          type: string
+          enum:
+          - content
+          - column_name
+        patterns:
+          type: array
+          items:
+            $ref: '#/components/schemas/PatternMatch'
+    EntityError:
+      type: object
+      properties:
+        message:
+          type: string
+        entity:
+          type: object
+    CoverImage:
+      type: object
+      properties:
+        url:
+          type: string
+        position:
+          type: string
+    AccessDetails:
+      required:
+      - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: integer
+          format: int64
+        accessedBy:
+          $ref: '#/components/schemas/EntityReference'
+        accessedByAProcess:
+          type: string
+    Paging:
+      required:
+      - total
+      type: object
+      properties:
+        before:
+          type: string
+        after:
+          type: string
+        offset:
+          type: integer
+          format: int32
+        limit:
+          type: integer
+          format: int32
+        total:
+          type: integer
+          format: int32
+    ChangeSummaryMap:
+      type: object
+    LifeCycle:
+      type: object
+      properties:
+        created:
+          $ref: '#/components/schemas/AccessDetails'
+        updated:
+          $ref: '#/components/schemas/AccessDetails'
+        accessed:
+          $ref: '#/components/schemas/AccessDetails'
+    JsonPatch:
+      type: object
+    ChangeDescription:
+      type: object
+      properties:
+        fieldsAdded:
+          type: array
+          items:
+            $ref: '#/components/schemas/FieldChange'
+        fieldsUpdated:
+          type: array
+          items:
+            $ref: '#/components/schemas/FieldChange'
+        fieldsDeleted:
+          type: array
+          items:
+            $ref: '#/components/schemas/FieldChange'
+        previousVersion:
+          type: number
+          format: double
+        changeSummary:
+          $ref: '#/components/schemas/ChangeSummaryMap'
+    MemoryStats:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+          - Queued
+          - Processing
+          - Processed
+          - Failed
+        error:
+          type: string
+        sourceHash:
+          type: string
+        derivedTermCount:
+          type: integer
+          format: int32
+        derivedMetricCount:
+          type: integer
+          format: int32
+        reusedCount:
+          type: integer
+          format: int32
+        lastRunAt:
+          type: integer
+          format: int64
+    MemoryShareConfig:
+      type: object
+      properties:
+        visibility:
+          type: string
+          enum:
+          - Private
+          - Entity
+          - Shared
+        sharedWith:
+          type: array
+          items:
+            $ref: '#/components/schemas/MemorySharedPrincipal'
+    ResultList:
+      required:
+      - data
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+        paging:
+          $ref: '#/components/schemas/Paging'
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityError'
+        warningsCount:
+          type: integer
+          format: int32
+        warnings:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityError'
+    ContextMemory:
+      required:
+      - id
+      - name
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          maxLength: 256
+          minLength: 1
+          pattern: ^((?!::)[^>"\x00-\x1f])*$
+          type: string
+        fullyQualifiedName:
+          maxLength: 3072
+          minLength: 1
+          type: string
+        displayName:
+          type: string
+        description:
+          type: string
+        title:
+          type: string
+        summary:
+          type: string
+        question:
+          type: string
+        answer:
+          type: string
+        memoryType:
+          type: string
+          enum:
+          - Preference
+          - UseCase
+          - Note
+          - Runbook
+          - Faq
+        memoryScope:
+          type: string
+          enum:
+          - UserGlobal
+          - EntityScoped
+        status:
+          type: string
+          enum:
+          - Draft
+          - Active
+          - Archived
+        pinned:
+          type: boolean
+        shareConfig:
+          $ref: '#/components/schemas/MemoryShareConfig'
+        primaryEntity:
+          $ref: '#/components/schemas/EntityReference'
+        relatedEntities:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        sourceType:
+          type: string
+          enum:
+          - Manual
+          - ChatPromotion
+          - RememberRequest
+          - FileExtraction
+          - PageExtraction
+        sourceConversation:
+          type: string
+          format: uuid
+        sourceHumanMessage:
+          type: string
+          format: uuid
+        sourceAssistantMessage:
+          type: string
+          format: uuid
+        sourceFile:
+          $ref: '#/components/schemas/EntityReference'
+        sourceEntity:
+          $ref: '#/components/schemas/EntityReference'
+        rootMemory:
+          $ref: '#/components/schemas/EntityReference'
+        parentMemory:
+          $ref: '#/components/schemas/EntityReference'
+        machineRepresentation:
+          $ref: '#/components/schemas/ContextMemoryRepresentation'
+        memoryStats:
+          $ref: '#/components/schemas/MemoryStats'
+        derivedEntities:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        reusedEntities:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        usageCount:
+          type: integer
+          format: int32
+        lastUsedAt:
+          type: integer
+          format: int64
+        owners:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/TagLabel'
+        domains:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        version:
+          type: number
+          format: double
+        updatedAt:
+          type: integer
+          format: int64
+        updatedBy:
+          type: string
+        href:
+          type: string
+          format: uri
+        changeDescription:
+          $ref: '#/components/schemas/ChangeDescription'
+        incrementalChangeDescription:
+          $ref: '#/components/schemas/ChangeDescription'
+        deleted:
+          type: boolean
+        reviewers:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        dataProducts:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        dataContract:
+          $ref: '#/components/schemas/EntityReference'
+        followers:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        votes:
+          $ref: '#/components/schemas/Votes'
+        lifeCycle:
+          $ref: '#/components/schemas/LifeCycle'
+        usageSummary:
+          $ref: '#/components/schemas/UsageDetails'
+        experts:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        entityStatus:
+          type: string
+          enum:
+          - Draft
+          - In Review
+          - Approved
+          - Archived
+          - Deprecated
+          - Rejected
+          - Unprocessed
+        certification:
+          $ref: '#/components/schemas/AssetCertification'
+        sourceHash:
+          type: string
+        impersonatedBy:
+          type: string
+        provider:
+          type: string
+          enum:
+          - system
+          - user
+          - automation
+        extension:
+          type: object
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        service:
+          $ref: '#/components/schemas/EntityReference'
+        style:
+          $ref: '#/components/schemas/Style'
+    ContextMemoryRepresentation:
+      type: object
+      properties:
+        format:
+          type: string
+        version:
+          type: string
+        content:
+          type: string
+        generatedFromHash:
+          type: string
+        generatedAt:
+          type: integer
+          format: int64
+        status:
+          type: string
+          enum:
+          - Pending
+          - Ready
+          - Stale
+          - Failed
+    UsageStats:
+      required:
+      - count
+      type: object
+      properties:
+        count:
+          minimum: 0
+          type: integer
+          format: int32
+        percentileRank:
+          type: number
+          format: double
+    FieldChange:
+      type: object
+      properties:
+        name:
+          type: string
+        oldValue:
+          type: object
+        newValue:
+          type: object
+    UsageDetails:
+      required:
+      - dailyStats
+      - date
+      type: object
+      properties:
+        dailyStats:
+          $ref: '#/components/schemas/UsageStats'
+        weeklyStats:
+          $ref: '#/components/schemas/UsageStats'
+        monthlyStats:
+          $ref: '#/components/schemas/UsageStats'
+        date:
+          type: string
+    MemorySharedPrincipal:
+      type: object
+      properties:
+        principal:
+          $ref: '#/components/schemas/EntityReference'
+        role:
+          type: string
+          enum:
+          - Viewer
+          - Editor
+    PatternMatch:
+      required:
+      - name
+      - score
+      type: object
+      properties:
+        name:
+          type: string
+        regex:
+          type: string
+        score:
+          type: number
+          format: double
+    Style:
+      type: object
+      properties:
+        color:
+          type: string
+        iconURL:
+          type: string
+        coverImage:
+          $ref: '#/components/schemas/CoverImage'
+    Votes:
+      type: object
+      properties:
+        upVotes:
+          type: integer
+          format: int32
+        downVotes:
+          type: integer
+          format: int32
+        upVoters:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        downVoters:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+    AssetCertification:
+      required:
+      - appliedDate
+      - expiryDate
+      - tagLabel
+      type: object
+      properties:
+        tagLabel:
+          $ref: '#/components/schemas/TagLabel'
+        appliedDate:
+          type: integer
+          format: int64
+        expiryDate:
+          type: integer
+          format: int64
+    ContextMemoryList:
+      required:
+      - data
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContextMemory'
+        paging:
+          $ref: '#/components/schemas/Paging'
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityError'
+        warningsCount:
+          type: integer
+          format: int32
+        warnings:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityError'
+    CreateContextMemory:
+      required:
+      - answer
+      - name
+      - question
+      type: object
+      properties:
+        name:
+          maxLength: 256
+          minLength: 1
+          pattern: ^((?!::)[^>"\x00-\x1f])*$
+          type: string
+        displayName:
+          type: string
+        description:
+          type: string
+        title:
+          type: string
+        summary:
+          type: string
+        question:
+          type: string
+        answer:
+          type: string
+        memoryType:
+          type: string
+          enum:
+          - Preference
+          - UseCase
+          - Note
+          - Runbook
+          - Faq
+        memoryScope:
+          type: string
+          enum:
+          - UserGlobal
+          - EntityScoped
+        status:
+          type: string
+          enum:
+          - Draft
+          - Active
+          - Archived
+        shareConfig:
+          $ref: '#/components/schemas/MemoryShareConfig'
+        primaryEntity:
+          $ref: '#/components/schemas/EntityReference'
+        relatedEntities:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        sourceType:
+          type: string
+          enum:
+          - Manual
+          - ChatPromotion
+          - RememberRequest
+          - FileExtraction
+          - PageExtraction
+        sourceConversation:
+          type: string
+          format: uuid
+        sourceHumanMessage:
+          type: string
+          format: uuid
+        sourceAssistantMessage:
+          type: string
+          format: uuid
+        sourceFile:
+          $ref: '#/components/schemas/EntityReference'
+        sourceEntity:
+          $ref: '#/components/schemas/EntityReference'
+        rootMemory:
+          $ref: '#/components/schemas/EntityReference'
+        parentMemory:
+          $ref: '#/components/schemas/EntityReference'
+        machineRepresentation:
+          $ref: '#/components/schemas/ContextMemoryRepresentation'
+        owners:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/TagLabel'
+        domains:
+          type: array
+          items:
+            type: string
+        reviewers:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityReference'
+        dataProducts:
+          type: array
+          items:
+            type: string
+        lifeCycle:
+          $ref: '#/components/schemas/LifeCycle'
+        extension:
+          type: object
+    EntityHistory:
+      required:
+      - entityType
+      - versions
+      type: object
+      properties:
+        entityType:
+          type: string
+        versions:
+          type: array
+          items:
+            type: object
+    TagLabelMetadata:
+      type: object
+      properties:
+        recognizer:
+          $ref: '#/components/schemas/TagLabelRecognizerMetadata'
+        expiryDate:
+          type: integer
+          format: int64
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

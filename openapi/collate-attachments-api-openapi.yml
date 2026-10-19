@@ -1,0 +1,197 @@
+openapi: 3.2.0
+info:
+  title: OpenMetadata Attachments API
+  description: Common types and API definition for OpenMetadata
+  contact:
+    name: OpenMetadata
+    url: https://open-metadata.org
+    email: openmetadata-dev@googlegroups.com
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+  version: 2.0.5
+servers:
+- url: /api
+  description: Current Host
+- url: http://localhost:8585/api
+  description: Endpoint URL
+security:
+- BearerAuth: []
+tags:
+- name: Attachments
+  description: APIs related to uploading attachments.
+paths:
+  /v1/attachments/{id}:
+    get:
+      tags:
+      - Attachments
+      operationId: getAssetById
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        default:
+          description: default response
+          content:
+            application/json: {}
+      summary: Get asset by id
+      x-summary-source: derived
+    delete:
+      tags:
+      - Attachments
+      operationId: deleteAttachment
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: hardDelete
+        in: query
+        schema:
+          type: boolean
+          default: false
+      responses:
+        default:
+          description: default response
+          content:
+            application/json: {}
+      summary: Delete attachment
+      x-summary-source: derived
+  /v1/attachments/{id}/download:
+    get:
+      tags:
+      - Attachments
+      operationId: downloadAsset
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: expiry
+        in: query
+        schema:
+          type: integer
+          format: int32
+          default: 3600
+      - name: direct
+        in: query
+        schema:
+          type: boolean
+          default: false
+      responses:
+        default:
+          description: default response
+          content:
+            application/json: {}
+      summary: Download asset
+      x-summary-source: derived
+  /v1/attachments/fqn/{fqn}/{assetType}:
+    get:
+      tags:
+      - Attachments
+      operationId: listAttachmentsByFqn
+      parameters:
+      - name: fqn
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: assetType
+        in: path
+        required: true
+        schema:
+          type: string
+          enum:
+          - Inline
+          - External
+      - name: sortBy
+        in: query
+        schema:
+          type: string
+      - name: sortOrder
+        in: query
+        schema:
+          type: string
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          format: int32
+      - name: offset
+        in: query
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      responses:
+        default:
+          description: default response
+          content:
+            application/json: {}
+      summary: List attachments by fqn
+      x-summary-source: derived
+  /v1/attachments/upload:
+    post:
+      tags:
+      - Attachments
+      operationId: uploadAttachment
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  $ref: '#/components/schemas/FormDataContentDisposition'
+                entityLink:
+                  type: string
+                assetType:
+                  type: string
+                  default: Inline
+                  enum:
+                  - Inline
+                  - External
+      responses:
+        default:
+          description: default response
+          content:
+            application/json: {}
+      summary: Upload attachment
+      x-summary-source: derived
+components:
+  schemas:
+    FormDataContentDisposition:
+      type: object
+      properties:
+        type:
+          type: string
+        parameters:
+          type: object
+          additionalProperties:
+            type: string
+        fileName:
+          type: string
+        creationDate:
+          type: string
+          format: date-time
+        modificationDate:
+          type: string
+          format: date-time
+        readDate:
+          type: string
+          format: date-time
+        size:
+          type: integer
+          format: int64
+        name:
+          type: string
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
