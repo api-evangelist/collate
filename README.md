@@ -64,6 +64,120 @@
 > Full detail: **[Where this data comes from](https://apievangelist.com/about/where-our-data-comes-from)**
 <!-- API-EVANGELIST-PROVENANCE:END -->
 
-Collate is a company surfaced as a portfolio company of crv, redpoint-ventures and added to the API Evangelist network as a stub for enrichment. Sector: data. This profile is a lead awaiting the enrichment pipeline.
+Collate is the commercial company behind OpenMetadata, the open-source unified metadata platform and data catalog for data and AI. OpenMetadata provides a single place to discover, govern, observe, and collaborate on data assets — databases, tables, dashboards, pipelines, ML models, topics, containers, and API collections/endpoints — with a JSON-schema-first metadata standard, 90+ ingestion connectors, data quality and profiling, lineage, glossary, and role-based access control. Everything in the product is driven by a comprehensive JWT-authenticated REST API (plus Python and Java SDKs, a `metadata` CLI, webhook change-events, and a hosted MCP server), making the metadata layer fully programmable for humans, AI assistants, and agents. Collate offers a managed, enterprise SaaS edition of OpenMetadata. Backed by CRV and Redpoint Ventures.
 
-Backed by: crv, redpoint-ventures — https://collate.com/
+**Areas:** Company · Data · Metadata · Data Catalog · Data Governance · Data Discovery · Data Quality · Data Lineage · Open Source
+
+## Collate on APIs.io
+
+Everything profiled for Collate is published on APIs.io rather than in this repository. Start at the provider page — **[apis.io/providers/collate/](https://apis.io/providers/collate/)** — or go straight to one of the APIs or properties below.
+
+### APIs (1)
+
+- [OpenMetadata REST API](https://apis.io/apis/collate/collate-openmetadata-rest-api/) — The OpenMetadata REST API — a JWT-authenticated (Bearer) CRUD API over every data asset and governance entity in OpenMetadata (databases, schemas, tables,…
+
+### Published properties
+
+Each property below is a page on APIs.io carrying the machine-readable artifact and what it says.
+
+#### AsyncAPI (1)
+
+Event-driven and webhook contracts.
+
+- [Collate Webhooks](https://apis.io/asyncapis/collate/collate-webhooks/)
+
+#### MCP servers (1)
+
+Model Context Protocol servers that expose the API to agents.
+
+- [openmetadata](https://apis.io/servers/collate/openmetadata/)
+
+#### Collections (1)
+
+Postman and Open Collection request collections.
+
+- [OpenMetadata APIs](https://apis.io/collections/collate/open-collate-openmetadata/)
+
+#### Overlays (1)
+
+OpenAPI overlays, including conversational phrasing for each operation.
+
+- [Collate Openmetadata Overlay](https://apis.io/overlays/collate/collate-openmetadata-overlay/)
+
+#### Security (3)
+
+Authentication, trust centre, and vulnerability disclosure.
+
+- [Collate Authentication](https://apis.io/security/collate/collate-authentication/)
+- [Collate Domain Security](https://apis.io/security/collate/collate-domain-security/)
+- [Collate Vulnerability Disclosure](https://apis.io/security/collate/collate-vulnerability-disclosure/)
+
+## Where to find this API
+
+Links to the company's own pages. This repository publishes no copy of their specifications — the canonical document is theirs and lives at the URLs below.
+
+- [Website](https://collate.com/)
+- [Documentation](https://docs.open-metadata.org/)
+- [Getting started](https://docs.open-metadata.org/latest/quick-start)
+- [API reference](https://docs.open-metadata.org/latest/api-reference)
+- [Sign up](https://collate.com/#demo-request)
+- [Support](https://open-metadata.org/community)
+- [Blog](https://blog.open-metadata.org/)
+- [Terms of service](https://collate.com/legal/terms)
+- [Privacy policy](https://collate.com/legal/privacy)
+- [GitHub](https://github.com/open-metadata)
+
+## API Evangelist rating
+
+**Kin Score 50.0** — developing · rubric 0.25.0 · scored 2026-10-23
+
+| Facet | Score |
+|---|---|
+| Discoverability | 75.0 |
+| Contract quality | 48.0 |
+| Contract governance | 18.2 |
+| Operational transparency | 36.8 |
+| Developer ergonomics | 78.6 |
+| Access clarity | 27.6 |
+
+**Agent readiness 57.1** — agent-ready (gated down from agent-native)
+
+| Agent-readiness dimension | Result |
+|---|---|
+| Spec Presence | yes |
+| Agentic Access | — |
+| Reversibility Documented | — |
+| MCP Server | verified |
+| Auth Clarity | served (partial credit) |
+| Idempotency | — |
+| Error Semantics | verified |
+| OpenAPI Examples | partial |
+| Rate Limit Signal | — |
+| Event Surface Described | yes |
+| Agent Skills | — |
+| Well Known Catalog | — |
+| Consent Identity | — |
+| Agent Card | — |
+| Dry Run Mode | yes |
+| Delegated Identity | served (partial credit) |
+| Protected Resource Metadata | verified |
+| Dynamic Client Registration | yes |
+| Agentic Commerce | — |
+| Pagination Ratio | paginated |
+| Operation Distinctiveness | mostly |
+
+**Regulatory alignment 30.4** — Horizontal (data, software, accessibility, platform)
+
+The rubric is published at [github.com/api-evangelist/kin-score](https://github.com/api-evangelist/kin-score). The per-check breakdown behind these numbers — which checks were earned, partial or missed — along with score history and how this provider compares to its peers, is available at [apis.io/providers/collate/](https://apis.io/providers/collate/).
+
+## How this profile is made
+
+API Evangelist profiles a company's public API surface the way a developer would find it: the website, developer portal and documentation, the specifications it publishes, its public repositories, and its pricing, status and changelog pages. From that it derives the properties above — contracts split per API, workflows, schemas, collections, governance rules, plans and rate limits — and scores them against the published [Kin Score rubric](https://github.com/api-evangelist/kin-score).
+
+The artifacts are published on [APIs.io](https://apis.io), not in this repository. This repository is the public record for Collate: the place to say something is wrong, missing or out of date, and to ask for a re-score or a removal.
+
+## Open an issue
+
+- **Something about this listing** — a wrong description, a missing API, a stale artifact or a question about the rating: [open an issue on this repository](https://github.com/api-evangelist/collate/issues/new).
+- **A new API, or one that is not in the catalog yet** — [submit it on APIs.io](https://apis.io/add/).
+- **Anything else** — [the APIs.io inbox](https://github.com/api-search/inbox/issues/new) or [info@apievangelist.com](mailto:info@apievangelist.com).
